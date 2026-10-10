@@ -4,6 +4,7 @@ Page de révisions avec des flashcards auto-corrigées, un décompte des points 
 
 - **Mathématiques** : droite, demi-droite, segment (15 cartes, 8 exercices)
 - **EMC** : représenter les autres, délégués, élections, intérêt général (21 cartes, 7 exercices)
+- **Histoire-Géographie** : méthode NADOI, dates, siècles, chiffres romains, grandes périodes (31 cartes, 7 exercices)
 
 ## Utilisation
 
