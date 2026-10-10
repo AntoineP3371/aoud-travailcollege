@@ -6,6 +6,10 @@ Page de révisions avec des flashcards auto-corrigées, un décompte des points 
 - **EMC** : représenter les autres, délégués, élections, intérêt général (21 cartes, 7 exercices)
 - **Histoire-Géographie** : méthode NADOI, dates, siècles, chiffres romains, grandes périodes (31 cartes, 7 exercices)
 
+## Exercices à l'écran (iPad et Apple Pencil)
+
+Chaque matière a un bouton « Faire les exercices à l'écran ». Les feuilles s'affichent plein écran et on écrit dessus à l'Apple Pencil (stylo, 4 couleurs, 3 épaisseurs, gomme, annuler). Le doigt fait défiler la page, sauf si on coche « Écrire aussi au doigt ». Le travail est gardé automatiquement dans Safari sur l'appareil, et le bouton « Enregistrer en PDF » exporte les feuilles remplies.
+
 ## Utilisation
 
 Ouvrir `index.html` dans un navigateur (ordinateur, tablette ou téléphone). Aucune installation, aucun compte.
