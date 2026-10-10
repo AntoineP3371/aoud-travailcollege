@@ -10,6 +10,10 @@ Page de révisions avec des flashcards auto-corrigées, un décompte des points 
 
 Chaque matière a un bouton « Faire les exercices à l'écran ». Les feuilles s'affichent plein écran et on écrit dessus à l'Apple Pencil (stylo, 4 couleurs, 3 épaisseurs, gomme, annuler). Le doigt fait défiler la page, sauf si on coche « Écrire aussi au doigt ». Le travail est gardé automatiquement dans Safari sur l'appareil, et le bouton « Enregistrer en PDF » exporte les feuilles remplies.
 
+## Espace parent
+
+Le bouton « Espace parent » demande un code, puis affiche la feuille de l'élève (avec son écriture) et le corrigé côte à côte, avec défilement lié. Les corrigés sont chiffrés dans la page et ne sont lisibles qu'avec le code. Ce n'est pas une sécurité absolue (code à 4 chiffres), mais ils ne sont pas visibles dans le code source.
+
 ## Utilisation
 
 Ouvrir `index.html` dans un navigateur (ordinateur, tablette ou téléphone). Aucune installation, aucun compte.
