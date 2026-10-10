@@ -12,7 +12,7 @@ Chaque matière a un bouton « Faire les exercices à l'écran ». Les feuilles 
 
 ## Espace parent
 
-Le bouton « Espace parent » demande un code, puis affiche la feuille de l'élève (avec son écriture) et le corrigé côte à côte, avec défilement lié. Les corrigés sont chiffrés dans la page et ne sont lisibles qu'avec le code. Ce n'est pas une sécurité absolue (code à 4 chiffres), mais ils ne sont pas visibles dans le code source.
+Le bouton « Espace parent » demande un code, puis affiche la feuille de l'élève (avec son écriture) et le corrigé côte à côte, avec défilement lié. Les corrigés sont chiffrés dans la page et ne sont lisibles qu'avec le code. Ce n'est pas une sécurité absolue (code court), mais ils ne sont pas visibles dans le code source.
 
 ## Utilisation
 
