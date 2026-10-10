@@ -65,7 +65,12 @@ sub { font-size: 0.72em; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
-.subjects { display: flex; gap: 22px; border-bottom: 2px solid var(--border); }
+.tabrow { position: relative; padding-top: 20px; display: flex; align-items: flex-end; border-bottom: 2px solid var(--border); gap: 12px; }
+.ver { position: absolute; top: 0; right: 0; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
+.subjects { display: flex; gap: 22px; min-width: 0; }
+.subjects button { white-space: nowrap; }
+.ver { flex-shrink: 0; }
+@media (max-width: 520px) { .subjects { gap: 12px; } .subjects button { font-size: 12px; letter-spacing: 0.03em; } .tabrow { gap: 8px; } }
 .subjects button { background: none; border: 0; border-bottom: 4px solid transparent; margin-bottom: -2px; padding: 10px 2px; min-height: 48px; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .subjects button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
@@ -173,11 +178,14 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 </style>
 
 <div class="wrap" id="wrap" data-subject="maths">
+  <div class="tabrow">
   <nav class="subjects" role="tablist" aria-label="Matières">
     <button type="button" role="tab" id="t-maths" aria-selected="true">Mathématiques</button>
     <button type="button" role="tab" id="t-emc" aria-selected="false">EMC</button>
     <button type="button" role="tab" id="t-hg" aria-selected="false">Histoire-Géo</button>
   </nav>
+  <span class="ver" title="Version">v3.1</span>
+  </div>
   <header class="top">
     <div>
       <p class="eyebrow" id="eyebrow"></p>
