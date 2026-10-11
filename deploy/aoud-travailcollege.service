@@ -5,12 +5,12 @@ After=network.target
 [Service]
 User=pocketbase
 Group=pocketbase
-WorkingDirectory=/opt/travail-college
-ExecStart=/opt/travail-college/pocketbase serve \
+WorkingDirectory=/opt/aoud-travailcollege
+ExecStart=/opt/aoud-travailcollege/pocketbase serve \
   --http=127.0.0.1:8090 \
-  --dir=/opt/travail-college/pb_data \
-  --migrationsDir=/opt/travail-college/repo/deploy/pb_migrations \
-  --publicDir=/opt/travail-college/repo/deploy/pb_public
+  --dir=/opt/aoud-travailcollege/pb_data \
+  --migrationsDir=/opt/aoud-travailcollege/repo/deploy/pb_migrations \
+  --publicDir=/opt/aoud-travailcollege/repo/deploy/pb_public
 Restart=always
 RestartSec=3
 LimitNOFILE=4096
@@ -19,7 +19,7 @@ NoNewPrivileges=true
 ProtectSystem=full
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/opt/travail-college
+ReadWritePaths=/opt/aoud-travailcollege
 
 [Install]
 WantedBy=multi-user.target
