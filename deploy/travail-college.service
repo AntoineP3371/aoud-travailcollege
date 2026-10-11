@@ -1,0 +1,25 @@
+[Unit]
+Description=Travail college (PocketBase : site, comptes, cours, travaux)
+After=network.target
+
+[Service]
+User=pocketbase
+Group=pocketbase
+WorkingDirectory=/opt/travail-college
+ExecStart=/opt/travail-college/pocketbase serve \
+  --http=127.0.0.1:8090 \
+  --dir=/opt/travail-college/pb_data \
+  --migrationsDir=/opt/travail-college/repo/deploy/pb_migrations \
+  --publicDir=/opt/travail-college/repo/deploy/pb_public
+Restart=always
+RestartSec=3
+LimitNOFILE=4096
+# Durcissement léger
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/travail-college
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1134 @@
+{
+ "subjects": [
+  {
+   "key": "maths",
+   "name": "Mathématiques",
+   "position": 1,
+   "color": "#1b3a8a"
+  },
+  {
+   "key": "emc",
+   "name": "EMC",
+   "position": 2,
+   "color": "#0e6b57"
+  },
+  {
+   "key": "hg",
+   "name": "Histoire-Géo",
+   "position": 3,
+   "color": "#9a4a12"
+  },
+  {
+   "key": "svt",
+   "name": "SVT",
+   "position": 4,
+   "color": "#6b3fa0"
+  }
+ ],
+ "courses": [
+  {
+   "key": "maths",
+   "subject": "maths",
+   "label": "Droites et segments",
+   "position": 1,
+   "eyebrow": "Mathématiques · Séquence 2",
+   "title": "Droites et segments",
+   "sub": "Droite, demi-droite, segment",
+   "exo": "8 exercices sur 3 pages : vocabulaire, notations, vrai ou faux, appartenance, propriétés, milieu et constructions à l'équerre.",
+   "file_name": "exercices_sequence2_droites.pdf",
+   "cards": [
+    {
+     "tag": "Point",
+     "q": "Comment note-t-on et représente-t-on un point ?",
+     "o": [
+      "Lettre majuscule, représenté par une croix",
+      "Lettre minuscule, représenté par un rond",
+      "Lettre majuscule entre crochets",
+      "Lettre minuscule entre parenthèses"
+     ],
+     "e": "Un point se note avec une <b>lettre majuscule</b> (A, B…) et se représente avec une <b>croix</b> ×."
+    },
+    {
+     "tag": "Segment",
+     "q": "Quelle est la notation du <b>segment</b> d'extrémités A et B ?",
+     "o": [
+      "[AB]",
+      "(AB)",
+      "[AB)",
+      "AB)"
+     ],
+     "e": "Le segment se note <b>[AB]</b>. On peut le mesurer, et [AB] et [BA] désignent le même segment."
+    },
+    {
+     "tag": "Demi-droite",
+     "q": "Quelle est la notation de la <b>demi-droite</b> d'origine A passant par B ?",
+     "o": [
+      "[AB)",
+      "[AB]",
+      "(AB)",
+      "(BA]"
+     ],
+     "e": "La demi-droite se note <b>[AB)</b>. On ne peut pas la mesurer, et [AB) et [BA) ne désignent pas la même demi-droite."
+    },
+    {
+     "tag": "Droite",
+     "q": "Quelle notation désigne la <b>droite</b> passant par A et B ? Que dire de (AB) et (BA) ?",
+     "o": [
+      "(AB) ; (AB) et (BA) désignent la même droite",
+      "[AB] ; ce sont deux segments différents",
+      "[AB) ; ce sont deux demi-droites différentes",
+      "(AB) ; (AB) et (BA) sont deux droites différentes"
+     ],
+     "e": "La droite se note <b>(AB)</b>. (AB) et (BA) désignent la même droite, que l'on ne peut pas mesurer."
+    },
+    {
+     "tag": "Mesure",
+     "q": "Parmi segment, demi-droite et droite, lesquels peut-on mesurer ?",
+     "o": [
+      "Seulement le segment",
+      "Le segment et la demi-droite",
+      "La demi-droite et la droite",
+      "Les trois"
+     ],
+     "e": "Seul le <b>segment</b> a une longueur. Exemple : [CD] mesure 5,2 cm, on écrit <b>CD = 5,2 cm</b>."
+    },
+    {
+     "tag": "Alignement",
+     "q": "Quand dit-on que trois points sont <b>alignés</b> ?",
+     "o": [
+      "Quand on peut tracer une droite passant par ces 3 points",
+      "Quand ils forment un triangle",
+      "Quand ils sont à égale distance les uns des autres",
+      "Quand ils appartiennent à un même segment de 5 cm"
+     ],
+     "e": "Trois points sont alignés si l'on peut tracer <b>une droite passant par ces 3 points</b>."
+    },
+    {
+     "tag": "Appartenance",
+     "q": "Que signifient <b>A ∈ (d)</b> et <b>A ∉ (d)</b> ?",
+     "o": [
+      "A appartient / n'appartient pas à la droite (d)",
+      "A est parallèle / non parallèle à (d)",
+      "A est perpendiculaire / non perpendiculaire à (d)",
+      "A est le milieu / n'est pas le milieu de (d)"
+     ],
+     "e": "<b>∈</b> se lit « appartient à » et <b>∉</b> se lit « n'appartient pas à »."
+    },
+    {
+     "tag": "Droites sécantes",
+     "q": "Qu'est-ce que deux droites <b>sécantes</b> ? Comment appelle-t-on leur point commun ?",
+     "o": [
+      "Deux droites qui se coupent en un point : le point d'intersection",
+      "Deux droites qui ne se coupent jamais : le point de fuite",
+      "Deux droites qui forment un angle droit : le sommet",
+      "Deux droites confondues : le point milieu"
+     ],
+     "e": "Deux droites sécantes (d) et (d') se coupent en un point T, le <b>point d'intersection</b> : T ∈ (d) et T ∈ (d')."
+    },
+    {
+     "tag": "Perpendiculaires",
+     "q": "Quelle est la définition et la notation de deux droites <b>perpendiculaires</b> ?",
+     "o": [
+      "Deux droites sécantes formant un angle droit : (d<sub>1</sub>) ⊥ (d<sub>2</sub>)",
+      "Deux droites qui ne se coupent pas : (d<sub>1</sub>) // (d<sub>2</sub>)",
+      "Deux droites sécantes quelconques : (d<sub>1</sub>) ⊥ (d<sub>2</sub>)",
+      "Deux droites formant un angle de 45° : (d<sub>1</sub>) // (d<sub>2</sub>)"
+     ],
+     "e": "Deux droites perpendiculaires sont deux droites <b>sécantes</b> qui forment un <b>angle droit</b>. Notation : <b>(d<sub>1</sub>) ⊥ (d<sub>2</sub>)</b>."
+    },
+    {
+     "tag": "Parallèles",
+     "q": "Quelle est la définition et la notation de deux droites <b>parallèles</b> ?",
+     "o": [
+      "Deux droites qui ne se coupent pas : (d<sub>3</sub>) // (d<sub>4</sub>)",
+      "Deux droites sécantes formant un angle droit : (d<sub>3</sub>) ⊥ (d<sub>4</sub>)",
+      "Deux droites qui se coupent en un point : (d<sub>3</sub>) // (d<sub>4</sub>)",
+      "Deux droites qui forment un angle de 45° : (d<sub>3</sub>) ⊥ (d<sub>4</sub>)"
+     ],
+     "e": "Deux droites parallèles <b>ne se coupent pas</b>. Notation : <b>(d<sub>3</sub>) // (d<sub>4</sub>)</b>."
+    },
+    {
+     "tag": "Construction",
+     "q": "Construction de la <b>perpendiculaire</b> à (d) passant par M (M ∉ (d)) : comment place-t-on l'équerre ?",
+     "o": [
+      "Un côté de l'angle droit sur (d), l'autre côté passe par M",
+      "Le côté le plus long sur (d), le sommet sur M",
+      "Les deux côtés de l'angle droit passent par M",
+      "Un côté de l'angle droit sur M, l'autre sur (d')"
+     ],
+     "e": "Un côté de l'angle droit de l'équerre est sur (d) et l'autre côté passe par M. On trace en prolongeant, on nomme la droite et on <b>code l'angle droit</b>."
+    },
+    {
+     "tag": "Construction",
+     "q": "Construction de la <b>parallèle</b> à (d) passant par M (M ∉ (d)) : l'équerre est sur (d) et une règle contre son autre côté. Ensuite ?",
+     "o": [
+      "On fait coulisser l'équerre le long de la règle jusqu'à M, puis on trace",
+      "On fait tourner l'équerre autour de M",
+      "On trace la droite passant par M et un point quelconque de (d)",
+      "On place l'angle droit de l'équerre exactement en M"
+     ],
+     "e": "On fait <b>coulisser</b> l'équerre le long de la règle jusqu'au point M, puis on trace et on nomme la droite."
+    },
+    {
+     "tag": "Propriété 1",
+     "q": "Si deux droites sont <b>perpendiculaires à une même troisième</b> droite, alors…",
+     "o": [
+      "elles sont parallèles",
+      "elles sont perpendiculaires entre elles",
+      "elles sont sécantes",
+      "elles sont confondues"
+     ],
+     "e": "Elles sont <b>parallèles</b> : (d<sub>1</sub>) ⊥ (d) et (d<sub>2</sub>) ⊥ (d), donc <b>(d<sub>1</sub>) // (d<sub>2</sub>)</b>."
+    },
+    {
+     "tag": "Propriété 2",
+     "q": "Si deux droites sont <b>parallèles</b>, alors toute droite perpendiculaire à l'une est…",
+     "o": [
+      "perpendiculaire à l'autre",
+      "parallèle à l'autre",
+      "sécante mais pas perpendiculaire à l'autre",
+      "confondue avec l'autre"
+     ],
+     "e": "Elle est <b>perpendiculaire à l'autre</b> : (d<sub>1</sub>) // (d<sub>2</sub>) et (d) ⊥ (d<sub>1</sub>), donc <b>(d) ⊥ (d<sub>2</sub>)</b>."
+    },
+    {
+     "tag": "Milieu",
+     "q": "Que veut dire « I est le <b>milieu</b> du segment [CD] » ?",
+     "o": [
+      "I est un point de [CD] à égale distance de C et de D",
+      "I est un point de la droite (CD) situé hors du segment",
+      "I est le point tel que CI = 2 × ID",
+      "I est le point d'intersection de (CD) avec une autre droite"
+     ],
+     "e": "Le milieu d'un segment est le point du segment situé à <b>égale distance de ses deux extrémités</b>. Si [CD] mesure 5,2 cm, alors CI = ID = 2,6 cm."
+    }
+   ],
+   "pages": [
+    "maths-1.jpg",
+    "maths-2.jpg",
+    "maths-3.jpg"
+   ],
+   "pdf": "exercices_sequence2_droites.pdf"
+  },
+  {
+   "key": "hg",
+   "subject": "hg",
+   "label": "Méthode NADOI et repères",
+   "position": 1,
+   "eyebrow": "Histoire-Géographie · Méthode et repères",
+   "title": "Présenter un document et se repérer dans le temps",
+   "sub": "Méthode NADOI, dates, siècles et grandes périodes",
+   "exo": "7 exercices sur 3 pages : méthode NADOI, vrai ou faux, durées, siècles, chiffres romains, frise des grandes périodes et questions « Je retiens ».",
+   "file_name": "exercices_histoire_geo_nadoi_reperes.pdf",
+   "cards": [
+    {
+     "tag": "Méthode NADOI",
+     "q": "Que veut dire <b>présenter un document</b> en histoire-géographie ?",
+     "o": [
+      "Donner, à l'écrit ou à l'oral, les éléments nécessaires pour comprendre le document",
+      "Recopier le document en entier",
+      "Dire si le document est joli ou non",
+      "Apprendre le document par cœur"
+     ],
+     "e": "<b>Présenter un document</b>, c'est donner à l'écrit ou à l'oral les éléments nécessaires à sa compréhension. On utilise pour cela les 5 points <b>N-A-D-O-I</b>."
+    },
+    {
+     "tag": "Méthode NADOI",
+     "q": "Que signifient les 5 lettres de <b>NADOI</b> ?",
+     "o": [
+      "Nature, Auteur, Date, Œuvre (origine), Idée",
+      "Nom, Âge, Durée, Origine, Image",
+      "Nature, Action, Document, Opinion, Information",
+      "Numéro, Auteur, Date, Observation, Intérêt"
+     ],
+     "e": "<b>N</b>ature · <b>A</b>uteur · <b>D</b>ate · <b>O</b>euvre (d'où vient le document, son origine) · <b>I</b>dée (l'information essentielle)."
+    },
+    {
+     "tag": "Nature",
+     "q": "Que désigne la <b>nature</b> d'un document ?",
+     "o": [
+      "Son genre ou son type (texte, photographie, carte, gravure, affiche…)",
+      "La personne qui l'a réalisé",
+      "L'année où il a été créé",
+      "L'idée principale qu'il contient"
+     ],
+     "e": "La <b>nature</b> est le genre du document : article de journal, texte de loi, photographie, carte, tableau, gravure, affiche de propagande, graphique, peinture, discours…"
+    },
+    {
+     "tag": "Nature",
+     "q": "Lequel de ces mots n'est <b>pas</b> une nature de document ?",
+     "o": [
+      "Apulée",
+      "Photographie",
+      "Affiche de propagande",
+      "Carte"
+     ],
+     "e": "<b>Apulée</b> est un auteur (celui qui a écrit le texte). Photographie, affiche de propagande et carte sont des natures de documents."
+    },
+    {
+     "tag": "Auteur",
+     "q": "Qui est l'<b>auteur</b> d'un document ?",
+     "o": [
+      "Celui qui l'a réalisé (personne ou groupe, connu ou anonyme)",
+      "Celui qui le lit",
+      "Le professeur qui le distribue",
+      "L'éditeur du manuel uniquement"
+     ],
+     "e": "L'<b>auteur</b> est celui qui a réalisé le document. Il peut être connu ou anonyme, une personne ou un groupe. Il est indiqué <b>en premier</b> dans les références, en bas du document."
+    },
+    {
+     "tag": "Auteur",
+     "q": "Où trouve-t-on généralement l'<b>auteur</b> d'un document ?",
+     "o": [
+      "Dans les références, en bas du document",
+      "Au dos du manuel",
+      "Dans le titre de la leçon",
+      "Il n'est jamais indiqué"
+     ],
+     "e": "L'auteur est indiqué <b>en premier</b> dans les références données <b>en bas du document</b>."
+    },
+    {
+     "tag": "Date",
+     "q": "À quoi sert la <b>date</b>, associée à l'auteur ?",
+     "o": [
+      "À savoir si l'auteur a vécu à l'époque (témoin direct) ou non",
+      "À savoir combien de pages fait le document",
+      "À connaître la couleur du document",
+      "À retrouver le titre du livre"
+     ],
+     "e": "La date (avec l'auteur) permet de savoir si l'auteur est un <b>témoin direct</b> (il a vécu l'époque) ou <b>indirect</b> (il parle d'une époque qu'il n'a pas connue)."
+    },
+    {
+     "tag": "Date",
+     "q": "Un auteur a vécu à l'époque qu'il décrit. C'est un témoin direct et son document est…",
+     "o": [
+      "Une source",
+      "Un document d'interprétation",
+      "Une invention",
+      "Une légende"
+     ],
+     "e": "Un <b>témoin direct</b> a vécu l'époque : son document est une <b>source</b>."
+    },
+    {
+     "tag": "Date",
+     "q": "Un historien analyse une période longtemps après. Son document est…",
+     "o": [
+      "Un document d'interprétation (témoin indirect)",
+      "Une source (témoin direct)",
+      "Un document sans auteur",
+      "Une carte"
+     ],
+     "e": "Quand l'auteur analyse une époque <b>longtemps après</b>, c'est un <b>témoin indirect</b> : son document est un <b>document d'interprétation</b>."
+    },
+    {
+     "tag": "Œuvre",
+     "q": "Que désigne l'<b>œuvre</b> (ou origine) d'un document ?",
+     "o": [
+      "D'où il vient (livre, journal, site internet…)",
+      "La personne qui l'a écrit",
+      "Sa date de création",
+      "Sa taille"
+     ],
+     "e": "L'<b>œuvre</b> (ou origine, source) indique d'où vient le document : internet, journal, œuvre littéraire… Elle est en général écrite <b>en italique</b>, en bas du document."
+    },
+    {
+     "tag": "Idée",
+     "q": "Que doit-on écrire pour l'<b>idée</b> d'un document ?",
+     "o": [
+      "L'information essentielle qu'il donne, avec ses propres mots",
+      "Seulement le titre recopié",
+      "Le nom de l'auteur",
+      "Une phrase sans rapport avec le document"
+     ],
+     "e": "L'<b>idée</b> est l'information essentielle fournie par le document (« L'auteur explique… », « La peinture montre… »). On ne se contente <b>pas de réécrire le titre</b>."
+    },
+    {
+     "tag": "Rédiger",
+     "q": "Quelle phrase de présentation est correcte ?",
+     "o": [
+      "Ce document est un texte écrit par Apulée au IIe siècle après J.-C., extrait de Métamorphoses.",
+      "Apulée, texte, Métamorphoses.",
+      "Je pense que ce texte est intéressant.",
+      "Le document parle de quelque chose."
+     ],
+     "e": "On rédige une phrase complète : « Ce document est un <b>(nature)</b> écrit par <b>(auteur)</b> au/en <b>(date)</b>. Il est extrait de <b>(œuvre)</b>. L'auteur explique <b>(idée)</b>. »"
+    },
+    {
+     "tag": "Date",
+     "q": "Combien de temps dure une <b>décennie</b> ?",
+     "o": [
+      "10 ans",
+      "100 ans",
+      "1 000 ans",
+      "5 ans"
+     ],
+     "e": "Une <b>décennie</b> = 10 ans · un <b>siècle</b> = 100 ans · un <b>millénaire</b> = 1 000 ans."
+    },
+    {
+     "tag": "Durées",
+     "q": "Un millénaire, c'est combien de siècles ?",
+     "o": [
+      "10 siècles",
+      "100 siècles",
+      "1 siècle",
+      "1 000 siècles"
+     ],
+     "e": "Un millénaire dure 1 000 ans, et un siècle 100 ans : <b>1 000 ÷ 100 = 10 siècles</b>."
+    },
+    {
+     "tag": "Repères",
+     "q": "À partir de quel événement compte-t-on les années ?",
+     "o": [
+      "La naissance de Jésus-Christ (an 1)",
+      "La chute de l'Empire romain",
+      "L'invention de l'écriture",
+      "La Révolution française"
+     ],
+     "e": "On compte les années à partir de la <b>naissance de Jésus-Christ</b> (an 1). L'année zéro n'existe pas."
+    },
+    {
+     "tag": "Repères",
+     "q": "Quelle année vient juste après l'an 1 avant J.-C. ?",
+     "o": [
+      "L'an 1 après J.-C. (il n'y a pas d'année zéro)",
+      "L'an 0",
+      "L'an 2 avant J.-C.",
+      "L'an 10 après J.-C."
+     ],
+     "e": "L'<b>année zéro n'existe pas</b> : on passe directement de l'an 1 avant J.-C. à l'an 1 après J.-C."
+    },
+    {
+     "tag": "Siècles",
+     "q": "Dans quel siècle se situe l'année <b>1996</b> ?",
+     "o": [
+      "Le XXe siècle",
+      "Le XIXe siècle",
+      "Le XVIIIe siècle",
+      "Le XXIe siècle"
+     ],
+     "e": "Pour trouver le siècle, on <b>ajoute 1 au nombre de centaines</b> : 1996 → 19 + 1 = <b>20</b>, donc le XXe siècle."
+    },
+    {
+     "tag": "Siècles",
+     "q": "Dans quel siècle se situe l'année <b>253</b> ?",
+     "o": [
+      "Le IIIe siècle",
+      "Le IIe siècle",
+      "Le XXVe siècle",
+      "Le Ve siècle"
+     ],
+     "e": "253 → 2 centaines, donc 2 + 1 = <b>3</b> : le IIIe siècle."
+    },
+    {
+     "tag": "Siècles",
+     "q": "Dans quel siècle se situe l'année <b>1789</b> ?",
+     "o": [
+      "Le XVIIIe siècle",
+      "Le XVIIe siècle",
+      "Le XIXe siècle",
+      "Le XVe siècle"
+     ],
+     "e": "1789 → 17 centaines, donc 17 + 1 = <b>18</b> : le XVIIIe siècle."
+    },
+    {
+     "tag": "Chiffres romains",
+     "q": "Comment écrit-on <b>15</b> en chiffres romains ?",
+     "o": [
+      "XV",
+      "VX",
+      "XIV",
+      "XXV"
+     ],
+     "e": "X = 10 et V = 5 : 10 + 5 = <b>XV</b>. On écrit les siècles en chiffres romains (le XVe siècle)."
+    },
+    {
+     "tag": "Chiffres romains",
+     "q": "Quel nombre représente <b>XII</b> ?",
+     "o": [
+      "12",
+      "7",
+      "11",
+      "21"
+     ],
+     "e": "X = 10, I = 1, I = 1 : 10 + 1 + 1 = <b>12</b>. C'est le XIIe siècle."
+    },
+    {
+     "tag": "Chiffres romains",
+     "q": "Comment écrit-on le <b>4e siècle</b> en chiffres romains ?",
+     "o": [
+      "IVe siècle",
+      "IIIIe siècle",
+      "VIe siècle",
+      "VIIe siècle"
+     ],
+     "e": "IV = 5 − 1 = <b>4</b>. I devant V se retranche : IVe siècle."
+    },
+    {
+     "tag": "Siècles",
+     "q": "Comment écrit-on le <b>9e siècle avant J.-C.</b> ?",
+     "o": [
+      "IXe siècle av. J.-C.",
+      "XIe siècle av. J.-C.",
+      "IXe siècle ap. J.-C.",
+      "VIIIe siècle"
+     ],
+     "e": "IX = 10 − 1 = 9. Avant J.-C., il faut <b>préciser « av. J.-C. »</b> : IXe siècle av. J.-C."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Qu'est-ce qui marque la fin de la <b>Préhistoire</b> ?",
+     "o": [
+      "L'invention de l'écriture (vers −3000)",
+      "La chute de l'Empire romain",
+      "La découverte de l'Amérique",
+      "La Révolution française"
+     ],
+     "e": "La Préhistoire s'arrête avec l'<b>invention de l'écriture</b> (vers −3000)."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Quelles sont les 4 grandes périodes qui suivent la Préhistoire, dans l'ordre ?",
+     "o": [
+      "Antiquité, Moyen Âge, Temps modernes, Époque contemporaine",
+      "Moyen Âge, Antiquité, Temps modernes, Époque contemporaine",
+      "Antiquité, Temps modernes, Moyen Âge, Époque contemporaine",
+      "Époque contemporaine, Temps modernes, Moyen Âge, Antiquité"
+     ],
+     "e": "Dans l'ordre : <b>Antiquité → Moyen Âge → Temps modernes → Époque contemporaine</b>."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Quel événement marque la fin de l'<b>Antiquité</b> ?",
+     "o": [
+      "La chute de l'Empire romain (476)",
+      "La découverte de l'Amérique (1492)",
+      "La Révolution française (1789)",
+      "L'invention de l'écriture"
+     ],
+     "e": "L'Antiquité s'achève en <b>476</b>, avec la chute de l'Empire romain."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Quelles dates délimitent le <b>Moyen Âge</b> ?",
+     "o": [
+      "De 476 à 1492",
+      "De 1492 à 1789",
+      "De −3000 à 476",
+      "De 1789 à nos jours"
+     ],
+     "e": "Moyen Âge : de <b>476</b> (chute de l'Empire romain) à <b>1492</b> (découverte de l'Amérique)."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Quelle période commence avec la Révolution française (1789) ?",
+     "o": [
+      "L'époque contemporaine",
+      "Les Temps modernes",
+      "Le Moyen Âge",
+      "L'Antiquité"
+     ],
+     "e": "Les Temps modernes vont de 1492 à 1789 ; l'<b>époque contemporaine</b> commence en 1789 et dure jusqu'à nos jours."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Parmi les 4 grandes périodes qui suivent la Préhistoire, laquelle est la plus longue ?",
+     "o": [
+      "L'Antiquité",
+      "Le Moyen Âge",
+      "Les Temps modernes",
+      "L'époque contemporaine"
+     ],
+     "e": "C'est l'<b>Antiquité</b> : elle dure de −3000 (invention de l'écriture) à 476, soit plus de 3 400 ans. Le Moyen Âge, lui, dure environ 1 000 ans."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Quelles périodes étudie-t-on en classe de sixième ?",
+     "o": [
+      "La Préhistoire et l'Antiquité",
+      "Le Moyen Âge et les Temps modernes",
+      "L'époque contemporaine uniquement",
+      "Toutes les périodes"
+     ],
+     "e": "Le programme de 6e porte sur la <b>Préhistoire</b> et l'<b>Antiquité</b>."
+    },
+    {
+     "tag": "Périodes",
+     "q": "Dans quelle période vivons-nous aujourd'hui ?",
+     "o": [
+      "L'époque contemporaine",
+      "Les Temps modernes",
+      "L'Antiquité",
+      "Le Moyen Âge"
+     ],
+     "e": "Nous vivons à l'<b>époque contemporaine</b>, commencée en 1789."
+    }
+   ],
+   "pages": [
+    "hg-1.jpg",
+    "hg-2.jpg",
+    "hg-3.jpg"
+   ],
+   "pdf": "exercices_histoire_geo_nadoi_reperes.pdf"
+  },
+  {
+   "key": "svt",
+   "subject": "svt",
+   "label": "La Terre",
+   "position": 1,
+   "eyebrow": "SVT · Thème 1",
+   "title": "La Terre, une planète singulière",
+   "sub": "Système solaire, conditions de la vie, causes et effets",
+   "exo": "5 exercices sur 2 pages : ordre des planètes, vrai ou faux, singularités de la Terre, schéma de causes et conséquences, explication écrite.",
+   "file_name": "exercices_svt_la_terre.pdf",
+   "cards": [
+    {
+     "tag": "Système solaire",
+     "q": "Quelle phrase aide à retenir l'<b>ordre des planètes</b> en partant du Soleil ?",
+     "o": [
+      "Ma Voiture Te Mène Joyeusement Sur Une Nationale",
+      "Mon Vélo Tourne Moins Joliment Sur Une Neige",
+      "Ma Tante Vend Mille Jolis Sacs Usés Noirs",
+      "Mes Voisins Téléphonent Mardi Jeudi Samedi Un Nuit"
+     ],
+     "e": "<b>M</b>a <b>V</b>oiture <b>T</b>e <b>M</b>ène <b>J</b>oyeusement <b>S</b>ur <b>U</b>ne <b>N</b>ationale : Mercure, Vénus, Terre, Mars, Jupiter, Saturne, Uranus, Neptune."
+    },
+    {
+     "tag": "Système solaire",
+     "q": "Quelle est la <b>3<sup>e</sup> planète</b> en partant du Soleil ?",
+     "o": [
+      "La Terre",
+      "Mars",
+      "Vénus",
+      "Jupiter"
+     ],
+     "e": "Dans l'ordre : Mercure, Vénus, <b>Terre</b>, Mars, Jupiter, Saturne, Uranus, Neptune."
+    },
+    {
+     "tag": "Système solaire",
+     "q": "Quelles sont les <b>quatre planètes rocheuses</b> du système solaire, plus proches du Soleil ?",
+     "o": [
+      "Mercure, Vénus, Terre, Mars",
+      "Jupiter, Saturne, Uranus, Neptune",
+      "Mars, Jupiter, Saturne, Uranus",
+      "Vénus, Terre, Jupiter, Neptune"
+     ],
+     "e": "Les planètes <b>rocheuses</b> sont Mercure, Vénus, la Terre et Mars."
+    },
+    {
+     "tag": "Système solaire",
+     "q": "Quelles sont les <b>quatre planètes géantes gazeuses</b> ?",
+     "o": [
+      "Jupiter, Saturne, Uranus, Neptune",
+      "Mercure, Vénus, Terre, Mars",
+      "Terre, Mars, Jupiter, Saturne",
+      "Vénus, Mars, Uranus, Neptune"
+     ],
+     "e": "Les planètes <b>géantes gazeuses</b> sont Jupiter, Saturne, Uranus et Neptune, les plus éloignées du Soleil."
+    },
+    {
+     "tag": "Système solaire",
+     "q": "La Terre est-elle une planète rocheuse ou une planète géante gazeuse ?",
+     "o": [
+      "Une planète rocheuse",
+      "Une planète géante gazeuse",
+      "Une étoile",
+      "Un satellite de Mars"
+     ],
+     "e": "La Terre fait partie des quatre <b>planètes rocheuses</b>, avec Mercure, Vénus et Mars."
+    },
+    {
+     "tag": "Système solaire",
+     "q": "Quelle est la <b>dernière planète</b> du système solaire, la plus éloignée du Soleil ?",
+     "o": [
+      "Neptune",
+      "Uranus",
+      "Saturne",
+      "Mars"
+     ],
+     "e": "La plus éloignée du Soleil est <b>Neptune</b>."
+    },
+    {
+     "tag": "Conditions de la vie",
+     "q": "Quelle est la <b>température moyenne en surface</b> de la Terre ?",
+     "o": [
+      "15 °C",
+      "100 °C",
+      "−50 °C",
+      "450 °C"
+     ],
+     "e": "La température moyenne en surface de la Terre est de <b>15 °C</b>. C'est l'une de ses singularités."
+    },
+    {
+     "tag": "Conditions de la vie",
+     "q": "Qu'est-ce qu'une <b>atmosphère</b> ?",
+     "o": [
+      "Une couche de gaz qui entoure une planète",
+      "Une couche de roches sous la surface d'une planète",
+      "Un océan qui recouvre une planète",
+      "L'anneau de poussière autour d'une planète"
+     ],
+     "e": "Une atmosphère est une <b>couche de gaz qui entoure une planète</b>."
+    },
+    {
+     "tag": "Conditions de la vie",
+     "q": "Sous quels états l'<b>eau</b> est-elle présente sur Terre ?",
+     "o": [
+      "Solide, liquide et gazeux : trois états",
+      "Uniquement liquide",
+      "Uniquement solide (glace)",
+      "Uniquement gazeux (vapeur)"
+     ],
+     "e": "Sur Terre, l'eau est présente sous <b>trois états</b> : solide, liquide et gazeux, dont de l'eau liquide."
+    },
+    {
+     "tag": "Conditions de la vie",
+     "q": "Citer les <b>singularités de la Terre</b> qui permettent la vie :",
+     "o": [
+      "Une température de 15 °C, une atmosphère et de l'eau sous trois états",
+      "Une température de 450 °C, pas d'atmosphère et de l'eau gelée",
+      "Une grande distance au Soleil et pas d'eau",
+      "Des anneaux et plusieurs soleils"
+     ],
+     "e": "Les singularités de la Terre : une <b>température</b> en surface de 15 °C, la présence d'une <b>atmosphère</b>, et de l'<b>eau sous trois états</b>, dont de l'eau liquide."
+    },
+    {
+     "tag": "Causes et effets",
+     "q": "Quelle est la <b>conséquence</b> de la distance entre la Terre et le Soleil ?",
+     "o": [
+      "Une température moyenne en surface de 15 °C",
+      "Une température moyenne en surface de 450 °C",
+      "Une température moyenne en surface de −200 °C",
+      "L'absence totale de température"
+     ],
+     "e": "À cette <b>distance du Soleil</b>, la température moyenne en surface est de <b>15 °C</b>."
+    },
+    {
+     "tag": "Causes et effets",
+     "q": "Quelle est la conséquence d'une <b>température moyenne de 15 °C</b> en surface ?",
+     "o": [
+      "L'eau peut exister sous trois états, dont l'eau liquide",
+      "L'eau n'existe que sous forme de glace",
+      "L'eau n'existe que sous forme de vapeur",
+      "Il n'y a plus d'eau du tout"
+     ],
+     "e": "Avec 15 °C en moyenne, l'<b>eau</b> existe sous <b>trois états</b>, dont l'<b>eau liquide</b>."
+    },
+    {
+     "tag": "Causes et effets",
+     "q": "Quelles caractéristiques de la Terre permettent l'<b>apparition de la vie</b> ?",
+     "o": [
+      "Une température de 15 °C, une atmosphère et de l'eau liquide",
+      "Sa couleur et sa taille uniquement",
+      "L'absence d'atmosphère",
+      "Sa distance à Jupiter"
+     ],
+     "e": "<b>Distance au Soleil</b> → température de <b>15 °C</b> → <b>eau liquide</b>, avec la présence d'une <b>atmosphère</b> : ces caractéristiques permettent l'<b>apparition de la vie</b>."
+    },
+    {
+     "tag": "Causes et effets",
+     "q": "Complète : la Terre est à la bonne distance du Soleil, <b>donc</b>…",
+     "o": [
+      "sa température en surface permet la présence d'eau liquide",
+      "elle n'a pas d'atmosphère",
+      "elle est une planète géante gazeuse",
+      "elle n'a pas d'eau"
+     ],
+     "e": "Cause : la <b>bonne distance au Soleil</b>. Conséquence : une température de 15 °C, qui permet l'<b>eau liquide</b>."
+    }
+   ],
+   "pages": [
+    "svt-1.jpg",
+    "svt-2.jpg"
+   ],
+   "pdf": "exercices_svt_la_terre.pdf"
+  },
+  {
+   "key": "emc",
+   "subject": "emc",
+   "label": "Représenter les autres",
+   "position": 2,
+   "eyebrow": "EMC · Enfant et déjà apprenti citoyen",
+   "title": "Représenter les autres",
+   "sub": "Délégués, élections et intérêt général",
+   "exo": "7 exercices sur 3 pages : lexique, missions des élus, vrai ou faux, élection du délégué, intérêt général et production écrite.",
+   "file_name": "exercices_emc_representer_les_autres.pdf",
+   "cards": [
+    {
+     "tag": "Délégués de classe",
+     "q": "Comment les <b>délégués de classe</b> sont-ils élus ?",
+     "o": [
+      "Au scrutin uninominal à deux tours : tous les élèves de la classe sont électeurs et éligibles",
+      "Ils sont désignés par le professeur principal",
+      "Ils sont tirés au sort dans la classe",
+      "Seuls les délégués de l'an dernier votent"
+     ],
+     "e": "Deux délégués sont élus par classe, chacun avec son suppléant. Le scrutin est <b>uninominal</b> : chaque électeur choisit un candidat (et non une liste). Tous les élèves sont électeurs et éligibles, et les candidatures sont individuelles."
+    },
+    {
+     "tag": "Délégués de classe",
+     "q": "Quel est le rôle du <b>délégué de classe</b> ?",
+     "o": [
+      "Représenter les élèves de sa classe et agir pour l'ensemble de la classe, par exemple au conseil de classe",
+      "Faire respecter la discipline à la place des professeurs",
+      "Corriger les devoirs de ses camarades",
+      "Choisir les sujets des contrôles"
+     ],
+     "e": "Les délégués <b>représentent</b> les élèves de leur classe et agissent pour l'ensemble de la classe : ils transmettent la parole de leurs camarades, par exemple lors du conseil de classe."
+    },
+    {
+     "tag": "Élection",
+     "q": "Que faut-il pour être élu délégué au <b>1<sup>er</sup> tour</b> ?",
+     "o": [
+      "La majorité absolue : la moitié des voix + une voix",
+      "La majorité relative : le plus de voix",
+      "Être le plus jeune des candidats",
+      "Avoir l'accord du professeur principal"
+     ],
+     "e": "Au 1<sup>er</sup> tour, il faut la <b>majorité absolue</b> : avoir obtenu la moitié des voix + une voix."
+    },
+    {
+     "tag": "Élection",
+     "q": "Que faut-il pour être élu au <b>2<sup>e</sup> tour</b> ? Et en cas d'égalité des voix ?",
+     "o": [
+      "La majorité relative (le plus de voix) ; en cas d'égalité, le plus jeune est élu",
+      "La majorité absolue ; en cas d'égalité, le plus âgé est élu",
+      "La majorité relative ; en cas d'égalité, on tire au sort",
+      "La majorité absolue ; en cas d'égalité, on refait un 3<sup>e</sup> tour"
+     ],
+     "e": "Au 2<sup>e</sup> tour, il faut la <b>majorité relative</b> : celui qui a le plus de voix l'emporte. En cas d'égalité, c'est <b>le candidat le plus jeune</b> qui est élu."
+    },
+    {
+     "tag": "Vote",
+     "q": "Pourquoi vote-t-on à <b>bulletin secret</b>, dans l'isoloir ?",
+     "o": [
+      "Pour choisir librement, sans pression : c'est la liberté de conscience",
+      "Pour que personne ne sache qui est candidat",
+      "Pour pouvoir voter plusieurs fois sans être vu",
+      "Pour que le résultat reste inconnu"
+     ],
+     "e": "On vote dans l'isoloir pour <b>choisir librement</b>, sans pression : c'est ce qu'on appelle la liberté de conscience."
+    },
+    {
+     "tag": "Vote",
+     "q": "À quoi sert de <b>voter</b> ?",
+     "o": [
+      "À élire les dirigeants politiques qui nous représentent",
+      "À désigner la personne la plus âgée de la commune",
+      "À changer le nom de la commune",
+      "À payer ses impôts"
+     ],
+     "e": "Voter sert à <b>élire les dirigeants politiques</b>. C'est un droit que des gens se sont battus pour obtenir, et un moyen de donner son avis."
+    },
+    {
+     "tag": "Représenter",
+     "q": "Que signifie « <b>représenter les autres</b> » quand on est élu ?",
+     "o": [
+      "Prendre des responsabilités : décider pour le bien de tous et rendre des comptes à ceux qui nous ont élus",
+      "Décider seul sans écouter personne",
+      "Faire passer ses propres envies avant celles des autres",
+      "Obtenir des avantages pour ses amis"
+     ],
+     "e": "Représenter les autres, c'est <b>prendre des responsabilités</b>. Les élus ont le devoir de prendre des décisions pour le bien de tous et de rendre des comptes aux citoyens qui les ont élus."
+    },
+    {
+     "tag": "Représenter",
+     "q": "Les citoyens français peuvent être représentés à <b>différentes échelles</b>. Lesquelles ?",
+     "o": [
+      "Par exemple dans leur commune (mairie) et dans leur département (conseillers départementaux)",
+      "Uniquement à l'échelle du pays",
+      "Uniquement dans leur quartier",
+      "Uniquement au niveau de l'Europe"
+     ],
+     "e": "Les Français sont représentés à <b>différents niveaux</b> : par exemple par le maire et le conseil municipal dans leur commune, par les conseillers départementaux dans leur département. À chaque échelle, les décisions répondent à un besoin collectif."
+    },
+    {
+     "tag": "Intérêt général",
+     "q": "Dans une démocratie, que doit faire passer un élu en premier ?",
+     "o": [
+      "L'intérêt général avant l'intérêt particulier",
+      "L'intérêt particulier avant l'intérêt général",
+      "Son propre intérêt, puis celui de ses amis",
+      "Aucun des deux : il décide au hasard"
+     ],
+     "e": "Il faut accepter de faire passer l'<b>intérêt général</b> (ce qui est bénéfique à une majorité de personnes) avant l'<b>intérêt particulier</b>. Les décisions sont prises après des débats qui cherchent ce qui peut être utile à tous."
+    }
+   ],
+   "pages": [
+    "emc-1.jpg",
+    "emc-2.jpg",
+    "emc-3.jpg"
+   ],
+   "pdf": "exercices_emc_representer_les_autres.pdf"
+  },
+  {
+   "key": "emcl",
+   "subject": "emc",
+   "label": "Lexique",
+   "position": 1,
+   "eyebrow": "EMC · Lexique",
+   "title": "Le lexique de la séquence",
+   "sub": "Mots-clés, définitions et sigles (CME, CVC, FSE…)",
+   "exo": "3 exercices sur 1 page : relier les mots à leur définition, compléter les définitions, distinguer CME, CVC et FSE.",
+   "file_name": "exercices_emc_lexique.pdf",
+   "cards": [
+    {
+     "tag": "Démocratie",
+     "q": "Qu'est-ce que la <b>démocratie représentative</b> ?",
+     "o": [
+      "Un régime où les citoyens élisent des représentants qui décident en leur nom",
+      "Un régime où un seul chef décide pour tous",
+      "Un régime où chaque citoyen vote lui-même chaque décision",
+      "Un régime où les dirigeants sont désignés par l'armée"
+     ],
+     "e": "La démocratie représentative est une forme de gouvernement où le <b>pouvoir appartient aux citoyens</b>. Ils élisent des représentants à qui ils confient la mission de prendre des décisions en leur nom."
+    },
+    {
+     "tag": "CME / CMJ",
+     "q": "Que signifie <b>CME</b> (ou CMJ) et à quoi sert cette assemblée ?",
+     "o": [
+      "Conseil Municipal des Enfants (ou des Jeunes) : des enfants élus proposent des idées pour la commune",
+      "Conseil du Monde Éducatif : il fixe les emplois du temps",
+      "Comité Médical des Élèves : il organise les soins au collège",
+      "Centre Municipal d'Éducation : il construit les écoles"
+     ],
+     "e": "CME = <b>Conseil Municipal des Enfants</b> (CMJ = des Jeunes) : assemblée d'enfants élus dans une commune pour apprendre le fonctionnement de la démocratie représentative et proposer des idées pour améliorer la vie dans la commune."
+    },
+    {
+     "tag": "CVC",
+     "q": "Qu'est-ce que le <b>CVC</b> (Conseil de la Vie Collégienne) ?",
+     "o": [
+      "Une instance où des adultes et des élèves élus discutent et proposent des actions pour améliorer la vie des collégiens",
+      "Un conseil qui décide des notes et des passages de classe",
+      "Une association qui organise les voyages scolaires",
+      "Un jury qui recrute les professeurs"
+     ],
+     "e": "Le CVC est une instance où des <b>adultes et des élèves élus</b> discutent et peuvent proposer des actions pour améliorer la vie des collégiens."
+    },
+    {
+     "tag": "Éco-délégué",
+     "q": "Quelle est la mission d'un <b>éco-délégué</b> ?",
+     "o": [
+      "Mettre en place des actions en faveur de l'environnement",
+      "Représenter sa classe au conseil de classe",
+      "Gérer le foyer du collège",
+      "Surveiller la cantine pour le professeur"
+     ],
+     "e": "Un éco-délégué est un élève élu pour mettre en place des <b>actions en faveur de l'environnement</b>. Représenter la classe au conseil de classe, c'est le rôle du délégué de classe."
+    },
+    {
+     "tag": "FSE",
+     "q": "Qu'est-ce que le <b>FSE</b> (Foyer Socio-Éducatif) dans un collège ?",
+     "o": [
+      "Une association qui permet aux élèves, aux personnels et aux familles d'organiser des actions éducatives et ludiques",
+      "Un syndicat d'enseignants",
+      "Un conseil qui vote le règlement intérieur",
+      "Un service qui gère la cantine"
+     ],
+     "e": "Le FSE est une <b>association</b> du collège qui permet aux élèves, aux personnels et aux familles d'organiser des actions pédagogiques, éducatives, ludiques…"
+    },
+    {
+     "tag": "Majorité absolue",
+     "q": "Qu'est-ce que la <b>majorité absolue</b> lors d'une élection ?",
+     "o": [
+      "Obtenir la moitié des voix + une voix",
+      "Obtenir le plus de voix, même sans atteindre la moitié",
+      "Obtenir toutes les voix",
+      "Obtenir exactement la moitié des voix"
+     ],
+     "e": "La majorité absolue, c'est obtenir <b>la moitié des voix + une voix</b>."
+    },
+    {
+     "tag": "Majorité relative",
+     "q": "Qu'est-ce que la <b>majorité relative</b> lors d'une élection ?",
+     "o": [
+      "Obtenir le plus de voix",
+      "Obtenir la moitié des voix + une voix",
+      "Obtenir au moins deux tiers des voix",
+      "Être le candidat le plus âgé"
+     ],
+     "e": "La majorité relative, c'est obtenir <b>le plus de voix</b>, sans avoir besoin de dépasser la moitié."
+    },
+    {
+     "tag": "Électeur",
+     "q": "Que veut dire être « <b>électeur</b> » ?",
+     "o": [
+      "Avoir le droit de voter, de choisir ses représentants",
+      "Avoir le droit de se présenter à l'élection",
+      "Avoir été élu",
+      "Organiser le vote"
+     ],
+     "e": "Un électeur est celui qui a <b>le droit de voter</b> et de choisir ses représentants."
+    },
+    {
+     "tag": "Éligible",
+     "q": "Que veut dire être « <b>éligible</b> » ?",
+     "o": [
+      "Avoir le droit de se présenter à une élection : on peut être élu",
+      "Avoir le droit de voter",
+      "Avoir déjà été élu",
+      "Dépouiller les bulletins de vote"
+     ],
+     "e": "Une personne éligible a le droit de <b>se présenter</b> à une élection : elle peut être élue."
+    },
+    {
+     "tag": "Liberté de conscience",
+     "q": "Que veut dire la <b>liberté de conscience</b> ?",
+     "o": [
+      "Le droit de penser ce que l'on veut, mais aussi de croire ou de ne pas croire",
+      "Le droit de voter plusieurs fois",
+      "Le droit de ne jamais obéir aux lois",
+      "Le droit de se présenter à toutes les élections"
+     ],
+     "e": "C'est le droit de <b>penser ce que l'on veut</b>, mais aussi de croire ou de ne pas croire."
+    },
+    {
+     "tag": "Intérêt général",
+     "q": "Que désigne l'<b>intérêt général</b> ?",
+     "o": [
+      "Ce qui est bon pour l'ensemble des citoyens, ce qui profite à un maximum de personnes",
+      "Ce qui ne profite qu'à soi ou à un petit nombre de personnes",
+      "Ce que décide le plus âgé des élus",
+      "Ce qui plaît seulement aux élus"
+     ],
+     "e": "L'intérêt général désigne ce qui est <b>bon pour l'ensemble des citoyens</b>, ce qui profite à un maximum de personnes."
+    },
+    {
+     "tag": "Intérêt particulier",
+     "q": "Que désigne l'<b>intérêt particulier</b> ?",
+     "o": [
+      "Ce qui ne profite qu'à soi ou à un petit nombre de personnes",
+      "Ce qui est bon pour l'ensemble des citoyens",
+      "Ce qui est interdit par la loi",
+      "Ce qui concerne uniquement les enfants"
+     ],
+     "e": "L'intérêt particulier désigne ce qui <b>ne profite qu'à soi</b> ou à un petit nombre de personnes."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Quel est le mot défini ici : « forme de gouvernement où le pouvoir appartient aux citoyens, qui élisent des représentants »&nbsp;?",
+     "o": [
+      "La démocratie représentative",
+      "La liberté de conscience",
+      "L'intérêt général",
+      "La majorité relative"
+     ],
+     "e": "C'est la <b>démocratie représentative</b> : les citoyens élisent des représentants à qui ils confient la mission de prendre des décisions en leur nom."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Quel est le mot défini ici : « assemblée d'enfants élus dans une commune pour apprendre la démocratie et proposer des idées »&nbsp;?",
+     "o": [
+      "Le CME (ou CMJ)",
+      "Le CVC",
+      "Le FSE",
+      "Le conseil de classe"
+     ],
+     "e": "C'est le <b>CME</b> (Conseil Municipal des Enfants) ou <b>CMJ</b> (des Jeunes). Ne pas confondre avec le CVC, qui existe au collège."
+    },
+    {
+     "tag": "Lexique",
+     "q": "CME ou CVC : lequel se trouve <b>au collège</b> et réunit des adultes et des élèves élus ?",
+     "o": [
+      "Le CVC (Conseil de la Vie Collégienne)",
+      "Le CME (Conseil Municipal des Enfants)",
+      "Les deux, c'est la même instance",
+      "Aucun des deux"
+     ],
+     "e": "Le <b>CVC</b> est une instance du collège où des adultes et des élèves élus discutent et proposent des <b>actions pour améliorer la vie des collégiens</b>. Le CME, lui, est dans la commune."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Quel est le mot défini ici : « association du collège qui organise des actions éducatives et ludiques pour les élèves, les personnels et les familles »&nbsp;?",
+     "o": [
+      "Le FSE (Foyer Socio-Éducatif)",
+      "Le CVC",
+      "Le CME",
+      "Le conseil d'administration"
+     ],
+     "e": "C'est le <b>FSE</b> (Foyer Socio-Éducatif)."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Complète : le CVC propose des actions pour…",
+     "o": [
+      "améliorer la vie des collégiens",
+      "choisir les professeurs",
+      "fixer les dates des vacances",
+      "voter les lois"
+     ],
+     "e": "Le CVC propose des <b>actions pour améliorer la vie des collégiens</b>."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Complète : un éco-délégué met en place des actions en faveur de…",
+     "o": [
+      "l'environnement",
+      "la discipline",
+      "la cantine uniquement",
+      "la bibliothèque uniquement"
+     ],
+     "e": "Un éco-délégué est un élève élu pour mettre en place des actions en faveur de <b>l'environnement</b>."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Complète : être « électeur », c'est être celui qui a le droit de…",
+     "o": [
+      "voter, de choisir ses représentants",
+      "se présenter à l'élection",
+      "compter les bulletins",
+      "être élu automatiquement"
+     ],
+     "e": "Être électeur, c'est <b>avoir le droit de voter</b>, de choisir ses représentants."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Complète : être « éligible », c'est être celui qui a le droit de…",
+     "o": [
+      "se présenter à une élection : il peut être élu",
+      "voter seulement",
+      "choisir le jour de l'élection",
+      "ne pas se présenter"
+     ],
+     "e": "Être éligible, c'est <b>avoir le droit de se présenter</b> à l'élection : on peut être élu."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Majorité <b>absolue</b> ou majorité <b>relative</b> : laquelle est exigée au <b>1<sup>er</sup> tour</b>, laquelle suffit au <b>2<sup>e</sup> tour</b> ?",
+     "o": [
+      "Absolue au 1<sup>er</sup> tour, relative au 2<sup>e</sup> tour",
+      "Relative au 1<sup>er</sup> tour, absolue au 2<sup>e</sup> tour",
+      "Absolue aux deux tours",
+      "Relative aux deux tours"
+     ],
+     "e": "<b>Majorité absolue</b> (moitié des voix + une voix) au <b>1<sup>er</sup> tour</b> ; <b>majorité relative</b> (le plus de voix) au <b>2<sup>e</sup> tour</b>."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Quel est le mot défini ici : « le droit de penser ce que l'on veut, mais aussi de croire ou de ne pas croire »&nbsp;?",
+     "o": [
+      "La liberté de conscience",
+      "L'intérêt particulier",
+      "La majorité absolue",
+      "Le droit de vote"
+     ],
+     "e": "C'est la <b>liberté de conscience</b>."
+    },
+    {
+     "tag": "Lexique",
+     "q": "Intérêt général ou intérêt particulier : « ce qui ne profite qu'à soi ou à un petit nombre de personnes » ?",
+     "o": [
+      "L'intérêt particulier",
+      "L'intérêt général",
+      "Les deux",
+      "Aucun des deux"
+     ],
+     "e": "C'est l'<b>intérêt particulier</b>. L'<b>intérêt général</b>, lui, est ce qui est bon pour l'ensemble des citoyens."
+    }
+   ],
+   "pages": [
+    "emcl-1.jpg"
+   ],
+   "pdf": "exercices_emc_lexique.pdf"
+  }
+ ]
+}

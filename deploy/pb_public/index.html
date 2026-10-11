@@ -1,0 +1,1761 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Travail collège">
+<meta name="theme-color" content="#fbf9f3">
+<script src="config.js"></script>
+<title>Révisions par matière</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: one column of 640px, a lined-notebook flashcard in the middle, score top right, exercises PDF below. */
+:root {
+  --paper: #f5f7fc;
+  --card: #ffffff;
+  --line: #d9e2f4;
+  --border: #d3dbed;
+  --ink: #1b3a8a;
+  --ink-soft: #4a5f9c;
+  --fg: #17203a;
+  --muted: #566282;
+  --red: #c23a2b;
+  --ok: #1d7448;
+  --ok-bg: #e2f3ea;
+  --bad: #ad2a22;
+  --bad-bg: #fae6e3;
+  --btn-fg: #ffffff;
+  --ink-emc: #0e6b57;
+  --ink-soft-emc: #3f8a78;
+  --brand-blue: #1b3a8a;
+  --ink-svt: #6b3fa0;
+  --ink-soft-svt: #8a63b8;
+  --ink-hg: #9a4a12;
+  --ink-soft-hg: #b8733a;
+  --display: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --body: "Atkinson Hyperlegible", system-ui, "Segoe UI", "DejaVu Sans", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1422; --card: #171d30; --line: #27314f; --border: #2c3655;
+    --ink: #a3bcff; --ink-soft: #8598d0; --fg: #e8ecf7; --muted: #9ba6c6;
+    --red: #ff9183; --ok: #72d6a0; --ok-bg: #12301f; --bad: #ff9088; --bad-bg: #381917;
+    --btn-fg: #0f1422; --ink-emc: #7fd6bd; --ink-soft-emc: #6fb9a5; --ink-svt: #c9b0f0; --ink-soft-svt: #b095dc; --ink-hg: #f0b27a; --ink-soft-hg: #d49a68; --brand-blue: #a3bcff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1422; --card: #171d30; --line: #27314f; --border: #2c3655;
+  --ink: #a3bcff; --ink-soft: #8598d0; --fg: #e8ecf7; --muted: #9ba6c6;
+  --red: #ff9183; --ok: #72d6a0; --ok-bg: #12301f; --bad: #ff9088; --bad-bg: #381917;
+  --btn-fg: #0f1422; --ink-emc: #7fd6bd; --ink-soft-emc: #6fb9a5; --ink-svt: #c9b0f0; --ink-soft-svt: #b095dc; --ink-hg: #f0b27a; --ink-soft-hg: #d49a68; --brand-blue: #a3bcff;
+  color-scheme: dark;
+}
+.wrap[data-subject="emc"], .wrap[data-subject="emcl"] { --ink: var(--ink-emc); --ink-soft: var(--ink-soft-emc); }
+.wrap[data-subject="svt"] { --ink: var(--ink-svt); --ink-soft: var(--ink-soft-svt); }
+.wrap[data-subject="hg"] { --ink: var(--ink-hg); --ink-soft: var(--ink-soft-hg); }
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-inline: 16px;
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 640px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+sub { font-size: 0.72em; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.brand { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.brand svg { display: block; width: 230px; max-width: 70%; height: auto; }
+.lg-a { fill: var(--fg); } .lg-b { fill: var(--brand-blue); } .lg-c { stroke: var(--ink-hg); } .lg-d { fill: var(--ink-emc); }
+.subtabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 0; }
+.subtabs[hidden] { display: none; }
+.subtabs button { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 16px; min-height: 40px; font: inherit; font-weight: 700; font-size: 14px; }
+.subtabs button[aria-selected="true"] { background: var(--ink); color: var(--btn-fg); }
+.tabrow { display: flex; align-items: flex-end; border-bottom: 2px solid var(--border); gap: 12px; }
+.ver { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
+.subjects { display: flex; gap: 22px; min-width: 0; }
+.subjects button { white-space: nowrap; }
+.ver { flex-shrink: 0; }
+.brandr { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.sync { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 10px; min-height: 32px; white-space: nowrap; }
+.sync[data-s="ok"] { color: var(--ink); border-color: var(--ink); }
+.sync[data-s="err"] { color: var(--bad); border-color: var(--bad); }
+.sync[data-s="login"] { background: var(--ink); color: var(--btn-fg); border-color: var(--ink); }
+.subjects button { background: none; border: 0; border-bottom: 4px solid transparent; margin-bottom: -2px; padding: 10px 2px; min-height: 48px; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.subjects button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+@media (max-width: 520px) { .subjects { gap: 9px; max-width: 100%; overflow-x: auto; } .subjects button { font-size: 11.5px; letter-spacing: 0.02em; padding: 10px 0; } .tabrow { gap: 8px; } }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
+.top > div { min-width: 0; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; line-height: 1.05; color: var(--ink); text-wrap: balance; }
+.lede { margin: 4px 0 0; color: var(--muted); }
+.score { display: flex; align-items: baseline; gap: 6px; font-family: var(--display); color: var(--red); }
+.score .n { font-size: 54px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score .of { font-size: 26px; font-variant-numeric: tabular-nums; }
+.score .lab { font-family: var(--body); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-left: 4px; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 8px; overflow: hidden; }
+.seg button { background: transparent; border: 0; padding: 9px 14px; color: var(--ink); font-weight: 700; font-size: 14px; min-height: 44px; }
+.seg button + button { border-left: 1.5px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--btn-fg); }
+.chk { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); min-height: 44px; }
+.chk input { width: 18px; height: 18px; accent-color: var(--ink); }
+
+.dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: transparent; background: var(--card); }
+.dot.cur { border-color: var(--ink); border-width: 2.5px; }
+.dot.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.dot.ko { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+
+.card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 20px 18px 20px 52px; box-shadow: 0 1px 0 var(--border); }
+.card::before { content: ""; position: absolute; top: 0; bottom: 0; left: 36px; width: 2px; background: var(--red); opacity: 0.55; }
+.meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+.meta .tag { color: var(--ink); }
+.meta .cnt { color: var(--muted); font-variant-numeric: tabular-nums; }
+.qtext { margin: 0 0 16px; font-size: 19px; line-height: 28px; font-weight: 700; color: var(--ink); background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px); min-height: 56px; text-wrap: pretty; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 14px; min-height: 48px; color: var(--fg); }
+.opt .k { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink); color: var(--ink); display: grid; place-items: center; font-size: 13px; font-weight: 700; margin-top: 1px; }
+.opt .t { min-width: 0; overflow-wrap: anywhere; }
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt:disabled { cursor: default; color: var(--fg); }
+.opt.ok { background: var(--ok-bg); border-color: var(--ok); }
+.opt.ok .k { background: var(--ok); border-color: var(--ok); color: var(--card); }
+.opt.ko { background: var(--bad-bg); border-color: var(--bad); }
+.opt.ko .k { background: var(--bad); border-color: var(--bad); color: var(--card); }
+.opt.dim { opacity: 0.6; }
+
+.fix { margin-top: 16px; padding: 12px 14px; border: 1.5px dashed var(--red); border-radius: 8px; }
+.fix .lab { font-family: var(--display); font-size: 26px; line-height: 1; color: var(--red); display: block; margin-bottom: 4px; }
+.fix .verdict { font-weight: 700; }
+.fix p { margin: 0; }
+.fix p + p { margin-top: 6px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.btn { background: var(--ink); color: var(--btn-fg); border: 1.5px solid var(--ink); border-radius: 8px; padding: 11px 18px; font-weight: 700; min-height: 48px; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.good { background: var(--ok); border-color: var(--ok); color: var(--card); }
+.btn.again { background: var(--bad); border-color: var(--bad); color: var(--card); }
+.btn:hover { filter: brightness(1.08); }
+.hint { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+.results { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 22px 18px 22px 52px; position: relative; }
+.results::before { content: ""; position: absolute; top: 0; bottom: 0; left: 36px; width: 2px; background: var(--red); opacity: 0.55; }
+.results h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 28px; color: var(--ink); }
+.bigscore { font-family: var(--display); color: var(--red); font-size: 76px; line-height: 1; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.bigscore span { font-size: 38px; }
+.results p { margin: 0 0 6px; }
+.missed { margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.missed li { border-top: 1px solid var(--border); padding-top: 10px; }
+.missed .mq { font-weight: 700; color: var(--ink); }
+.missed .ma { color: var(--muted); font-size: 15px; }
+
+.exo { border-top: 1.5px solid var(--ink); padding-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.exo h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 30px; color: var(--ink); }
+.exo p { margin: 0; color: var(--muted); }
+.exo .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 6px; }
+#dlmsg { font-size: 14px; color: var(--muted); }
+
+@media (max-width: 480px) {
+  h1 { font-size: 38px; }
+  .card, .results { padding-left: 44px; padding-right: 14px; }
+  .card::before, .results::before { left: 30px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .opt, .dot, .btn { transition: background-color .15s, border-color .15s; }
+}
+.ink[data-subject="emc"], .ink[data-subject="emcl"] { --ink: var(--ink-emc); --ink-soft: var(--ink-soft-emc); }
+.ink[data-subject="svt"] { --ink: var(--ink-svt); --ink-soft: var(--ink-soft-svt); }
+.ink[data-subject="hg"] { --ink: var(--ink-hg); --ink-soft: var(--ink-soft-hg); }
+.ink, .ink * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.ink input { -webkit-user-select: auto; user-select: auto; }
+.ink { position: fixed; inset: 0; z-index: 50; background: var(--paper); display: flex; flex-direction: column; font-family: var(--body); color: var(--fg); }
+.ink[hidden] { display: none; }
+.ink-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 12px; border-bottom: 2px solid var(--border); background: var(--card); }
+.ink-title { font-weight: 700; color: var(--ink); margin-right: auto; }
+.ink-grp { display: inline-flex; align-items: center; gap: 6px; }
+.ink-b { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 8px; padding: 6px 12px; min-height: 44px; min-width: 44px; font: inherit; font-weight: 700; font-size: 14px; }
+.ink-b[aria-pressed="true"] { background: var(--ink); color: var(--btn-fg); }
+.ink-b.solid { background: var(--ink); color: var(--btn-fg); }
+.ink-sw { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--border); padding: 0; }
+.ink-sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.ink-opt { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); min-height: 44px; }
+.ink-opt input { width: 22px; height: 22px; }
+#ink-msg { font-size: 14px; color: var(--muted); }
+.ink-scroll { flex: 1; overflow: auto; background: #cfd3dc; padding: 14px 10px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ink-scroll { background: #0a0d18; } }
+:root[data-theme="dark"] .ink-scroll { background: #0a0d18; }
+.ink-page { position: relative; margin: 0 auto 16px; max-width: 920px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.25); aspect-ratio: 210 / 297; }
+.ink-page { background-size: 100% 100%; background-repeat: no-repeat; background-color: #fff; }
+.ink-page img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.ink-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pinch-zoom; -webkit-touch-callout: none; }
+.ink-split { flex: 1; display: flex; min-height: 0; }
+.ink-split .ink-scroll { flex: 1; min-width: 0; }
+#ink-corr[hidden] { display: none; }
+.ink-cap { margin: 0 auto 8px; max-width: 920px; font-weight: 700; color: var(--ink); font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.ink-par { display: none; }
+.ink.parent .ink-par { display: inline-flex; }
+.ink.parent p.ink-par { display: block; }
+.ink.parent .ink-draw { display: none; }
+.ink.parent .ink-page canvas { pointer-events: none; }
+.ink:not(.parent) .ink-cap { display: none; }
+@media (max-width: 700px) { .ink.parent .ink-split { flex-direction: column; } }
+.pw { position: fixed; inset: 0; z-index: 60; background: rgba(10,14,28,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.pw[hidden] { display: none; }
+.ed { position: fixed; inset: 0; z-index: 55; background: var(--paper); color: var(--fg); display: flex; flex-direction: column; font-family: var(--body); }
+.ed[hidden] { display: none; }
+.ed-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 12px; border-bottom: 2px solid var(--border); background: var(--card); }
+.ed-bar strong { margin-right: auto; color: var(--ink); }
+#ed-msg { font-size: 14px; color: var(--muted); }
+.ed-body { flex: 1; overflow: auto; padding: 14px 16px 60px; max-width: 860px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.ed-body h3 { margin: 18px 0 6px; color: var(--ink); display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.ed label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700; color: var(--muted); margin: 8px 0; }
+.ed input, .ed textarea, .ed select { font: inherit; font-size: 16px; font-weight: 400; color: var(--fg); background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; min-height: 40px; width: 100%; box-sizing: border-box; }
+.ed input[type="color"] { width: 80px; padding: 2px; }
+.ed-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px 10px; margin: 10px 0; background: var(--card); }
+.ed-card .ed-ch { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--ink); }
+.ed-card .ed-ch span { display: inline-flex; gap: 6px; }
+.ed-card .ok label { color: var(--ink); }
+.ed-new { border: 2px solid var(--ink); border-radius: 10px; padding: 4px 14px 12px; margin-bottom: 12px; }
+.ed-help { margin: 4px 0; font-size: 13px; color: var(--muted); }
+.pw-card { background: var(--card); color: var(--fg); border: 1.5px solid var(--border); border-radius: 12px; padding: 22px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; font-family: var(--body); }
+.pw-card h2 { margin: 0; font-family: var(--display); font-size: 30px; color: var(--ink); }
+.pw-card p { margin: 0; color: var(--muted); }
+.pw-card input { font: inherit; font-size: 22px; letter-spacing: 0.3em; text-align: center; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--fg); min-height: 52px; }
+.pw-card .row { display: flex; gap: 10px; flex-wrap: wrap; }
+#pw-msg, #lg-msg { min-height: 1.4em; color: var(--bad); font-size: 14px; }
+</style>
+
+<div class="wrap" id="wrap" data-subject="maths">
+  <div class="brand">
+    <svg viewBox="0 0 330 92" role="img" aria-label="Travail collège Gianni">
+      <text x="0" y="52" font-family="Caveat, 'Segoe Print', 'Bradley Hand', cursive" font-weight="700" font-size="60" textLength="312" lengthAdjust="spacingAndGlyphs" class="lg-a">Travail <tspan class="lg-b">collège</tspan></text>
+      <path d="M6 66 C 80 58, 190 72, 292 62" fill="none" stroke-width="5" stroke-linecap="round" class="lg-c"/>
+      <text x="4" y="88" font-family="'Atkinson Hyperlegible', system-ui, sans-serif" font-weight="700" font-size="15" letter-spacing="7" textLength="98" lengthAdjust="spacing" class="lg-d">GIANNI</text>
+    </svg>
+    <div class="brandr"><span class="ver" title="Version">v4.0</span><button type="button" class="sync" id="sync" hidden></button></div>
+  </div>
+  <div class="tabrow">
+  <nav class="subjects" id="subjects" role="tablist" aria-label="Matières"></nav>
+  </div>
+  <div class="subtabs" id="course-sub" role="tablist" aria-label="Cours de la matière" hidden></div>
+  <header class="top">
+    <div>
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 id="h1"></h1>
+      <p class="lede" id="lede"></p>
+    </div>
+    <div class="score" aria-live="polite" aria-label="Score">
+      <span class="n" id="pts">0</span><span class="of">/ <span id="tot">15</span></span><span class="lab">points</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Mode de révision">
+      <button type="button" id="m-qcm" aria-pressed="true">QCM corrigé</button>
+      <button type="button" id="m-flip" aria-pressed="false">Carte à retourner</button>
+    </div>
+    <label class="chk" for="shuffle"><input type="checkbox" id="shuffle"> Ordre aléatoire</label>
+  </div>
+
+  <div class="dots" id="dots" aria-hidden="true"></div>
+
+  <main class="card" id="stage"></main>
+
+  <section class="results" id="results" hidden></section>
+
+  <section class="exo" aria-labelledby="exo-title">
+    <h2 id="exo-title">Exercices</h2>
+    <p id="exo-desc"></p>
+    <div class="row">
+      <button type="button" class="btn" id="ink-open">Faire les exercices à l'écran (Apple Pencil)</button>
+      <button type="button" class="btn ghost" id="parent-open">Espace parent</button>
+      <button type="button" class="btn ghost" id="dl">Télécharger le PDF à imprimer</button>
+      <button type="button" class="btn ghost" id="edit-open" hidden>✎ Modifier ce cours</button>
+      <span id="dlmsg" role="status"></span>
+    </div>
+  </section>
+  <section class="exo" aria-labelledby="bk-title">
+    <h2 id="bk-title">Sauvegarde</h2>
+    <p>Garde une copie des travaux et des scores dans un fichier, ou restaure-la sur un autre appareil.</p>
+    <div class="row">
+      <button type="button" class="btn ghost" id="bk-exp">Exporter mes travaux</button>
+      <button type="button" class="btn ghost" id="bk-imp">Importer une sauvegarde</button>
+      <input type="file" id="bk-file" accept=".json,application/json" hidden>
+      <span id="bk-msg" role="status"></span>
+    </div>
+  </section>
+</div>
+
+<div class="pw" id="lg" hidden role="dialog" aria-label="Connexion au serveur">
+  <form class="pw-card" id="lg-form">
+    <h2>Connexion</h2>
+    <p>Un parent saisit une seule fois, sur cet appareil, le mot de passe du compte de Gianni. Ensuite les travaux se synchronisent tout seuls.</p>
+    <input type="password" id="lg-in" autocomplete="current-password" aria-label="Mot de passe du compte" style="letter-spacing: normal; font-size: 18px;">
+    <p id="lg-msg" role="status"></p>
+    <div class="row"><button type="submit" class="btn">Se connecter</button><button type="button" class="btn ghost" id="lg-cancel">Plus tard</button></div>
+  </form>
+</div>
+
+<div class="pw" id="pw" hidden role="dialog" aria-label="Espace parent">
+  <form class="pw-card" id="pw-form">
+    <h2>Espace parent</h2>
+    <p>Entre le code pour afficher le corrigé à côté de la feuille de l'élève.</p>
+    <input type="password" id="pw-in" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Code parent">
+    <p id="pw-msg" role="status"></p>
+    <div class="row"><button type="submit" class="btn">Valider</button><button type="button" class="btn ghost" id="pw-cancel">Annuler</button></div>
+  </form>
+</div>
+
+<div class="ed" id="ed" hidden role="dialog" aria-label="Modifier le cours">
+  <div class="ed-bar">
+    <button type="button" class="ink-b" id="ed-close">← Retour</button>
+    <strong id="ed-title">Modifier le cours</strong>
+    <button type="button" class="ink-b" id="ed-newbtn">+ Nouveau cours</button>
+    <span id="ed-msg" role="status"></span>
+    <button type="button" class="ink-b solid" id="ed-save">Enregistrer</button>
+  </div>
+  <div class="ed-body">
+    <section class="ed-new" id="ed-new" hidden>
+      <h3>Nouveau cours</h3>
+      <label>Matière<select id="edn-subject"></select></label>
+      <div id="edn-newsub" hidden>
+        <label>Nom de la nouvelle matière<input id="edn-name" maxlength="40"></label>
+        <label>Couleur<input id="edn-color" type="color" value="#0b6e8a"></label>
+      </div>
+      <label>Nom du bouton du cours<input id="edn-label" maxlength="60" placeholder="ex. La Terre"></label>
+      <label>Titre de la page<input id="edn-title" maxlength="120"></label>
+      <div class="row"><button type="button" class="btn" id="edn-create">Créer le cours</button><button type="button" class="btn ghost" id="edn-cancel">Annuler</button></div>
+    </section>
+    <section class="ed-meta">
+      <label>Nom du bouton du cours<input id="ed-label" maxlength="60"></label>
+      <label>Titre<input id="ed-ttl" maxlength="120"></label>
+      <label>Surtitre<input id="ed-eyebrow" maxlength="120"></label>
+      <label>Sous-titre<input id="ed-sub" maxlength="160"></label>
+      <label>Description des exercices<textarea id="ed-exo" rows="2"></textarea></label>
+      <label>Ordre du bouton (1 = premier)<input id="ed-pos" type="number" min="0" step="1"></label>
+      <p class="ed-help">Les feuilles d'exercices (images des pages), le PDF et les corrigés se déposent dans le tableau de bord PocketBase (adresse /_/ du serveur).</p>
+    </section>
+    <h3>Cartes <button type="button" class="ink-b" id="ed-add">+ Ajouter une carte</button></h3>
+    <p class="ed-help">La première réponse est la bonne : l'application mélange l'ordre à l'affichage. Gras : &lt;b&gt;mot&lt;/b&gt;.</p>
+    <div id="ed-cards"></div>
+  </div>
+</div>
+
+<div class="ink" id="ink" hidden role="dialog" aria-label="Exercices à écrire">
+  <div class="ink-bar">
+    <button type="button" class="ink-b" id="ink-close">← Retour</button>
+    <span class="ink-title" id="ink-title"></span>
+    <span class="ink-grp ink-draw" role="group" aria-label="Couleur">
+      <button type="button" class="ink-sw" data-color="#1a1a1a" style="background:#1a1a1a" aria-label="Noir" aria-pressed="true"></button>
+      <button type="button" class="ink-sw" data-color="#1b3a8a" style="background:#1b3a8a" aria-label="Bleu" aria-pressed="false"></button>
+      <button type="button" class="ink-sw" data-color="#c0261c" style="background:#c0261c" aria-label="Rouge" aria-pressed="false"></button>
+      <button type="button" class="ink-sw" data-color="#0e7a4a" style="background:#0e7a4a" aria-label="Vert" aria-pressed="false"></button>
+    </span>
+    <span class="ink-grp ink-draw" role="group" aria-label="Épaisseur">
+      <button type="button" class="ink-b" data-w="0.0016" aria-pressed="false">Fin</button>
+      <button type="button" class="ink-b" data-w="0.0028" aria-pressed="true">Moyen</button>
+      <button type="button" class="ink-b" data-w="0.0055" aria-pressed="false">Épais</button>
+    </span>
+    <button type="button" class="ink-b ink-draw" id="ink-erase" aria-pressed="false">Gomme</button>
+    <button type="button" class="ink-b ink-draw" id="ink-undo">Annuler</button>
+    <button type="button" class="ink-b ink-draw" id="ink-clear">Tout effacer</button>
+    <label class="ink-opt ink-draw"><input type="checkbox" id="ink-finger"> Écrire aussi au doigt</label>
+    <button type="button" class="ink-b solid ink-draw" id="ink-pdf">Enregistrer en PDF</button>
+    <label class="ink-opt ink-par"><input type="checkbox" id="ink-link" checked> Défilement lié</label>
+    <span id="ink-msg" role="status"></span>
+  </div>
+  <div class="ink-split">
+    <div class="ink-scroll" id="ink-scroll"><p class="ink-cap ink-par">Feuille de l'élève</p><div id="ink-pages"></div></div>
+    <div class="ink-scroll" id="ink-corr" hidden><p class="ink-cap">Corrigé</p><div id="ink-corr-pages"></div></div>
+  </div>
+</div>
+
+<script>
+var STANDALONE = true;
+var PDF_MATHS = "";
+var PDF_EMC = "";
+var PDF_SVT = "";
+var PDF_EMCL = "";
+var PDF_HG = "";
+function d(n) { return "(d<sub>" + n + "</sub>)"; }
+
+var MATHS = [
+  { tag: "Point", q: "Comment note-t-on et représente-t-on un point ?",
+    o: ["Lettre majuscule, représenté par une croix", "Lettre minuscule, représenté par un rond", "Lettre majuscule entre crochets", "Lettre minuscule entre parenthèses"],
+    e: "Un point se note avec une <b>lettre majuscule</b> (A, B…) et se représente avec une <b>croix</b> ×." },
+  { tag: "Segment", q: "Quelle est la notation du <b>segment</b> d'extrémités A et B ?",
+    o: ["[AB]", "(AB)", "[AB)", "AB)"],
+    e: "Le segment se note <b>[AB]</b>. On peut le mesurer, et [AB] et [BA] désignent le même segment." },
+  { tag: "Demi-droite", q: "Quelle est la notation de la <b>demi-droite</b> d'origine A passant par B ?",
+    o: ["[AB)", "[AB]", "(AB)", "(BA]"],
+    e: "La demi-droite se note <b>[AB)</b>. On ne peut pas la mesurer, et [AB) et [BA) ne désignent pas la même demi-droite." },
+  { tag: "Droite", q: "Quelle notation désigne la <b>droite</b> passant par A et B ? Que dire de (AB) et (BA) ?",
+    o: ["(AB) ; (AB) et (BA) désignent la même droite", "[AB] ; ce sont deux segments différents", "[AB) ; ce sont deux demi-droites différentes", "(AB) ; (AB) et (BA) sont deux droites différentes"],
+    e: "La droite se note <b>(AB)</b>. (AB) et (BA) désignent la même droite, que l'on ne peut pas mesurer." },
+  { tag: "Mesure", q: "Parmi segment, demi-droite et droite, lesquels peut-on mesurer ?",
+    o: ["Seulement le segment", "Le segment et la demi-droite", "La demi-droite et la droite", "Les trois"],
+    e: "Seul le <b>segment</b> a une longueur. Exemple : [CD] mesure 5,2 cm, on écrit <b>CD = 5,2 cm</b>." },
+  { tag: "Alignement", q: "Quand dit-on que trois points sont <b>alignés</b> ?",
+    o: ["Quand on peut tracer une droite passant par ces 3 points", "Quand ils forment un triangle", "Quand ils sont à égale distance les uns des autres", "Quand ils appartiennent à un même segment de 5 cm"],
+    e: "Trois points sont alignés si l'on peut tracer <b>une droite passant par ces 3 points</b>." },
+  { tag: "Appartenance", q: "Que signifient <b>A ∈ (d)</b> et <b>A ∉ (d)</b> ?",
+    o: ["A appartient / n'appartient pas à la droite (d)", "A est parallèle / non parallèle à (d)", "A est perpendiculaire / non perpendiculaire à (d)", "A est le milieu / n'est pas le milieu de (d)"],
+    e: "<b>∈</b> se lit « appartient à » et <b>∉</b> se lit « n'appartient pas à »." },
+  { tag: "Droites sécantes", q: "Qu'est-ce que deux droites <b>sécantes</b> ? Comment appelle-t-on leur point commun ?",
+    o: ["Deux droites qui se coupent en un point : le point d'intersection", "Deux droites qui ne se coupent jamais : le point de fuite", "Deux droites qui forment un angle droit : le sommet", "Deux droites confondues : le point milieu"],
+    e: "Deux droites sécantes " + d("") .replace("<sub></sub>", "") + " se coupent en un point T, le <b>point d'intersection</b> : T ∈ (d) et T ∈ (d')." },
+  { tag: "Perpendiculaires", q: "Quelle est la définition et la notation de deux droites <b>perpendiculaires</b> ?",
+    o: ["Deux droites sécantes formant un angle droit : " + d(1) + " ⊥ " + d(2), "Deux droites qui ne se coupent pas : " + d(1) + " // " + d(2), "Deux droites sécantes quelconques : " + d(1) + " ⊥ " + d(2), "Deux droites formant un angle de 45° : " + d(1) + " // " + d(2)],
+    e: "Deux droites perpendiculaires sont deux droites <b>sécantes</b> qui forment un <b>angle droit</b>. Notation : <b>" + d(1) + " ⊥ " + d(2) + "</b>." },
+  { tag: "Parallèles", q: "Quelle est la définition et la notation de deux droites <b>parallèles</b> ?",
+    o: ["Deux droites qui ne se coupent pas : " + d(3) + " // " + d(4), "Deux droites sécantes formant un angle droit : " + d(3) + " ⊥ " + d(4), "Deux droites qui se coupent en un point : " + d(3) + " // " + d(4), "Deux droites qui forment un angle de 45° : " + d(3) + " ⊥ " + d(4)],
+    e: "Deux droites parallèles <b>ne se coupent pas</b>. Notation : <b>" + d(3) + " // " + d(4) + "</b>." },
+  { tag: "Construction", q: "Construction de la <b>perpendiculaire</b> à (d) passant par M (M ∉ (d)) : comment place-t-on l'équerre ?",
+    o: ["Un côté de l'angle droit sur (d), l'autre côté passe par M", "Le côté le plus long sur (d), le sommet sur M", "Les deux côtés de l'angle droit passent par M", "Un côté de l'angle droit sur M, l'autre sur (d')"],
+    e: "Un côté de l'angle droit de l'équerre est sur (d) et l'autre côté passe par M. On trace en prolongeant, on nomme la droite et on <b>code l'angle droit</b>." },
+  { tag: "Construction", q: "Construction de la <b>parallèle</b> à (d) passant par M (M ∉ (d)) : l'équerre est sur (d) et une règle contre son autre côté. Ensuite ?",
+    o: ["On fait coulisser l'équerre le long de la règle jusqu'à M, puis on trace", "On fait tourner l'équerre autour de M", "On trace la droite passant par M et un point quelconque de (d)", "On place l'angle droit de l'équerre exactement en M"],
+    e: "On fait <b>coulisser</b> l'équerre le long de la règle jusqu'au point M, puis on trace et on nomme la droite." },
+  { tag: "Propriété 1", q: "Si deux droites sont <b>perpendiculaires à une même troisième</b> droite, alors…",
+    o: ["elles sont parallèles", "elles sont perpendiculaires entre elles", "elles sont sécantes", "elles sont confondues"],
+    e: "Elles sont <b>parallèles</b> : " + d(1) + " ⊥ (d) et " + d(2) + " ⊥ (d), donc <b>" + d(1) + " // " + d(2) + "</b>." },
+  { tag: "Propriété 2", q: "Si deux droites sont <b>parallèles</b>, alors toute droite perpendiculaire à l'une est…",
+    o: ["perpendiculaire à l'autre", "parallèle à l'autre", "sécante mais pas perpendiculaire à l'autre", "confondue avec l'autre"],
+    e: "Elle est <b>perpendiculaire à l'autre</b> : " + d(1) + " // " + d(2) + " et (d) ⊥ " + d(1) + ", donc <b>(d) ⊥ " + d(2) + "</b>." },
+  { tag: "Milieu", q: "Que veut dire « I est le <b>milieu</b> du segment [CD] » ?",
+    o: ["I est un point de [CD] à égale distance de C et de D", "I est un point de la droite (CD) situé hors du segment", "I est le point tel que CI = 2 × ID", "I est le point d'intersection de (CD) avec une autre droite"],
+    e: "Le milieu d'un segment est le point du segment situé à <b>égale distance de ses deux extrémités</b>. Si [CD] mesure 5,2 cm, alors CI = ID = 2,6 cm." }
+];
+MATHS[7].e = "Deux droites sécantes (d) et (d') se coupent en un point T, le <b>point d'intersection</b> : T ∈ (d) et T ∈ (d').";
+
+var EMC = [
+  { tag: "Démocratie", q: "Qu'est-ce que la <b>démocratie représentative</b> ?",
+    o: ["Un régime où les citoyens élisent des représentants qui décident en leur nom", "Un régime où un seul chef décide pour tous", "Un régime où chaque citoyen vote lui-même chaque décision", "Un régime où les dirigeants sont désignés par l'armée"],
+    e: "La démocratie représentative est une forme de gouvernement où le <b>pouvoir appartient aux citoyens</b>. Ils élisent des représentants à qui ils confient la mission de prendre des décisions en leur nom." },
+  { tag: "CME / CMJ", q: "Que signifie <b>CME</b> (ou CMJ) et à quoi sert cette assemblée ?",
+    o: ["Conseil Municipal des Enfants (ou des Jeunes) : des enfants élus proposent des idées pour la commune", "Conseil du Monde Éducatif : il fixe les emplois du temps", "Comité Médical des Élèves : il organise les soins au collège", "Centre Municipal d'Éducation : il construit les écoles"],
+    e: "CME = <b>Conseil Municipal des Enfants</b> (CMJ = des Jeunes) : assemblée d'enfants élus dans une commune pour apprendre le fonctionnement de la démocratie représentative et proposer des idées pour améliorer la vie dans la commune." },
+  { tag: "CVC", q: "Qu'est-ce que le <b>CVC</b> (Conseil de la Vie Collégienne) ?",
+    o: ["Une instance où des adultes et des élèves élus discutent et proposent des actions pour améliorer la vie des collégiens", "Un conseil qui décide des notes et des passages de classe", "Une association qui organise les voyages scolaires", "Un jury qui recrute les professeurs"],
+    e: "Le CVC est une instance où des <b>adultes et des élèves élus</b> discutent et peuvent proposer des actions pour améliorer la vie des collégiens." },
+  { tag: "Éco-délégué", q: "Quelle est la mission d'un <b>éco-délégué</b> ?",
+    o: ["Mettre en place des actions en faveur de l'environnement", "Représenter sa classe au conseil de classe", "Gérer le foyer du collège", "Surveiller la cantine pour le professeur"],
+    e: "Un éco-délégué est un élève élu pour mettre en place des <b>actions en faveur de l'environnement</b>. Représenter la classe au conseil de classe, c'est le rôle du délégué de classe." },
+  { tag: "FSE", q: "Qu'est-ce que le <b>FSE</b> (Foyer Socio-Éducatif) dans un collège ?",
+    o: ["Une association qui permet aux élèves, aux personnels et aux familles d'organiser des actions éducatives et ludiques", "Un syndicat d'enseignants", "Un conseil qui vote le règlement intérieur", "Un service qui gère la cantine"],
+    e: "Le FSE est une <b>association</b> du collège qui permet aux élèves, aux personnels et aux familles d'organiser des actions pédagogiques, éducatives, ludiques…" },
+  { tag: "Majorité absolue", q: "Qu'est-ce que la <b>majorité absolue</b> lors d'une élection ?",
+    o: ["Obtenir la moitié des voix + une voix", "Obtenir le plus de voix, même sans atteindre la moitié", "Obtenir toutes les voix", "Obtenir exactement la moitié des voix"],
+    e: "La majorité absolue, c'est obtenir <b>la moitié des voix + une voix</b>." },
+  { tag: "Majorité relative", q: "Qu'est-ce que la <b>majorité relative</b> lors d'une élection ?",
+    o: ["Obtenir le plus de voix", "Obtenir la moitié des voix + une voix", "Obtenir au moins deux tiers des voix", "Être le candidat le plus âgé"],
+    e: "La majorité relative, c'est obtenir <b>le plus de voix</b>, sans avoir besoin de dépasser la moitié." },
+  { tag: "Électeur", q: "Que veut dire être « <b>électeur</b> » ?",
+    o: ["Avoir le droit de voter, de choisir ses représentants", "Avoir le droit de se présenter à l'élection", "Avoir été élu", "Organiser le vote"],
+    e: "Un électeur est celui qui a <b>le droit de voter</b> et de choisir ses représentants." },
+  { tag: "Éligible", q: "Que veut dire être « <b>éligible</b> » ?",
+    o: ["Avoir le droit de se présenter à une élection : on peut être élu", "Avoir le droit de voter", "Avoir déjà été élu", "Dépouiller les bulletins de vote"],
+    e: "Une personne éligible a le droit de <b>se présenter</b> à une élection : elle peut être élue." },
+  { tag: "Liberté de conscience", q: "Que veut dire la <b>liberté de conscience</b> ?",
+    o: ["Le droit de penser ce que l'on veut, mais aussi de croire ou de ne pas croire", "Le droit de voter plusieurs fois", "Le droit de ne jamais obéir aux lois", "Le droit de se présenter à toutes les élections"],
+    e: "C'est le droit de <b>penser ce que l'on veut</b>, mais aussi de croire ou de ne pas croire." },
+  { tag: "Intérêt général", q: "Que désigne l'<b>intérêt général</b> ?",
+    o: ["Ce qui est bon pour l'ensemble des citoyens, ce qui profite à un maximum de personnes", "Ce qui ne profite qu'à soi ou à un petit nombre de personnes", "Ce que décide le plus âgé des élus", "Ce qui plaît seulement aux élus"],
+    e: "L'intérêt général désigne ce qui est <b>bon pour l'ensemble des citoyens</b>, ce qui profite à un maximum de personnes." },
+  { tag: "Intérêt particulier", q: "Que désigne l'<b>intérêt particulier</b> ?",
+    o: ["Ce qui ne profite qu'à soi ou à un petit nombre de personnes", "Ce qui est bon pour l'ensemble des citoyens", "Ce qui est interdit par la loi", "Ce qui concerne uniquement les enfants"],
+    e: "L'intérêt particulier désigne ce qui <b>ne profite qu'à soi</b> ou à un petit nombre de personnes." },
+  { tag: "Délégués de classe", q: "Comment les <b>délégués de classe</b> sont-ils élus ?",
+    o: ["Au scrutin uninominal à deux tours : tous les élèves de la classe sont électeurs et éligibles", "Ils sont désignés par le professeur principal", "Ils sont tirés au sort dans la classe", "Seuls les délégués de l'an dernier votent"],
+    e: "Deux délégués sont élus par classe, chacun avec son suppléant. Le scrutin est <b>uninominal</b> : chaque électeur choisit un candidat (et non une liste). Tous les élèves sont électeurs et éligibles, et les candidatures sont individuelles." },
+  { tag: "Délégués de classe", q: "Quel est le rôle du <b>délégué de classe</b> ?",
+    o: ["Représenter les élèves de sa classe et agir pour l'ensemble de la classe, par exemple au conseil de classe", "Faire respecter la discipline à la place des professeurs", "Corriger les devoirs de ses camarades", "Choisir les sujets des contrôles"],
+    e: "Les délégués <b>représentent</b> les élèves de leur classe et agissent pour l'ensemble de la classe : ils transmettent la parole de leurs camarades, par exemple lors du conseil de classe." },
+  { tag: "Élection", q: "Que faut-il pour être élu délégué au <b>1<sup>er</sup> tour</b> ?",
+    o: ["La majorité absolue : la moitié des voix + une voix", "La majorité relative : le plus de voix", "Être le plus jeune des candidats", "Avoir l'accord du professeur principal"],
+    e: "Au 1<sup>er</sup> tour, il faut la <b>majorité absolue</b> : avoir obtenu la moitié des voix + une voix." },
+  { tag: "Élection", q: "Que faut-il pour être élu au <b>2<sup>e</sup> tour</b> ? Et en cas d'égalité des voix ?",
+    o: ["La majorité relative (le plus de voix) ; en cas d'égalité, le plus jeune est élu", "La majorité absolue ; en cas d'égalité, le plus âgé est élu", "La majorité relative ; en cas d'égalité, on tire au sort", "La majorité absolue ; en cas d'égalité, on refait un 3<sup>e</sup> tour"],
+    e: "Au 2<sup>e</sup> tour, il faut la <b>majorité relative</b> : celui qui a le plus de voix l'emporte. En cas d'égalité, c'est <b>le candidat le plus jeune</b> qui est élu." },
+  { tag: "Vote", q: "Pourquoi vote-t-on à <b>bulletin secret</b>, dans l'isoloir ?",
+    o: ["Pour choisir librement, sans pression : c'est la liberté de conscience", "Pour que personne ne sache qui est candidat", "Pour pouvoir voter plusieurs fois sans être vu", "Pour que le résultat reste inconnu"],
+    e: "On vote dans l'isoloir pour <b>choisir librement</b>, sans pression : c'est ce qu'on appelle la liberté de conscience." },
+  { tag: "Vote", q: "À quoi sert de <b>voter</b> ?",
+    o: ["À élire les dirigeants politiques qui nous représentent", "À désigner la personne la plus âgée de la commune", "À changer le nom de la commune", "À payer ses impôts"],
+    e: "Voter sert à <b>élire les dirigeants politiques</b>. C'est un droit que des gens se sont battus pour obtenir, et un moyen de donner son avis." },
+  { tag: "Représenter", q: "Que signifie « <b>représenter les autres</b> » quand on est élu ?",
+    o: ["Prendre des responsabilités : décider pour le bien de tous et rendre des comptes à ceux qui nous ont élus", "Décider seul sans écouter personne", "Faire passer ses propres envies avant celles des autres", "Obtenir des avantages pour ses amis"],
+    e: "Représenter les autres, c'est <b>prendre des responsabilités</b>. Les élus ont le devoir de prendre des décisions pour le bien de tous et de rendre des comptes aux citoyens qui les ont élus." },
+  { tag: "Représenter", q: "Les citoyens français peuvent être représentés à <b>différentes échelles</b>. Lesquelles ?",
+    o: ["Par exemple dans leur commune (mairie) et dans leur département (conseillers départementaux)", "Uniquement à l'échelle du pays", "Uniquement dans leur quartier", "Uniquement au niveau de l'Europe"],
+    e: "Les Français sont représentés à <b>différents niveaux</b> : par exemple par le maire et le conseil municipal dans leur commune, par les conseillers départementaux dans leur département. À chaque échelle, les décisions répondent à un besoin collectif." },
+  { tag: "Intérêt général", q: "Dans une démocratie, que doit faire passer un élu en premier ?",
+    o: ["L'intérêt général avant l'intérêt particulier", "L'intérêt particulier avant l'intérêt général", "Son propre intérêt, puis celui de ses amis", "Aucun des deux : il décide au hasard"],
+    e: "Il faut accepter de faire passer l'<b>intérêt général</b> (ce qui est bénéfique à une majorité de personnes) avant l'<b>intérêt particulier</b>. Les décisions sont prises après des débats qui cherchent ce qui peut être utile à tous." },
+  { tag: "Lexique", q: "Quel est le mot défini ici : « forme de gouvernement où le pouvoir appartient aux citoyens, qui élisent des représentants »&nbsp;?",
+    o: ["La démocratie représentative", "La liberté de conscience", "L'intérêt général", "La majorité relative"],
+    e: "C'est la <b>démocratie représentative</b> : les citoyens élisent des représentants à qui ils confient la mission de prendre des décisions en leur nom." },
+  { tag: "Lexique", q: "Quel est le mot défini ici : « assemblée d'enfants élus dans une commune pour apprendre la démocratie et proposer des idées »&nbsp;?",
+    o: ["Le CME (ou CMJ)", "Le CVC", "Le FSE", "Le conseil de classe"],
+    e: "C'est le <b>CME</b> (Conseil Municipal des Enfants) ou <b>CMJ</b> (des Jeunes). Ne pas confondre avec le CVC, qui existe au collège." },
+  { tag: "Lexique", q: "CME ou CVC : lequel se trouve <b>au collège</b> et réunit des adultes et des élèves élus ?",
+    o: ["Le CVC (Conseil de la Vie Collégienne)", "Le CME (Conseil Municipal des Enfants)", "Les deux, c'est la même instance", "Aucun des deux"],
+    e: "Le <b>CVC</b> est une instance du collège où des adultes et des élèves élus discutent et proposent des <b>actions pour améliorer la vie des collégiens</b>. Le CME, lui, est dans la commune." },
+  { tag: "Lexique", q: "Quel est le mot défini ici : « association du collège qui organise des actions éducatives et ludiques pour les élèves, les personnels et les familles »&nbsp;?",
+    o: ["Le FSE (Foyer Socio-Éducatif)", "Le CVC", "Le CME", "Le conseil d'administration"],
+    e: "C'est le <b>FSE</b> (Foyer Socio-Éducatif)." },
+  { tag: "Lexique", q: "Complète : le CVC propose des actions pour…",
+    o: ["améliorer la vie des collégiens", "choisir les professeurs", "fixer les dates des vacances", "voter les lois"],
+    e: "Le CVC propose des <b>actions pour améliorer la vie des collégiens</b>." },
+  { tag: "Lexique", q: "Complète : un éco-délégué met en place des actions en faveur de…",
+    o: ["l'environnement", "la discipline", "la cantine uniquement", "la bibliothèque uniquement"],
+    e: "Un éco-délégué est un élève élu pour mettre en place des actions en faveur de <b>l'environnement</b>." },
+  { tag: "Lexique", q: "Complète : être « électeur », c'est être celui qui a le droit de…",
+    o: ["voter, de choisir ses représentants", "se présenter à l'élection", "compter les bulletins", "être élu automatiquement"],
+    e: "Être électeur, c'est <b>avoir le droit de voter</b>, de choisir ses représentants." },
+  { tag: "Lexique", q: "Complète : être « éligible », c'est être celui qui a le droit de…",
+    o: ["se présenter à une élection : il peut être élu", "voter seulement", "choisir le jour de l'élection", "ne pas se présenter"],
+    e: "Être éligible, c'est <b>avoir le droit de se présenter</b> à l'élection : on peut être élu." },
+  { tag: "Lexique", q: "Majorité <b>absolue</b> ou majorité <b>relative</b> : laquelle est exigée au <b>1<sup>er</sup> tour</b>, laquelle suffit au <b>2<sup>e</sup> tour</b> ?",
+    o: ["Absolue au 1<sup>er</sup> tour, relative au 2<sup>e</sup> tour", "Relative au 1<sup>er</sup> tour, absolue au 2<sup>e</sup> tour", "Absolue aux deux tours", "Relative aux deux tours"],
+    e: "<b>Majorité absolue</b> (moitié des voix + une voix) au <b>1<sup>er</sup> tour</b> ; <b>majorité relative</b> (le plus de voix) au <b>2<sup>e</sup> tour</b>." },
+  { tag: "Lexique", q: "Quel est le mot défini ici : « le droit de penser ce que l'on veut, mais aussi de croire ou de ne pas croire »&nbsp;?",
+    o: ["La liberté de conscience", "L'intérêt particulier", "La majorité absolue", "Le droit de vote"],
+    e: "C'est la <b>liberté de conscience</b>." },
+  { tag: "Lexique", q: "Intérêt général ou intérêt particulier : « ce qui ne profite qu'à soi ou à un petit nombre de personnes » ?",
+    o: ["L'intérêt particulier", "L'intérêt général", "Les deux", "Aucun des deux"],
+    e: "C'est l'<b>intérêt particulier</b>. L'<b>intérêt général</b>, lui, est ce qui est bon pour l'ensemble des citoyens." }
+];
+
+/* Séparation EMC : le lexique (12 mots du lexique d'origine + cartes « Lexique ») d'un côté, le cours de l'autre */
+var EMCL = EMC.filter(function (c, i) { return i < 12 || c.tag === "Lexique"; });
+EMC = EMC.filter(function (c, i) { return !(i < 12 || c.tag === "Lexique"); });
+
+var SVT = [
+  { tag: "Système solaire", q: "Quelle phrase aide à retenir l'<b>ordre des planètes</b> en partant du Soleil ?",
+    o: ["Ma Voiture Te Mène Joyeusement Sur Une Nationale", "Mon Vélo Tourne Moins Joliment Sur Une Neige", "Ma Tante Vend Mille Jolis Sacs Usés Noirs", "Mes Voisins Téléphonent Mardi Jeudi Samedi Un Nuit"],
+    e: "<b>M</b>a <b>V</b>oiture <b>T</b>e <b>M</b>ène <b>J</b>oyeusement <b>S</b>ur <b>U</b>ne <b>N</b>ationale : Mercure, Vénus, Terre, Mars, Jupiter, Saturne, Uranus, Neptune." },
+  { tag: "Système solaire", q: "Quelle est la <b>3<sup>e</sup> planète</b> en partant du Soleil ?",
+    o: ["La Terre", "Mars", "Vénus", "Jupiter"],
+    e: "Dans l'ordre : Mercure, Vénus, <b>Terre</b>, Mars, Jupiter, Saturne, Uranus, Neptune." },
+  { tag: "Système solaire", q: "Quelles sont les <b>quatre planètes rocheuses</b> du système solaire, plus proches du Soleil ?",
+    o: ["Mercure, Vénus, Terre, Mars", "Jupiter, Saturne, Uranus, Neptune", "Mars, Jupiter, Saturne, Uranus", "Vénus, Terre, Jupiter, Neptune"],
+    e: "Les planètes <b>rocheuses</b> sont Mercure, Vénus, la Terre et Mars." },
+  { tag: "Système solaire", q: "Quelles sont les <b>quatre planètes géantes gazeuses</b> ?",
+    o: ["Jupiter, Saturne, Uranus, Neptune", "Mercure, Vénus, Terre, Mars", "Terre, Mars, Jupiter, Saturne", "Vénus, Mars, Uranus, Neptune"],
+    e: "Les planètes <b>géantes gazeuses</b> sont Jupiter, Saturne, Uranus et Neptune, les plus éloignées du Soleil." },
+  { tag: "Système solaire", q: "La Terre est-elle une planète rocheuse ou une planète géante gazeuse ?",
+    o: ["Une planète rocheuse", "Une planète géante gazeuse", "Une étoile", "Un satellite de Mars"],
+    e: "La Terre fait partie des quatre <b>planètes rocheuses</b>, avec Mercure, Vénus et Mars." },
+  { tag: "Système solaire", q: "Quelle est la <b>dernière planète</b> du système solaire, la plus éloignée du Soleil ?",
+    o: ["Neptune", "Uranus", "Saturne", "Mars"],
+    e: "La plus éloignée du Soleil est <b>Neptune</b>." },
+  { tag: "Conditions de la vie", q: "Quelle est la <b>température moyenne en surface</b> de la Terre ?",
+    o: ["15 °C", "100 °C", "−50 °C", "450 °C"],
+    e: "La température moyenne en surface de la Terre est de <b>15 °C</b>. C'est l'une de ses singularités." },
+  { tag: "Conditions de la vie", q: "Qu'est-ce qu'une <b>atmosphère</b> ?",
+    o: ["Une couche de gaz qui entoure une planète", "Une couche de roches sous la surface d'une planète", "Un océan qui recouvre une planète", "L'anneau de poussière autour d'une planète"],
+    e: "Une atmosphère est une <b>couche de gaz qui entoure une planète</b>." },
+  { tag: "Conditions de la vie", q: "Sous quels états l'<b>eau</b> est-elle présente sur Terre ?",
+    o: ["Solide, liquide et gazeux : trois états", "Uniquement liquide", "Uniquement solide (glace)", "Uniquement gazeux (vapeur)"],
+    e: "Sur Terre, l'eau est présente sous <b>trois états</b> : solide, liquide et gazeux, dont de l'eau liquide." },
+  { tag: "Conditions de la vie", q: "Citer les <b>singularités de la Terre</b> qui permettent la vie :",
+    o: ["Une température de 15 °C, une atmosphère et de l'eau sous trois états", "Une température de 450 °C, pas d'atmosphère et de l'eau gelée", "Une grande distance au Soleil et pas d'eau", "Des anneaux et plusieurs soleils"],
+    e: "Les singularités de la Terre : une <b>température</b> en surface de 15 °C, la présence d'une <b>atmosphère</b>, et de l'<b>eau sous trois états</b>, dont de l'eau liquide." },
+  { tag: "Causes et effets", q: "Quelle est la <b>conséquence</b> de la distance entre la Terre et le Soleil ?",
+    o: ["Une température moyenne en surface de 15 °C", "Une température moyenne en surface de 450 °C", "Une température moyenne en surface de −200 °C", "L'absence totale de température"],
+    e: "À cette <b>distance du Soleil</b>, la température moyenne en surface est de <b>15 °C</b>." },
+  { tag: "Causes et effets", q: "Quelle est la conséquence d'une <b>température moyenne de 15 °C</b> en surface ?",
+    o: ["L'eau peut exister sous trois états, dont l'eau liquide", "L'eau n'existe que sous forme de glace", "L'eau n'existe que sous forme de vapeur", "Il n'y a plus d'eau du tout"],
+    e: "Avec 15 °C en moyenne, l'<b>eau</b> existe sous <b>trois états</b>, dont l'<b>eau liquide</b>." },
+  { tag: "Causes et effets", q: "Quelles caractéristiques de la Terre permettent l'<b>apparition de la vie</b> ?",
+    o: ["Une température de 15 °C, une atmosphère et de l'eau liquide", "Sa couleur et sa taille uniquement", "L'absence d'atmosphère", "Sa distance à Jupiter"],
+    e: "<b>Distance au Soleil</b> → température de <b>15 °C</b> → <b>eau liquide</b>, avec la présence d'une <b>atmosphère</b> : ces caractéristiques permettent l'<b>apparition de la vie</b>." },
+  { tag: "Causes et effets", q: "Complète : la Terre est à la bonne distance du Soleil, <b>donc</b>…",
+    o: ["sa température en surface permet la présence d'eau liquide", "elle n'a pas d'atmosphère", "elle est une planète géante gazeuse", "elle n'a pas d'eau"],
+    e: "Cause : la <b>bonne distance au Soleil</b>. Conséquence : une température de 15 °C, qui permet l'<b>eau liquide</b>." }
+];
+
+var HG = [
+  { tag: "Méthode NADOI", q: "Que veut dire <b>présenter un document</b> en histoire-géographie ?",
+    o: ["Donner, à l'écrit ou à l'oral, les éléments nécessaires pour comprendre le document", "Recopier le document en entier", "Dire si le document est joli ou non", "Apprendre le document par cœur"],
+    e: "<b>Présenter un document</b>, c'est donner à l'écrit ou à l'oral les éléments nécessaires à sa compréhension. On utilise pour cela les 5 points <b>N-A-D-O-I</b>." },
+  { tag: "Méthode NADOI", q: "Que signifient les 5 lettres de <b>NADOI</b> ?",
+    o: ["Nature, Auteur, Date, Œuvre (origine), Idée", "Nom, Âge, Durée, Origine, Image", "Nature, Action, Document, Opinion, Information", "Numéro, Auteur, Date, Observation, Intérêt"],
+    e: "<b>N</b>ature · <b>A</b>uteur · <b>D</b>ate · <b>O</b>euvre (d'où vient le document, son origine) · <b>I</b>dée (l'information essentielle)." },
+  { tag: "Nature", q: "Que désigne la <b>nature</b> d'un document ?",
+    o: ["Son genre ou son type (texte, photographie, carte, gravure, affiche…)", "La personne qui l'a réalisé", "L'année où il a été créé", "L'idée principale qu'il contient"],
+    e: "La <b>nature</b> est le genre du document : article de journal, texte de loi, photographie, carte, tableau, gravure, affiche de propagande, graphique, peinture, discours…" },
+  { tag: "Nature", q: "Lequel de ces mots n'est <b>pas</b> une nature de document ?",
+    o: ["Apulée", "Photographie", "Affiche de propagande", "Carte"],
+    e: "<b>Apulée</b> est un auteur (celui qui a écrit le texte). Photographie, affiche de propagande et carte sont des natures de documents." },
+  { tag: "Auteur", q: "Qui est l'<b>auteur</b> d'un document ?",
+    o: ["Celui qui l'a réalisé (personne ou groupe, connu ou anonyme)", "Celui qui le lit", "Le professeur qui le distribue", "L'éditeur du manuel uniquement"],
+    e: "L'<b>auteur</b> est celui qui a réalisé le document. Il peut être connu ou anonyme, une personne ou un groupe. Il est indiqué <b>en premier</b> dans les références, en bas du document." },
+  { tag: "Auteur", q: "Où trouve-t-on généralement l'<b>auteur</b> d'un document ?",
+    o: ["Dans les références, en bas du document", "Au dos du manuel", "Dans le titre de la leçon", "Il n'est jamais indiqué"],
+    e: "L'auteur est indiqué <b>en premier</b> dans les références données <b>en bas du document</b>." },
+  { tag: "Date", q: "À quoi sert la <b>date</b>, associée à l'auteur ?",
+    o: ["À savoir si l'auteur a vécu à l'époque (témoin direct) ou non", "À savoir combien de pages fait le document", "À connaître la couleur du document", "À retrouver le titre du livre"],
+    e: "La date (avec l'auteur) permet de savoir si l'auteur est un <b>témoin direct</b> (il a vécu l'époque) ou <b>indirect</b> (il parle d'une époque qu'il n'a pas connue)." },
+  { tag: "Date", q: "Un auteur a vécu à l'époque qu'il décrit. C'est un témoin direct et son document est…",
+    o: ["Une source", "Un document d'interprétation", "Une invention", "Une légende"],
+    e: "Un <b>témoin direct</b> a vécu l'époque : son document est une <b>source</b>." },
+  { tag: "Date", q: "Un historien analyse une période longtemps après. Son document est…",
+    o: ["Un document d'interprétation (témoin indirect)", "Une source (témoin direct)", "Un document sans auteur", "Une carte"],
+    e: "Quand l'auteur analyse une époque <b>longtemps après</b>, c'est un <b>témoin indirect</b> : son document est un <b>document d'interprétation</b>." },
+  { tag: "Œuvre", q: "Que désigne l'<b>œuvre</b> (ou origine) d'un document ?",
+    o: ["D'où il vient (livre, journal, site internet…)", "La personne qui l'a écrit", "Sa date de création", "Sa taille"],
+    e: "L'<b>œuvre</b> (ou origine, source) indique d'où vient le document : internet, journal, œuvre littéraire… Elle est en général écrite <b>en italique</b>, en bas du document." },
+  { tag: "Idée", q: "Que doit-on écrire pour l'<b>idée</b> d'un document ?",
+    o: ["L'information essentielle qu'il donne, avec ses propres mots", "Seulement le titre recopié", "Le nom de l'auteur", "Une phrase sans rapport avec le document"],
+    e: "L'<b>idée</b> est l'information essentielle fournie par le document (« L'auteur explique… », « La peinture montre… »). On ne se contente <b>pas de réécrire le titre</b>." },
+  { tag: "Rédiger", q: "Quelle phrase de présentation est correcte ?",
+    o: ["Ce document est un texte écrit par Apulée au IIe siècle après J.-C., extrait de Métamorphoses.", "Apulée, texte, Métamorphoses.", "Je pense que ce texte est intéressant.", "Le document parle de quelque chose."],
+    e: "On rédige une phrase complète : « Ce document est un <b>(nature)</b> écrit par <b>(auteur)</b> au/en <b>(date)</b>. Il est extrait de <b>(œuvre)</b>. L'auteur explique <b>(idée)</b>. »" },
+  { tag: "Date", q: "Combien de temps dure une <b>décennie</b> ?",
+    o: ["10 ans", "100 ans", "1 000 ans", "5 ans"],
+    e: "Une <b>décennie</b> = 10 ans · un <b>siècle</b> = 100 ans · un <b>millénaire</b> = 1 000 ans." },
+  { tag: "Durées", q: "Un millénaire, c'est combien de siècles ?",
+    o: ["10 siècles", "100 siècles", "1 siècle", "1 000 siècles"],
+    e: "Un millénaire dure 1 000 ans, et un siècle 100 ans : <b>1 000 ÷ 100 = 10 siècles</b>." },
+  { tag: "Repères", q: "À partir de quel événement compte-t-on les années ?",
+    o: ["La naissance de Jésus-Christ (an 1)", "La chute de l'Empire romain", "L'invention de l'écriture", "La Révolution française"],
+    e: "On compte les années à partir de la <b>naissance de Jésus-Christ</b> (an 1). L'année zéro n'existe pas." },
+  { tag: "Repères", q: "Quelle année vient juste après l'an 1 avant J.-C. ?",
+    o: ["L'an 1 après J.-C. (il n'y a pas d'année zéro)", "L'an 0", "L'an 2 avant J.-C.", "L'an 10 après J.-C."],
+    e: "L'<b>année zéro n'existe pas</b> : on passe directement de l'an 1 avant J.-C. à l'an 1 après J.-C." },
+  { tag: "Siècles", q: "Dans quel siècle se situe l'année <b>1996</b> ?",
+    o: ["Le XXe siècle", "Le XIXe siècle", "Le XVIIIe siècle", "Le XXIe siècle"],
+    e: "Pour trouver le siècle, on <b>ajoute 1 au nombre de centaines</b> : 1996 → 19 + 1 = <b>20</b>, donc le XXe siècle." },
+  { tag: "Siècles", q: "Dans quel siècle se situe l'année <b>253</b> ?",
+    o: ["Le IIIe siècle", "Le IIe siècle", "Le XXVe siècle", "Le Ve siècle"],
+    e: "253 → 2 centaines, donc 2 + 1 = <b>3</b> : le IIIe siècle." },
+  { tag: "Siècles", q: "Dans quel siècle se situe l'année <b>1789</b> ?",
+    o: ["Le XVIIIe siècle", "Le XVIIe siècle", "Le XIXe siècle", "Le XVe siècle"],
+    e: "1789 → 17 centaines, donc 17 + 1 = <b>18</b> : le XVIIIe siècle." },
+  { tag: "Chiffres romains", q: "Comment écrit-on <b>15</b> en chiffres romains ?",
+    o: ["XV", "VX", "XIV", "XXV"],
+    e: "X = 10 et V = 5 : 10 + 5 = <b>XV</b>. On écrit les siècles en chiffres romains (le XVe siècle)." },
+  { tag: "Chiffres romains", q: "Quel nombre représente <b>XII</b> ?",
+    o: ["12", "7", "11", "21"],
+    e: "X = 10, I = 1, I = 1 : 10 + 1 + 1 = <b>12</b>. C'est le XIIe siècle." },
+  { tag: "Chiffres romains", q: "Comment écrit-on le <b>4e siècle</b> en chiffres romains ?",
+    o: ["IVe siècle", "IIIIe siècle", "VIe siècle", "VIIe siècle"],
+    e: "IV = 5 − 1 = <b>4</b>. I devant V se retranche : IVe siècle." },
+  { tag: "Siècles", q: "Comment écrit-on le <b>9e siècle avant J.-C.</b> ?",
+    o: ["IXe siècle av. J.-C.", "XIe siècle av. J.-C.", "IXe siècle ap. J.-C.", "VIIIe siècle"],
+    e: "IX = 10 − 1 = 9. Avant J.-C., il faut <b>préciser « av. J.-C. »</b> : IXe siècle av. J.-C." },
+  { tag: "Périodes", q: "Qu'est-ce qui marque la fin de la <b>Préhistoire</b> ?",
+    o: ["L'invention de l'écriture (vers −3000)", "La chute de l'Empire romain", "La découverte de l'Amérique", "La Révolution française"],
+    e: "La Préhistoire s'arrête avec l'<b>invention de l'écriture</b> (vers −3000)." },
+  { tag: "Périodes", q: "Quelles sont les 4 grandes périodes qui suivent la Préhistoire, dans l'ordre ?",
+    o: ["Antiquité, Moyen Âge, Temps modernes, Époque contemporaine", "Moyen Âge, Antiquité, Temps modernes, Époque contemporaine", "Antiquité, Temps modernes, Moyen Âge, Époque contemporaine", "Époque contemporaine, Temps modernes, Moyen Âge, Antiquité"],
+    e: "Dans l'ordre : <b>Antiquité → Moyen Âge → Temps modernes → Époque contemporaine</b>." },
+  { tag: "Périodes", q: "Quel événement marque la fin de l'<b>Antiquité</b> ?",
+    o: ["La chute de l'Empire romain (476)", "La découverte de l'Amérique (1492)", "La Révolution française (1789)", "L'invention de l'écriture"],
+    e: "L'Antiquité s'achève en <b>476</b>, avec la chute de l'Empire romain." },
+  { tag: "Périodes", q: "Quelles dates délimitent le <b>Moyen Âge</b> ?",
+    o: ["De 476 à 1492", "De 1492 à 1789", "De −3000 à 476", "De 1789 à nos jours"],
+    e: "Moyen Âge : de <b>476</b> (chute de l'Empire romain) à <b>1492</b> (découverte de l'Amérique)." },
+  { tag: "Périodes", q: "Quelle période commence avec la Révolution française (1789) ?",
+    o: ["L'époque contemporaine", "Les Temps modernes", "Le Moyen Âge", "L'Antiquité"],
+    e: "Les Temps modernes vont de 1492 à 1789 ; l'<b>époque contemporaine</b> commence en 1789 et dure jusqu'à nos jours." },
+  { tag: "Périodes", q: "Parmi les 4 grandes périodes qui suivent la Préhistoire, laquelle est la plus longue ?",
+    o: ["L'Antiquité", "Le Moyen Âge", "Les Temps modernes", "L'époque contemporaine"],
+    e: "C'est l'<b>Antiquité</b> : elle dure de −3000 (invention de l'écriture) à 476, soit plus de 3 400 ans. Le Moyen Âge, lui, dure environ 1 000 ans." },
+  { tag: "Périodes", q: "Quelles périodes étudie-t-on en classe de sixième ?",
+    o: ["La Préhistoire et l'Antiquité", "Le Moyen Âge et les Temps modernes", "L'époque contemporaine uniquement", "Toutes les périodes"],
+    e: "Le programme de 6e porte sur la <b>Préhistoire</b> et l'<b>Antiquité</b>." },
+  { tag: "Périodes", q: "Dans quelle période vivons-nous aujourd'hui ?",
+    o: ["L'époque contemporaine", "Les Temps modernes", "L'Antiquité", "Le Moyen Âge"],
+    e: "Nous vivons à l'<b>époque contemporaine</b>, commencée en 1789." }
+];
+
+var SUBJECTS = {
+  maths: { short: "Maths", eyebrow: "Mathématiques · Séquence 2", title: "Droites et segments", sub: "Droite, demi-droite, segment",
+           cards: MATHS, pdf: PDF_MATHS, file: "exercices_sequence2_droites.pdf",
+           exo: "8 exercices sur 3 pages : vocabulaire, notations, vrai ou faux, appartenance, propriétés, milieu et constructions à l'équerre." },
+  hg: { short: "Histoire-Géo", eyebrow: "Histoire-Géographie · Méthode et repères", title: "Présenter un document et se repérer dans le temps", sub: "Méthode NADOI, dates, siècles et grandes périodes",
+        cards: HG, pdf: PDF_HG, file: "exercices_histoire_geo_nadoi_reperes.pdf",
+        exo: "7 exercices sur 3 pages : méthode NADOI, vrai ou faux, durées, siècles, chiffres romains, frise des grandes périodes et questions « Je retiens »." },
+  svt: { short: "SVT", eyebrow: "SVT · Thème 1", title: "La Terre, une planète singulière", sub: "Système solaire, conditions de la vie, causes et effets",
+         cards: SVT, pdf: PDF_SVT, file: "exercices_svt_la_terre.pdf",
+         exo: "5 exercices sur 2 pages : ordre des planètes, vrai ou faux, singularités de la Terre, schéma de causes et conséquences, explication écrite." },
+  emc: { short: "EMC", eyebrow: "EMC · Enfant et déjà apprenti citoyen", title: "Représenter les autres", sub: "Délégués, élections et intérêt général",
+         cards: EMC, pdf: PDF_EMC, file: "exercices_emc_representer_les_autres.pdf",
+         exo: "7 exercices sur 3 pages : lexique, missions des élus, vrai ou faux, élection du délégué, intérêt général et production écrite." },
+  emcl: { short: "EMC · Lexique", eyebrow: "EMC · Lexique", title: "Le lexique de la séquence", sub: "Mots-clés, définitions et sigles (CME, CVC, FSE…)",
+         cards: EMCL, pdf: PDF_EMCL, file: "exercices_emc_lexique.pdf",
+         exo: "3 exercices sur 1 page : relier les mots à leur définition, compléter les définitions, distinguer CME, CVC et FSE." }
+};
+var subject = "maths";
+var Q = MATHS;
+
+var $ = function (s) { return document.querySelector(s); };
+var mode = "qcm";
+var run = null;
+var LETTERS = ["A", "B", "C", "D"];
+
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function startRun(ids) {
+  run = { ids: ids, pos: 0, pts: 0, res: ids.map(function () { return null; }),
+          opts: null, chosen: null, flipped: false, full: ids.length === Q.length };
+  $("#results").hidden = true;
+  $("#stage").hidden = false;
+  renderAll();
+}
+
+function newRun() {
+  if (!Q.length) {
+    run = null;
+    $("#results").hidden = true; $("#stage").hidden = false; $("#dots").innerHTML = "";
+    $("#pts").textContent = "0"; $("#tot").textContent = "0";
+    $("#stage").innerHTML = '<p class="qtext">Ce cours n\'a pas encore de cartes.</p>';
+    return;
+  }
+  var ids = Q.map(function (_, i) { return i; });
+  if ($("#shuffle").checked) shuffle(ids);
+  startRun(ids);
+}
+
+function renderAll() {
+  $("#pts").textContent = run.pts;
+  $("#tot").textContent = run.ids.length;
+  var dots = "";
+  for (var i = 0; i < run.ids.length; i++) {
+    var c = "dot";
+    var g = "";
+    if (run.res[i] === true) { c += " ok"; g = "✓"; }
+    else if (run.res[i] === false) { c += " ko"; g = "✗"; }
+    else if (i === run.pos) { c += " cur"; }
+    dots += '<span class="' + c + '">' + g + "</span>";
+  }
+  $("#dots").innerHTML = dots;
+  renderCard();
+}
+
+function head(q) {
+  return '<div class="meta"><span class="tag">' + q.tag + '</span><span class="cnt">Question ' + (run.pos + 1) + " sur " + run.ids.length + "</span></div>" +
+         '<p class="qtext">' + q.q + "</p>";
+}
+
+function renderCard() {
+  var q = Q[run.ids[run.pos]];
+  var last = run.pos === run.ids.length - 1;
+  var nextLabel = last ? "Voir mon score" : "Question suivante";
+  var h = head(q);
+  if (mode === "qcm") {
+    if (!run.opts) run.opts = shuffle(q.o.map(function (t, i) { return { t: t, ok: i === 0 }; }));
+    var answered = run.chosen !== null;
+    h += '<div class="opts" role="group" aria-label="Réponses">';
+    run.opts.forEach(function (o, k) {
+      var c = "opt";
+      var mark = LETTERS[k];
+      if (answered) {
+        if (o.ok) { c += " ok"; mark = "✓"; }
+        else if (k === run.chosen) { c += " ko"; mark = "✗"; }
+        else c += " dim";
+      }
+      h += '<button type="button" class="' + c + '" data-k="' + k + '"' + (answered ? " disabled" : "") + '><span class="k">' + mark + '</span><span class="t">' + o.t + "</span></button>";
+    });
+    h += "</div>";
+    if (answered) {
+      var ok = run.opts[run.chosen].ok;
+      h += '<div class="fix" role="status"><span class="lab">Correction</span><p class="verdict">' + (ok ? "Juste, +1 point." : "Raté, 0 point.") + "</p><p>" + q.e + "</p></div>";
+      h += '<div class="actions"><button type="button" class="btn" id="next">' + nextLabel + "</button></div>";
+    } else {
+      h += '<p class="hint">Touches 1 à 4 du clavier pour répondre.</p>';
+    }
+  } else {
+    if (!run.flipped) {
+      h += '<div class="actions"><button type="button" class="btn" id="flip">Retourner la carte</button></div>';
+      h += '<p class="hint">Réponds dans ta tête, retourne la carte, puis note-toi honnêtement.</p>';
+    } else if (run.res[run.pos] === null) {
+      h += '<div class="fix" role="status"><span class="lab">Réponse</span><p>' + q.e + "</p></div>";
+      h += '<div class="actions"><button type="button" class="btn good" id="knew">Je savais (+1)</button><button type="button" class="btn again" id="redo">À revoir</button></div>';
+    } else {
+      h += '<div class="fix" role="status"><span class="lab">Réponse</span><p>' + q.e + "</p></div>";
+      h += '<div class="actions"><button type="button" class="btn" id="next">' + nextLabel + "</button></div>";
+    }
+  }
+  $("#stage").innerHTML = h;
+  var n = $("#next"); if (n) n.focus();
+}
+
+function choose(k) {
+  if (!run || mode !== "qcm" || run.chosen !== null || !run.opts || $("#stage").hidden) return;
+  if (k < 0 || k >= run.opts.length) return;
+  run.chosen = k;
+  var ok = run.opts[k].ok;
+  run.res[run.pos] = ok;
+  if (ok) run.pts++;
+  renderAll();
+}
+
+function grade(ok) {
+  if (run.res[run.pos] !== null) return;
+  run.res[run.pos] = ok;
+  if (ok) run.pts++;
+  renderAll();
+}
+
+function nextQ() {
+  run.pos++;
+  run.opts = null; run.chosen = null; run.flipped = false;
+  if (run.pos >= run.ids.length) finish(); else renderAll();
+}
+
+function getBest() { try { return parseInt(localStorage.getItem("best-" + subject), 10) || 0; } catch (e) { return 0; } }
+function setBest(v) { try { localStorage.setItem("best-" + subject, String(v)); } catch (e) {} pushBest(subject, v); }
+
+function finish() {
+  var n = run.ids.length;
+  $("#pts").textContent = run.pts;
+  $("#stage").hidden = true;
+  var missed = [];
+  run.ids.forEach(function (id, i) { if (run.res[i] === false) missed.push(id); });
+  var msg;
+  var r = run.pts / n;
+  if (r >= 0.93) msg = "Très bien, la séquence est acquise.";
+  else if (r >= 0.66) msg = "Bien. Relis les cartes ratées, puis refais la série.";
+  else if (r >= 0.4) msg = "À consolider : refais la série sur tes erreurs.";
+  else msg = "Reprends la leçon, puis refais la série.";
+  var best = "";
+  if (run.full) postRun(subject, run.pts, Q.length);
+  if (run.full) {
+    var prev = getBest();
+    if (run.pts > prev) { setBest(run.pts); best = "Nouveau meilleur score sur cet appareil."; }
+    else if (prev > 0) best = "Meilleur score sur cet appareil : " + prev + " / " + Q.length + ".";
+  }
+  var h = "<h2>Série terminée</h2>" +
+    '<div class="bigscore">' + run.pts + "<span> / " + n + "</span></div>" +
+    "<p><b>" + msg + "</b></p>" + (best ? "<p>" + best + "</p>" : "");
+  if (missed.length) {
+    h += '<ul class="missed">';
+    missed.forEach(function (id) {
+      h += '<li><div class="mq">' + Q[id].q + '</div><div class="ma">' + Q[id].e + "</div></li>";
+    });
+    h += "</ul>";
+  }
+  h += '<div class="actions">';
+  if (missed.length) h += '<button type="button" class="btn" id="redoMissed">Refaire mes erreurs (' + missed.length + ")</button>";
+  h += '<button type="button" class="btn ghost" id="restart">Recommencer la série</button></div>';
+  var el = $("#results");
+  el.innerHTML = h;
+  el.hidden = false;
+  run.missed = missed;
+  var f = $("#redoMissed") || $("#restart");
+  if (f) f.focus();
+}
+
+function setMode(m) {
+  mode = m;
+  $("#m-qcm").setAttribute("aria-pressed", String(m === "qcm"));
+  $("#m-flip").setAttribute("aria-pressed", String(m === "flip"));
+  newRun();
+}
+
+document.addEventListener("click", function (ev) {
+  var t = ev.target.closest("button");
+  if (!t || !run) return;
+  if (t.classList.contains("opt")) choose(parseInt(t.getAttribute("data-k"), 10));
+  else if (t.id === "next") nextQ();
+  else if (t.id === "flip") { run.flipped = true; renderCard(); }
+  else if (t.id === "knew") grade(true);
+  else if (t.id === "redo") grade(false);
+  else if (t.id === "restart") { $("#shuffle").checked = true; newRun(); }
+  else if (t.id === "redoMissed") { startRun(shuffle(run.missed.slice())); }
+});
+$("#m-qcm").addEventListener("click", function () { setMode("qcm"); });
+$("#m-flip").addEventListener("click", function () { setMode("flip"); });
+$("#shuffle").addEventListener("change", newRun);
+document.addEventListener("keydown", function (ev) {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  var tg = ev.target && ev.target.tagName;
+  if (tg === "INPUT" || tg === "TEXTAREA") return;
+  if (!$("#ink").hidden || !$("#pw").hidden || !$("#ed").hidden) return;
+  var k = "1234".indexOf(ev.key);
+  if (k >= 0) choose(k);
+});
+
+/* --- Téléchargement du PDF des exercices --- */
+var dlOff = false;
+function pdfBlobP() {
+  var p = SUBJECTS[subject].pdf;
+  if (!p) return Promise.reject(new Error("nopdf"));
+  if (p.slice(0, 4) === "url:") return fetch(p.slice(4)).then(function (r) { if (!r.ok) throw new Error("http"); return r.blob(); });
+  var bin = atob(p);
+  var arr = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return Promise.resolve(new Blob([arr], { type: "application/pdf" }));
+}
+function dlMsg(t) { $("#dlmsg").textContent = t; }
+function noDownload() {
+  dlOff = true; $("#dl").hidden = true;
+  dlMsg("Le téléchargement n'est pas disponible dans cet affichage.");
+}
+function localDownload() {
+  pdfBlobP().then(function (blob) {
+    var u = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = u; a.download = SUBJECTS[subject].file;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+    dlMsg("Fichier téléchargé.");
+  }, function () { dlMsg("Le PDF n'est pas disponible pour le moment."); });
+}
+$("#dl").addEventListener("click", function () {
+  if (!window.claude || !window.claude.use) { if (STANDALONE) localDownload(); else noDownload(); return; }
+  window.claude.use("downloads").then(function (dl) {
+    if (!dl) { noDownload(); return null; }
+    return pdfBlobP().then(function (blob) {
+      return dl.save({ filename: SUBJECTS[subject].file, data: blob }).then(function () {
+        dlMsg("Fichier enregistré.");
+      }, function (e) {
+        dlMsg(e && e.code === "declined" ? "Téléchargement annulé." : "Le téléchargement a échoué dans cet affichage.");
+      });
+    }, function () { dlMsg("Le PDF n'est pas disponible pour le moment."); });
+  });
+});
+try {
+  if (window.claude && window.claude.use) {
+    window.claude.use("downloads").then(function (dl) { if (!dl) noDownload(); });
+  }
+} catch (e) {}
+
+/* ---------- Serveur PocketBase (facultatif) : synchro des travaux, des scores, corrigés du parent ---------- */
+/* Sans serveur configuré (PB vide), rien de tout cela n'est actif : tout reste dans le navigateur. */
+var CFG = window.TC_CONFIG || {};
+var PB = String(CFG.pb || "").replace(/\/+$/, "");
+var STU_EMAIL = CFG.studentEmail || "gianni@travail.local";
+var PAR_EMAIL = CFG.parentEmail || "parent@travail.local";
+var net = { token: "", state: PB ? "login" : "off", parentToken: "", ids: {} };
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function inkTsKey(k) { return "ink-" + k + "-ts"; }
+function noop() {}
+function q(s) { return encodeURIComponent(s); }
+function api(method, path, body, token) {
+  var h = {};
+  if (body !== undefined) h["Content-Type"] = "application/json";
+  if (token) h["Authorization"] = token;
+  return fetch(PB + path, { method: method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) }).then(function (r) {
+    return r.text().then(function (t) {
+      var d = {}; try { d = t ? JSON.parse(t) : {}; } catch (e) {}
+      if (!r.ok) { var er = new Error("http " + r.status); er.status = r.status; throw er; }
+      return d;
+    });
+  });
+}
+function setNet(state) {
+  net.state = state;
+  var b = $("#sync");
+  if (!PB) { b.hidden = true; return; }
+  b.hidden = false; b.setAttribute("data-s", state);
+  b.textContent = state === "ok" ? "☁ Synchronisé" : state === "err" ? "☁ Hors connexion" : state === "busy" ? "☁ …" : "☁ Se connecter";
+}
+function hasStrokes(json) {
+  try { return JSON.parse(json || "[]").some(function (p) { return p && p.length; }); } catch (e) { return false; }
+}
+function upsert(coll, field, val, body, token) {
+  var path = "/api/collections/" + coll + "/records";
+  function patch(id) { return api("PATCH", path + "/" + id, body, token); }
+  function find() {
+    return api("GET", path + "?perPage=1&filter=" + q(field + '="' + val + '"'), undefined, token).then(function (d) { return d.items[0]; });
+  }
+  var id = net.ids[coll + ":" + val];
+  if (id) return patch(id);
+  return find().then(function (r) {
+    if (r) { net.ids[coll + ":" + val] = r.id; return patch(r.id); }
+    return api("POST", path, body, token).then(function (c) { net.ids[coll + ":" + val] = c.id; return c; });
+  });
+}
+function netFail(e) {
+  if (e && (e.status === 401 || e.status === 403)) { net.token = ""; lsDel("tc-auth"); setNet("login"); }
+  else setNet("err");
+}
+/* tracés */
+var pushT = {};
+function pushInkLater(k) {
+  if (!PB) return;
+  lsSet("ink-" + k + "-dirty", "1");
+  if (!net.token) return;
+  clearTimeout(pushT[k]);
+  pushT[k] = setTimeout(function () { pushInk(k); }, 1500);
+}
+function pushInk(k) {
+  var strokes; try { strokes = JSON.parse(lsGet("ink-" + k) || "[]"); } catch (e) { return Promise.resolve(); }
+  var ts = parseInt(lsGet(inkTsKey(k)), 10) || Date.now();
+  lsSet(inkTsKey(k), String(ts));
+  return upsert("ink", "sub", k, { sub: k, strokes: strokes, ts: ts }, net.token).then(function () {
+    if ((parseInt(lsGet(inkTsKey(k)), 10) || 0) === ts) lsDel("ink-" + k + "-dirty");
+    setNet("ok");
+  }, netFail);
+}
+function syncInk(k) {
+  if (!net.token) return Promise.resolve();
+  return api("GET", "/api/collections/ink/records?perPage=1&filter=" + q('sub="' + k + '"'), undefined, net.token).then(function (d) {
+    var rec = d.items[0], local = lsGet("ink-" + k);
+    var lts = parseInt(lsGet(inkTsKey(k)), 10) || 0;
+    var dirty = lsGet("ink-" + k + "-dirty") === "1" || (!lts && hasStrokes(local));   /* travail local jamais envoyé : il passe en premier */
+    if (rec) net.ids["ink:" + k] = rec.id;
+    if (rec && !dirty && (rec.ts || 0) > lts) {
+      lsSet("ink-" + k, JSON.stringify(rec.strokes || [])); lsSet(inkTsKey(k), String(rec.ts || 0));
+      if (!$("#ink").hidden && ink.sub === k && !ink.cur && !ink.hist.length) refreshInk();
+      setNet("ok");
+    } else if (!rec ? hasStrokes(local) : dirty || lts > (rec.ts || 0)) {
+      if (rec && hasStrokes(JSON.stringify(rec.strokes)) && !lsGet("ink-" + k + "-bak")) lsSet("ink-" + k + "-bak", JSON.stringify(rec.strokes));
+      return pushInk(k);
+    } else setNet("ok");
+  }).catch(netFail);
+}
+function parentPullInk(k) {
+  if (!net.parentToken) return;
+  api("GET", "/api/collections/ink/records?perPage=1&filter=" + q('sub="' + k + '"'), undefined, net.parentToken).then(function (d) {
+    var rec = d.items[0]; if (!rec) return;
+    var lts = parseInt(lsGet(inkTsKey(k)), 10) || 0;
+    if ((rec.ts || 0) > lts && !$("#ink").hidden && ink.sub === k) {
+      ink.strokes = (rec.strokes || []).slice(); while (ink.strokes.length < ink.pg.length) ink.strokes.push([]);
+      for (var i = 0; i < ink.pg.length; i++) redraw(i);
+    }
+  }).catch(noop);
+}
+/* scores */
+function pushBest(k, v) {
+  if (!net.token) return;
+  upsert("scores", "key", k, { key: k, best: v }, net.token).catch(netFail);
+}
+function postRun(k, pts, total) {
+  if (!net.token) return;
+  api("POST", "/api/collections/runs/records", { key: k, pts: pts, total: total }, net.token).catch(noop);
+}
+function reconcile() {
+  if (!net.token) return;
+  Object.keys(SUBJECTS).forEach(function (k) { syncInk(k); });
+  api("GET", "/api/collections/scores/records?perPage=100", undefined, net.token).then(function (d) {
+    var remote = {}; d.items.forEach(function (r) { remote[r.key] = r.best || 0; });
+    Object.keys(SUBJECTS).forEach(function (k) {
+      var loc = parseInt(lsGet("best-" + k), 10) || 0, rem = remote[k] || 0;
+      if (rem > loc) lsSet("best-" + k, String(rem)); else if (loc > rem) pushBest(k, loc);
+    });
+  }).catch(noop);
+}
+/* connexion de l'élève */
+function netInit() {
+  if (!PB) { setNet("off"); return; }
+  var a = null; try { a = JSON.parse(lsGet("tc-auth") || "null"); } catch (e) {}
+  if (!a || !a.token) { setNet("login"); return; }
+  net.token = a.token; setNet("busy");
+  api("POST", "/api/collections/users/auth-refresh", {}, a.token).then(function (d) {
+    if (d.record && d.record.role !== "student") throw { status: 403 };
+    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token })); setNet("ok"); reconcile();
+  }, function (e) {
+    if (e && (e.status === 401 || e.status === 403 || e.status === 400)) { net.token = ""; lsDel("tc-auth"); setNet("login"); }
+    else setNet("err");       /* hors connexion : on garde le jeton et on réessaiera */
+  }).catch(function () { net.token = ""; lsDel("tc-auth"); setNet("login"); });
+}
+function lgMsg(t) { $("#lg-msg").textContent = t || ""; }
+$("#sync").addEventListener("click", function () {
+  if (net.state === "login") { lgMsg(""); $("#lg-in").value = ""; $("#lg").hidden = false; setTimeout(function () { $("#lg-in").focus(); }, 50); }
+  else netInit();
+});
+$("#lg-cancel").addEventListener("click", function () { $("#lg").hidden = true; });
+$("#lg-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var pw = $("#lg-in").value; if (!pw) return;
+  lgMsg("Connexion…");
+  api("POST", "/api/collections/users/auth-with-password", { identity: STU_EMAIL, password: pw }).then(function (d) {
+    if (d.record && d.record.role !== "student") { lgMsg("Ce compte n'est pas celui de l'élève."); return; }
+    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token }));
+    $("#lg").hidden = true; $("#lg-in").value = ""; setNet("ok"); reconcile();
+  }, function (er) {
+    lgMsg(er && er.status === 400 ? "Mot de passe incorrect." : er && er.status === 429 ? "Trop d'essais, réessaie dans une minute." : "Serveur injoignable.");
+    $("#lg-in").value = "";
+  });
+});
+window.addEventListener("online", function () { if (PB) netInit(); });
+/* sauvegarde dans un fichier */
+function bkMsg(t) { $("#bk-msg").textContent = t || ""; }
+function bkSave(name, blob) {
+  function plain() {
+    var u = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 4000); bkMsg("Fichier téléchargé.");
+  }
+  if (window.claude && window.claude.use) {
+    window.claude.use("downloads").then(function (dl) {
+      if (!dl) { bkMsg("Le téléchargement n'est pas disponible dans cet affichage."); return null; }
+      return dl.save({ filename: name, data: blob }).then(function () { bkMsg("Fichier enregistré."); }, function () { bkMsg("Téléchargement annulé."); });
+    });
+  } else plain();
+}
+$("#bk-exp").addEventListener("click", function () {
+  var data = {};
+  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^(ink-[a-z0-9]+(-ts)?|best-[a-z0-9]+)$/.test(k)) data[k] = localStorage.getItem(k); } } catch (e) {}
+  var n = Object.keys(data).length;
+  if (!n) { bkMsg("Rien à sauvegarder pour l'instant."); return; }
+  var d = new Date(), pad = function (x) { return (x < 10 ? "0" : "") + x; };
+  bkSave("travaux-gianni-" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + ".json",
+         new Blob([JSON.stringify({ app: "travail-college", v: 1, date: d.toISOString(), data: data })], { type: "application/json" }));
+});
+$("#bk-imp").addEventListener("click", function () { $("#bk-file").click(); });
+$("#bk-file").addEventListener("change", function () {
+  var f = this.files && this.files[0]; this.value = ""; if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var o = JSON.parse(r.result); if (!o || o.app !== "travail-college" || !o.data) throw 0;
+      var n = 0;
+      Object.keys(o.data).forEach(function (k) {
+        if (/^(ink-[a-z0-9]+(-ts)?|best-[a-z0-9]+)$/.test(k) && typeof o.data[k] === "string") { lsSet(k, o.data[k]); n++; if (/^ink-[a-z0-9]+$/.test(k)) { lsSet(inkTsKey(k.slice(4)), String(Date.now())); lsSet(k + "-dirty", "1"); } }
+      });
+      bkMsg(n + " élément(s) restauré(s).");
+      if (net.token) reconcile();
+    } catch (e) { bkMsg("Ce fichier n'est pas une sauvegarde valide."); }
+  };
+  r.readAsText(f);
+});
+
+/* ---------- Écriture à l'Apple Pencil sur les pages d'exercices ---------- */
+var PAGES = {};
+var ink = { sub: null, pg: [], strokes: [], hist: [], color: "#1a1a1a", width: 0.0028, erase: false,
+            finger: false, cur: null, touches: {}, ntouch: 0, clearArm: 0 };
+
+function inkMsg(t) { $("#ink-msg").textContent = t || ""; }
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+/* v3.8 : la page « lexique » (ancienne page 4 de l'EMC) devient une feuille à part (ink-emcl) ; on y déplace ce qui y avait été écrit */
+(function () {
+  try {
+    var raw = localStorage.getItem("ink-emc"); if (!raw) return;
+    var a = JSON.parse(raw);
+    if (!a || a.length <= 3) return;
+    if (a[3] && a[3].length && !localStorage.getItem("ink-emcl")) localStorage.setItem("ink-emcl", JSON.stringify([a[3]]));
+    if (!(a[3] && a[3].length) || localStorage.getItem("ink-emcl")) localStorage.setItem("ink-emc", JSON.stringify(a.slice(0, 3)));
+  } catch (e) {}
+})();
+function inkKey() { return "ink-" + ink.sub; }
+function inkSave() {
+  try { localStorage.setItem(inkKey(), JSON.stringify(ink.strokes)); } catch (e) {}
+  if ($("#ink").classList.contains("parent")) return;
+  lsSet(inkTsKey(ink.sub), String(Date.now()));
+  pushInkLater(ink.sub);
+}
+function refreshInk() {
+  ink.strokes = inkLoad(ink.pg.length);
+  for (var i = 0; i < ink.pg.length; i++) redraw(i);
+}
+function inkLoad(n) {
+  var out = [];
+  try {
+    var d = JSON.parse(localStorage.getItem(inkKey()) || "null");
+    if (d && d.length) out = d;   /* jamais jeter des tracés enregistrés si le nombre de pages change */
+  } catch (e) {}
+  while (out.length < n) out.push([]);
+  return out;
+}
+function drawStroke(ctx, s, W, H) {
+  var p = s.p;
+  ctx.strokeStyle = s.c; ctx.fillStyle = s.c;
+  ctx.lineWidth = Math.max(1, s.w * W); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  if (p.length === 1) {
+    ctx.beginPath(); ctx.arc(p[0][0] * W, p[0][1] * H, ctx.lineWidth / 2, 0, 6.2832); ctx.fill(); return;
+  }
+  ctx.beginPath(); ctx.moveTo(p[0][0] * W, p[0][1] * H);
+  for (var i = 1; i < p.length; i++) ctx.lineTo(p[i][0] * W, p[i][1] * H);
+  ctx.stroke();
+}
+function redraw(i) {
+  var o = ink.pg[i]; if (!o) return;
+  var ctx = o.cv.getContext("2d");
+  ctx.clearRect(0, 0, o.cv.width, o.cv.height);
+  ink.strokes[i].forEach(function (s) { drawStroke(ctx, s, o.cv.width, o.cv.height); });
+}
+function sizeCanvas(i) {
+  var o = ink.pg[i]; if (!o) return;
+  var r = o.div.getBoundingClientRect();
+  if (!r.width) return;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+  if (o.cv.width !== w || o.cv.height !== h) { o.cv.width = w; o.cv.height = h; redraw(i); }
+}
+function sizeAll() { for (var i = 0; i < ink.pg.length; i++) sizeCanvas(i); }
+
+function inkPos(cv, e) {
+  var r = cv.getBoundingClientRect();
+  return [Math.round((e.clientX - r.left) / r.width * 10000) / 10000, Math.round((e.clientY - r.top) / r.height * 10000) / 10000];
+}
+function eraseAt(i, pt) {
+  var o = ink.pg[i], W = o.cv.width, H = o.cv.height, rad = 0.022 * W, gone = [];
+  ink.strokes[i] = ink.strokes[i].filter(function (s) {
+    for (var k = 0; k < s.p.length; k++) {
+      var dx = (s.p[k][0] - pt[0]) * W, dy = (s.p[k][1] - pt[1]) * H;
+      if (dx * dx + dy * dy < rad * rad) { gone.push(s); return false; }
+    }
+    return true;
+  });
+  if (gone.length) { redraw(i); }
+  return gone;
+}
+function bindCanvas(cv, i) {
+  cv.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "touch" && !ink.finger) {
+      if (ink.cur) return;
+      ink.touches[e.pointerId] = e.clientY; ink.ntouch++;
+      return;
+    }
+    if (ink.cur) return;
+    e.preventDefault();
+    try { var sel = window.getSelection && window.getSelection(); if (sel && sel.removeAllRanges) sel.removeAllRanges(); } catch (x) {}
+    try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+    var pt = inkPos(cv, e);
+    ink.cur = { i: i, id: e.pointerId };
+    if (ink.erase) { ink.cur.del = eraseAt(i, pt); }
+    else {
+      ink.cur.s = { c: ink.color, w: ink.width, p: [pt] };
+      var ctx = cv.getContext("2d");
+      drawStroke(ctx, ink.cur.s, cv.width, cv.height);
+    }
+  });
+  cv.addEventListener("pointermove", function (e) {
+    if (e.pointerType === "touch" && !ink.finger) {
+      if (ink.touches[e.pointerId] === undefined) return;
+      if (ink.ntouch === 1 && !ink.cur) $("#ink-scroll").scrollTop -= (e.clientY - ink.touches[e.pointerId]);
+      ink.touches[e.pointerId] = e.clientY;
+      return;
+    }
+    var c = ink.cur; if (!c || c.id !== e.pointerId || c.i !== i) return;
+    e.preventDefault();
+    var evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+    if (!evs.length) evs = [e];
+    for (var k = 0; k < evs.length; k++) {
+      var pt = inkPos(cv, evs[k]);
+      if (ink.erase) { var g = eraseAt(i, pt); for (var q = 0; q < g.length; q++) c.del.push(g[q]); }
+      else {
+        var last = c.s.p[c.s.p.length - 1];
+        var dx = (pt[0] - last[0]) * cv.width, dy = (pt[1] - last[1]) * cv.height;
+        if (dx * dx + dy * dy < 0.6) continue;
+        c.s.p.push(pt);
+        var ctx = cv.getContext("2d");
+        ctx.strokeStyle = c.s.c; ctx.lineWidth = Math.max(1, c.s.w * cv.width); ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(last[0] * cv.width, last[1] * cv.height); ctx.lineTo(pt[0] * cv.width, pt[1] * cv.height); ctx.stroke();
+      }
+    }
+  });
+  function end(e) {
+    if (e.pointerType === "touch" && !ink.finger) {
+      if (ink.touches[e.pointerId] !== undefined) { delete ink.touches[e.pointerId]; ink.ntouch = Math.max(0, ink.ntouch - 1); }
+      return;
+    }
+    var c = ink.cur; if (!c || c.id !== e.pointerId) return;
+    ink.cur = null;
+    if (c.s) { ink.strokes[c.i].push(c.s); ink.hist.push({ t: "add", i: c.i, s: c.s }); inkSave(); }
+    else if (c.del && c.del.length) { ink.hist.push({ t: "del", i: c.i, list: c.del }); inkSave(); }
+  }
+  cv.addEventListener("pointerup", end);
+  cv.addEventListener("pointercancel", end);
+  cv.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  cv.addEventListener("selectstart", function (e) { e.preventDefault(); });
+  cv.addEventListener("touchstart", function (e) {
+    var t = e.changedTouches && e.changedTouches[0];
+    if ((t && t.touchType === "stylus") || ink.finger) e.preventDefault();
+  }, { passive: false });
+  cv.addEventListener("dblclick", function (e) { e.preventDefault(); });
+}
+function inkUndo() {
+  var h = ink.hist.pop(); if (!h) return;
+  if (h.t === "add") { var k = ink.strokes[h.i].indexOf(h.s); if (k >= 0) ink.strokes[h.i].splice(k, 1); }
+  else { h.list.forEach(function (s) { ink.strokes[h.i].push(s); }); }
+  redraw(h.i); inkSave();
+}
+function setPressed(sel, el) {
+  var all = document.querySelectorAll(sel);
+  for (var i = 0; i < all.length; i++) all[i].setAttribute("aria-pressed", String(all[i] === el));
+}
+
+function openInk(parent) {
+  var urls = PAGES[subject];
+  if (!urls || !urls.length) { dlMsg("Pas de feuille d'exercices à l'écran pour ce cours."); return; }
+  applyAccent(SUBJECTS[subject].subject);
+  ink.sub = subject; ink.hist = []; ink.cur = null; ink.touches = {}; ink.ntouch = 0;
+  ink.strokes = inkLoad(urls.length);
+  var box = $("#ink-pages"); box.innerHTML = ""; ink.pg = [];
+  urls.forEach(function (u, i) {
+    var d = document.createElement("div"); d.className = "ink-page";
+    var uri = u.slice(0, 4) === "url:" ? u.slice(4) : "data:image/jpeg;base64," + u;
+    var im = new Image(); im.src = uri;  /* hors de la page : sert seulement à l'export */
+    d.style.backgroundImage = 'url("' + uri + '")';
+    d.setAttribute("role", "img"); d.setAttribute("aria-label", "Page " + (i + 1) + " des exercices");
+    var cv = document.createElement("canvas");
+    d.appendChild(cv); box.appendChild(d);
+    ink.pg.push({ div: d, img: im, cv: cv });
+    bindCanvas(cv, i);
+  });
+  var par = parent === true;
+  $("#ink").classList.toggle("parent", par);
+  var cp = $("#ink-corr-pages"); cp.innerHTML = "";
+  $("#ink-corr").hidden = !par;
+  if (par && corrPages && corrPages[subject]) {
+    corrPages[subject].forEach(function (u, i) {
+      var d = document.createElement("div"); d.className = "ink-page";
+      var im = new Image(); im.alt = "Corrigé, page " + (i + 1); im.draggable = false;
+      im.src = u.slice(0, 4) === "url:" ? u.slice(4) : "data:image/jpeg;base64," + u; d.appendChild(im); cp.appendChild(d);
+    });
+  }
+  $("#ink-title").textContent = SUBJECTS[subject].short + (par ? " · corrigé parent" : " · exercices");
+  inkMsg(par ? "" : "Ton travail se garde tout seul sur cet appareil.");
+  $("#ink").hidden = false;
+  try { document.body.style.overflow = "hidden"; document.body.style.webkitUserSelect = "none"; document.body.style.userSelect = "none"; } catch (e) {}
+  $("#ink-scroll").scrollTop = 0;
+  sizeAll();
+  setTimeout(sizeAll, 60);
+  if (par) parentPullInk(subject); else if (net.token) syncInk(subject);
+}
+function closeInk() {
+  $("#ink").hidden = true; ink.cur = null;
+  $("#ink").classList.remove("parent"); $("#ink-corr").hidden = true; $("#ink-corr-pages").innerHTML = "";
+  try { document.body.style.overflow = ""; document.body.style.webkitUserSelect = ""; document.body.style.userSelect = ""; } catch (e) {}
+}
+
+function strBytes(s) { var b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 255; return b; }
+function makePdf(jp) {
+  var parts = [], off = [], len = 0;
+  function add(x) { var b = typeof x === "string" ? strBytes(x) : x; parts.push(b); len += b.length; }
+  function obj(n, head, stream) {
+    off[n] = len; add(n + " 0 obj\n" + head + "\n");
+    if (stream) { add("stream\n"); add(stream); add("\nendstream\n"); }
+    add("endobj\n");
+  }
+  add("%PDF-1.4\n");
+  var kids = jp.map(function (_, k) { return (3 + 3 * k) + " 0 R"; }).join(" ");
+  obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+  obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + jp.length + " >>");
+  jp.forEach(function (j, k) {
+    var p = 3 + 3 * k, c = 4 + 3 * k, im = 5 + 3 * k;
+    var content = "q 595.28 0 0 841.89 0 0 cm /Im0 Do Q";
+    obj(p, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + c + " 0 R >>");
+    obj(c, "<< /Length " + content.length + " >>", strBytes(content));
+    obj(im, "<< /Type /XObject /Subtype /Image /Width " + j.w + " /Height " + j.h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + j.bytes.length + " >>", j.bytes);
+  });
+  var n = 3 * jp.length + 3, xref = len;
+  var x = "xref\n0 " + n + "\n0000000000 65535 f \n";
+  for (var i = 1; i < n; i++) x += ("0000000000" + off[i]).slice(-10) + " 00000 n \n";
+  add(x + "trailer\n<< /Size " + n + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+  return new Blob(parts, { type: "application/pdf" });
+}
+function composePage(i) {
+  var o = ink.pg[i], im = o.img;
+  var w = im.naturalWidth, h = im.naturalHeight;
+  if (!w) return null;
+  var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  var ctx = cv.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(im, 0, 0, w, h);
+  ink.strokes[i].forEach(function (s) { drawStroke(ctx, s, w, h); });
+  var b64 = cv.toDataURL("image/jpeg", 0.88).split(",")[1];
+  var bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (var k = 0; k < bin.length; k++) arr[k] = bin.charCodeAt(k);
+  return { bytes: arr, w: w, h: h };
+}
+function inkExport() {
+  var jp = [];
+  for (var i = 0; i < ink.pg.length; i++) { var j = composePage(i); if (!j) { inkMsg("Les pages ne sont pas encore chargées, réessaie."); return; } jp.push(j); }
+  var blob = makePdf(jp), name = SUBJECTS[ink.sub].file.replace(/\.pdf$/, "") + "_mon_travail.pdf";
+  if (!window.claude || !window.claude.use) {
+    if (STANDALONE) {
+      var u = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+      inkMsg("PDF enregistré.");
+    } else inkMsg("L'enregistrement n'est pas disponible dans cet affichage.");
+    return;
+  }
+  window.claude.use("downloads").then(function (dl) {
+    if (!dl) { inkMsg("L'enregistrement n'est pas disponible dans cet affichage."); return null; }
+    return dl.save({ filename: name, data: blob }).then(function () { inkMsg("PDF enregistré."); },
+      function (e) { inkMsg(e && e.code === "declined" ? "Enregistrement annulé." : "L'enregistrement a échoué."); });
+  });
+}
+
+$("#ink-open").addEventListener("click", openInk);
+$("#ink-close").addEventListener("click", closeInk);
+$("#ink-undo").addEventListener("click", inkUndo);
+$("#ink-pdf").addEventListener("click", inkExport);
+$("#ink-erase").addEventListener("click", function () {
+  ink.erase = !ink.erase; this.setAttribute("aria-pressed", String(ink.erase));
+});
+$("#ink-finger").addEventListener("change", function () { ink.finger = this.checked; });
+$("#ink-clear").addEventListener("click", function () {
+  var b = this;
+  if (!ink.clearArm) {
+    ink.clearArm = 1; b.textContent = "Sûr ? Appuie encore";
+    setTimeout(function () { ink.clearArm = 0; b.textContent = "Tout effacer"; }, 3000);
+    return;
+  }
+  ink.clearArm = 0; b.textContent = "Tout effacer";
+  ink.strokes = ink.strokes.map(function () { return []; }); ink.hist = [];
+  for (var i = 0; i < ink.pg.length; i++) redraw(i);
+  inkSave();
+});
+(function () {
+  var sw = document.querySelectorAll(".ink-sw"), wd = document.querySelectorAll("[data-w]");
+  for (var i = 0; i < sw.length; i++) sw[i].addEventListener("click", function () {
+    ink.color = this.getAttribute("data-color"); ink.erase = false;
+    $("#ink-erase").setAttribute("aria-pressed", "false"); setPressed(".ink-sw", this);
+  });
+  for (var j = 0; j < wd.length; j++) wd[j].addEventListener("click", function () {
+    ink.width = parseFloat(this.getAttribute("data-w")); setPressed("[data-w]", this);
+  });
+})();
+window.addEventListener("resize", function () { if (!$("#ink").hidden) sizeAll(); });
+document.addEventListener("selectstart", function (e) { if (!$("#ink").hidden && !(e.target && e.target.tagName === "INPUT")) e.preventDefault(); });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (!$("#ed").hidden) $("#ed").hidden = true; else if (!$("#lg").hidden) $("#lg").hidden = true; else if (!$("#pw").hidden) $("#pw").hidden = true; else if (!$("#ink").hidden) closeInk(); } });
+
+
+/* ---------- Espace parent : corrigé chiffré, affiché à côté de la feuille ---------- */
+var CORR = null;
+var corrPages = null;
+function b64b(x) { var b = atob(x), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+function unlockCorr(code) {
+  var sub = window.crypto && window.crypto.subtle;
+  if (!sub) return Promise.reject(new Error("nocrypto"));
+  var enc = new TextEncoder();
+  return sub.importKey("raw", enc.encode(code), "PBKDF2", false, ["deriveKey"]).then(function (k) {
+    return sub.deriveKey({ name: "PBKDF2", salt: b64b(CORR.s), iterations: CORR.n, hash: "SHA-256" }, k,
+      { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  }).then(function (key) {
+    return sub.decrypt({ name: "AES-GCM", iv: b64b(CORR.i) }, key, b64b(CORR.d));
+  }).then(function (buf) { return JSON.parse(new TextDecoder().decode(buf)); });
+}
+function pwMsg(t) { $("#pw-msg").textContent = t || ""; }
+function showPw() {
+  pwMsg(!CORR && !PB ? "L'espace parent n'est disponible que depuis le serveur de la famille." : "");
+  $("#pw-in").value = ""; $("#pw").hidden = false;
+  setTimeout(function () { $("#pw-in").focus(); }, 50);
+}
+function loadCorr(k) {
+  return api("GET", "/api/collections/corriges/records?perPage=50&sort=page&filter=" + q('sub="' + k + '"'), undefined, net.parentToken).then(function (d) {
+    if (!d.items.length) throw { status: 404 };
+    return api("POST", "/api/files/token", {}, net.parentToken).then(function (t) {
+      corrPages = corrPages || {};
+      corrPages[k] = d.items.map(function (r) { return "url:" + PB + "/api/files/corriges/" + r.id + "/" + r.img + "?token=" + t.token; });
+    });
+  });
+}
+function openPw() {
+  if (corrPages && corrPages[subject]) { openParent(); return; }
+  if (!CORR && net.parentToken) {
+    loadCorr(subject).then(openParent, function () { net.parentToken = ""; showPw(); });
+    return;
+  }
+  showPw();
+}
+function openParent() {
+  openInk(true);
+}
+$("#parent-open").addEventListener("click", openPw);
+$("#pw-cancel").addEventListener("click", function () { $("#pw").hidden = true; });
+$("#pw-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var code = $("#pw-in").value;
+  if (!code) return;
+  if (!CORR) {   /* mode serveur : le code est vérifié par PocketBase, les corrigés n'existent pas dans la page */
+    if (!PB) { pwMsg("L'espace parent n'est disponible que depuis le serveur de la famille."); return; }
+    pwMsg("Vérification…");
+    api("POST", "/api/collections/users/auth-with-password", { identity: PAR_EMAIL, password: "parent-" + code }).then(function (d) {
+      if (d.record && d.record.role !== "parent") throw { status: 400 };
+      net.parentToken = d.token; refreshEdit();
+      return loadCorr(subject);
+    }).then(function () { $("#pw").hidden = true; openParent(); }, function (er) {
+      pwMsg(er && er.status === 400 ? "Code incorrect." : er && er.status === 429 ? "Trop d'essais, réessaie dans une minute." :
+            er && er.status === 404 ? "Pas de corrigé pour cette feuille." : "Serveur injoignable.");
+      $("#pw-in").value = "";
+    });
+    return;
+  }
+  pwMsg("Vérification…");
+  unlockCorr(code).then(function (d) {
+    corrPages = d; $("#pw").hidden = true; openParent();
+  }, function (err) {
+    pwMsg(err && err.message === "nocrypto" ? "Ce navigateur ne permet pas le déverrouillage ici." : "Code incorrect.");
+    $("#pw-in").value = "";
+  });
+});
+(function () {
+  var a = $("#ink-scroll"), b = $("#ink-corr"), lock = false;
+  function sync(from, to) {
+    from.addEventListener("scroll", function () {
+      if (lock || $("#ink").hidden || !$("#ink").classList.contains("parent") || !$("#ink-link").checked) return;
+      var mf = from.scrollHeight - from.clientHeight, mt = to.scrollHeight - to.clientHeight;
+      if (mf <= 0 || mt <= 0) return;
+      lock = true; to.scrollTop = from.scrollTop / mf * mt;
+      setTimeout(function () { lock = false; }, 30);
+    });
+  }
+  sync(a, b); sync(b, a);
+})();
+/* ---------- Catalogue des cours : lu dans PocketBase (sinon cache de l'appareil, sinon contenu intégré) ---------- */
+var CATSUB = [];
+var BUILTIN_ACC = { maths: 1, emc: 1, hg: 1, svt: 1 };   /* couleurs déjà définies dans la feuille de style */
+function mixHex(h, t, a) {
+  var c = [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); });
+  var d = [1, 3, 5].map(function (i) { return parseInt(t.slice(i, i + 2), 16); });
+  return "#" + c.map(function (v, i) { return ("0" + Math.round(v + (d[i] - v) * a).toString(16)).slice(-2); }).join("");
+}
+function isDark() {
+  var t = document.documentElement.getAttribute("data-theme");
+  if (t) return t === "dark";
+  return !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function applyAccent(sk) {
+  var sj = CATSUB.filter(function (x) { return x.key === sk; })[0];
+  [$("#wrap"), $("#ink")].forEach(function (el) {
+    el.setAttribute("data-subject", sk);
+    if (BUILTIN_ACC[sk] || !sj || !/^#[0-9a-fA-F]{6}$/.test(sj.color || "")) { el.style.removeProperty("--ink"); el.style.removeProperty("--ink-soft"); return; }
+    var dk = isDark();
+    el.style.setProperty("--ink", dk ? mixHex(sj.color, "#ffffff", 0.55) : sj.color);
+    el.style.setProperty("--ink-soft", mixHex(sj.color, "#ffffff", dk ? 0.4 : 0.3));
+  });
+}
+if (window.matchMedia) { try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { if (SUBJECTS[subject]) applyAccent(SUBJECTS[subject].subject); }); } catch (e) {} }
+function coursesOf(sk) {
+  return Object.keys(SUBJECTS).map(function (k) { return SUBJECTS[k]; }).filter(function (c) { return c.subject === sk; })
+    .sort(function (a, b) { return (a.position || 0) - (b.position || 0); });
+}
+function renderTabs() {
+  var nav = $("#subjects"); nav.innerHTML = "";
+  CATSUB.forEach(function (sj) {
+    if (!coursesOf(sj.key).length) return;
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("data-s", sj.key); b.textContent = sj.name;
+    b.addEventListener("click", function () {
+      var cur = SUBJECTS[subject];
+      setSubject(cur && cur.subject === sj.key ? subject : coursesOf(sj.key)[0].key);
+    });
+    nav.appendChild(b);
+  });
+}
+function renderSub(sk) {
+  var cs = coursesOf(sk), box = $("#course-sub"); box.innerHTML = ""; box.hidden = cs.length < 2;
+  cs.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "tab"); b.textContent = c.label || c.title;
+    b.setAttribute("aria-selected", String(c.key === subject));
+    b.addEventListener("click", function () { setSubject(c.key); });
+    box.appendChild(b);
+  });
+}
+function applyCatalog(cat) {
+  CATSUB = cat.subjects.slice().sort(function (a, b) { return (a.position || 0) - (b.position || 0); });
+  SUBJECTS = {}; PAGES = {};
+  cat.courses.forEach(function (c) { c.cards = c.cards || []; c.pages = c.pages || []; SUBJECTS[c.key] = c; PAGES[c.key] = c.pages; });
+  cat.courses.forEach(function (c) {
+    var sj = CATSUB.filter(function (x) { return x.key === c.subject; })[0];
+    c.short = (sj ? sj.name : c.subject) + (coursesOf(c.subject).length > 1 ? " · " + (c.label || c.title) : "");
+  });
+  renderTabs();
+}
+function builtinCat() {
+  var meta = { maths: ["maths", "Droites et segments", 1], emcl: ["emc", "Lexique", 1], emc: ["emc", "Représenter les autres", 2],
+               hg: ["hg", "Méthode NADOI et repères", 1], svt: ["svt", "La Terre", 1] };
+  var courses = Object.keys(BUILTIN_SUBJECTS).map(function (k) {
+    var c = BUILTIN_SUBJECTS[k], m = meta[k] || [k, c.title, 1];
+    return { key: k, subject: m[0], label: m[1], position: m[2], eyebrow: c.eyebrow, title: c.title, sub: c.sub, exo: c.exo,
+             cards: c.cards, pages: BUILTIN_PAGES[k] || [], pdf: c.pdf, file: c.file };
+  });
+  return { subjects: [{ key: "maths", name: "Mathématiques", position: 1 }, { key: "emc", name: "EMC", position: 2 },
+                      { key: "hg", name: "Histoire-Géo", position: 3 }, { key: "svt", name: "SVT", position: 4 }], courses: courses };
+}
+function loadCatalog() {
+  if (!PB) return Promise.resolve(null);
+  return Promise.all([api("GET", "/api/collections/subjects/records?perPage=100&sort=position"),
+                      api("GET", "/api/collections/courses/records?perPage=200&sort=position")]).then(function (r) {
+    if (!r[1].items.length) return null;
+    return {
+      subjects: r[0].items.map(function (x) { return { id: x.id, key: x.key, name: x.name, color: x.color, position: x.position }; }),
+      courses: r[1].items.map(function (c) {
+        var base = PB + "/api/files/courses/" + c.id + "/";
+        return { id: c.id, key: c.key, subject: c.subject, label: c.label, position: c.position, eyebrow: c.eyebrow, title: c.title, sub: c.sub, exo: c.exo,
+                 cards: c.cards || [], pages: (c.pages || []).map(function (f) { return "url:" + base + f; }),
+                 pdf: c.pdf ? "url:" + base + c.pdf : "", file: c.file_name || (c.key + ".pdf") };
+      })
+    };
+  });
+}
+function setSubject(k, keep) {
+  var S = SUBJECTS[k];
+  if (!S) { k = Object.keys(SUBJECTS)[0]; S = SUBJECTS[k]; }
+  subject = k;
+  Q = S.cards;
+  applyAccent(S.subject);
+  var tabs = document.querySelectorAll("#subjects button");
+  for (var i = 0; i < tabs.length; i++) tabs[i].setAttribute("aria-selected", String(tabs[i].getAttribute("data-s") === S.subject));
+  renderSub(S.subject);
+  $("#eyebrow").textContent = S.eyebrow || "";
+  $("#h1").textContent = S.title || "";
+  $("#lede").textContent = (S.sub || "") + (S.sub ? " : " : "") + (Q.length ? Q.length + " cartes pour réviser." : "bientôt des cartes.");
+  $("#exo-desc").textContent = S.exo || "";
+  $("#dl").hidden = dlOff || !S.pdf;
+  $("#ink-open").hidden = !(S.pages && S.pages.length);
+  refreshEdit();
+  dlMsg("");
+  try { location.hash = k; } catch (e) {}
+  if (!keep) newRun();
+}
+function reloadCatalog() {
+  return loadCatalog().then(function (cat) {
+    if (!cat) return;
+    lsSet("tc-cat", JSON.stringify(cat));
+    var cur = subject, before = JSON.stringify((SUBJECTS[cur] || {}).cards || []);
+    applyCatalog(cat);
+    var k = SUBJECTS[cur] ? cur : Object.keys(SUBJECTS)[0];
+    setSubject(k, k === cur && JSON.stringify(SUBJECTS[k].cards) === before);
+  });
+}
+
+/* ---------- Éditeur de cours (réservé au compte parent) ---------- */
+var ed = { course: null, cards: [] };
+function esc(x) { return String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function edMsg(t) { $("#ed-msg").textContent = t || ""; }
+function refreshEdit() { $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
+function edCardHtml(c, i) {
+  var o = c.o || ["", "", "", ""];
+  return '<div class="ed-card" data-i="' + i + '"><div class="ed-ch"><b>Carte ' + (i + 1) + '</b><span>' +
+    '<button type="button" class="ink-b" data-a="up" aria-label="Monter">↑</button><button type="button" class="ink-b" data-a="down" aria-label="Descendre">↓</button>' +
+    '<button type="button" class="ink-b" data-a="del">Supprimer</button></span></div>' +
+    '<label>Rubrique<input data-f="tag" value="' + esc(c.tag) + '"></label>' +
+    '<label>Question<textarea data-f="q" rows="2">' + esc(c.q) + '</textarea></label>' +
+    '<span class="ok"><label>Bonne réponse<input data-f="o0" value="' + esc(o[0]) + '"></label></span>' +
+    '<label>Mauvaise réponse 1<input data-f="o1" value="' + esc(o[1]) + '"></label>' +
+    '<label>Mauvaise réponse 2<input data-f="o2" value="' + esc(o[2]) + '"></label>' +
+    '<label>Mauvaise réponse 3<input data-f="o3" value="' + esc(o[3]) + '"></label>' +
+    '<label>Explication<textarea data-f="e" rows="3">' + esc(c.e) + '</textarea></label></div>';
+}
+function edRender(keepScroll) {
+  var y = $(".ed-body").scrollTop;
+  $("#ed-cards").innerHTML = ed.cards.map(edCardHtml).join("") || '<p class="ed-help">Aucune carte pour l\'instant.</p>';
+  if (keepScroll) $(".ed-body").scrollTop = y;
+}
+function openEditor() {
+  var c = SUBJECTS[subject]; if (!c || !c.id || !net.parentToken) return;
+  ed.course = c;
+  ed.cards = (c.cards || []).map(function (x) { return { tag: x.tag || "", q: x.q || "", o: (x.o || []).concat(["", "", "", ""]).slice(0, 4), e: x.e || "" }; });
+  $("#ed-title").textContent = "Modifier : " + (c.short || c.title);
+  $("#ed-label").value = c.label || ""; $("#ed-ttl").value = c.title || ""; $("#ed-eyebrow").value = c.eyebrow || "";
+  $("#ed-sub").value = c.sub || ""; $("#ed-exo").value = c.exo || ""; $("#ed-pos").value = c.position == null ? 1 : c.position;
+  $("#ed-new").hidden = true; edMsg("");
+  edRender(false);
+  $("#ed").hidden = false;
+  $(".ed-body").scrollTop = 0;
+}
+function edSave() {
+  for (var i = 0; i < ed.cards.length; i++) {
+    var c = ed.cards[i];
+    if (!c.q.trim() || !c.e.trim() || c.o.some(function (x) { return !x.trim(); })) {
+      edMsg("Carte " + (i + 1) + " : la question, les 4 réponses et l'explication sont obligatoires."); return;
+    }
+  }
+  edMsg("Enregistrement…");
+  var body = { label: $("#ed-label").value.trim(), title: $("#ed-ttl").value.trim(), eyebrow: $("#ed-eyebrow").value.trim(),
+               sub: $("#ed-sub").value.trim(), exo: $("#ed-exo").value.trim(), position: parseInt($("#ed-pos").value, 10) || 0,
+               cards: ed.cards.map(function (c) { return { tag: c.tag.trim(), q: c.q.trim(), o: c.o.map(function (x) { return x.trim(); }), e: c.e.trim() }; }) };
+  api("PATCH", "/api/collections/courses/records/" + ed.course.id, body, net.parentToken).then(function () {
+    return reloadCatalog();
+  }).then(function () { edMsg("Enregistré."); }, function (er) {
+    if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; refreshEdit(); edMsg("Session parent expirée : ferme l'éditeur et saisis de nouveau le code."); }
+    else edMsg("Échec de l'enregistrement (serveur injoignable ?).");
+  });
+}
+function slug(x) { return String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "").slice(0, 24); }
+function edNewOpen() {
+  var sel = $("#edn-subject"); sel.innerHTML = "";
+  CATSUB.forEach(function (s) { var o = document.createElement("option"); o.value = s.key; o.textContent = s.name; sel.appendChild(o); });
+  var n = document.createElement("option"); n.value = "__new"; n.textContent = "+ Nouvelle matière…"; sel.appendChild(n);
+  sel.value = SUBJECTS[subject] ? SUBJECTS[subject].subject : CATSUB[0].key;
+  $("#edn-newsub").hidden = true; $("#edn-label").value = ""; $("#edn-title").value = ""; $("#edn-name").value = "";
+  $("#ed-new").hidden = false; $("#edn-label").focus();
+}
+function edNewCreate() {
+  var label = $("#edn-label").value.trim(), title = $("#edn-title").value.trim() || label, sk = $("#edn-subject").value;
+  if (!label) { edMsg("Donne un nom au cours."); return; }
+  var isNew = sk === "__new", name = $("#edn-name").value.trim();
+  if (isNew) { if (!name) { edMsg("Donne un nom à la nouvelle matière."); return; } sk = slug(name); if (!sk) { edMsg("Nom de matière invalide."); return; } }
+  var key = slug(label) || "cours", n = 1, base = key;
+  while (SUBJECTS[key]) { n++; key = base + n; }
+  edMsg("Création…");
+  var pos = coursesOf(sk).length ? Math.max.apply(null, coursesOf(sk).map(function (c) { return c.position || 0; })) + 1 : 1;
+  var sjName = isNew ? name : (CATSUB.filter(function (x) { return x.key === sk; })[0] || {}).name || sk;
+  var pre = isNew ? api("POST", "/api/collections/subjects/records", { key: sk, name: name, color: $("#edn-color").value,
+                         position: CATSUB.length + 1 }, net.parentToken) : Promise.resolve();
+  pre.then(function () {
+    return api("POST", "/api/collections/courses/records", { key: key, subject: sk, label: label, title: title, eyebrow: sjName, sub: "", exo: "",
+                                                             position: pos, cards: [] }, net.parentToken);
+  }).then(function () { return reloadCatalog(); }).then(function () {
+    setSubject(key); openEditor(); edMsg("Cours créé : ajoute tes cartes, puis dépose la feuille d'exercices dans PocketBase.");
+  }, function (er) { edMsg(er && er.status === 400 ? "Création refusée (nom déjà utilisé ?)." : "Échec de la création."); });
+}
+$("#edit-open").addEventListener("click", openEditor);
+$("#ed-close").addEventListener("click", function () { $("#ed").hidden = true; });
+$("#ed-save").addEventListener("click", edSave);
+$("#ed-newbtn").addEventListener("click", edNewOpen);
+$("#edn-cancel").addEventListener("click", function () { $("#ed-new").hidden = true; });
+$("#edn-subject").addEventListener("change", function () { $("#edn-newsub").hidden = this.value !== "__new"; });
+$("#edn-create").addEventListener("click", edNewCreate);
+$("#ed-add").addEventListener("click", function () {
+  ed.cards.push({ tag: "", q: "", o: ["", "", "", ""], e: "" }); edRender(false);
+  var l = document.querySelectorAll(".ed-card"); if (l.length) l[l.length - 1].scrollIntoView({ block: "center" });
+});
+$("#ed-cards").addEventListener("input", function (ev) {
+  var t = ev.target, card = t.closest(".ed-card"), f = t.getAttribute("data-f"); if (!card || !f) return;
+  var c = ed.cards[parseInt(card.getAttribute("data-i"), 10)];
+  if (f.charAt(0) === "o" && f.length === 2) c.o[parseInt(f.charAt(1), 10)] = t.value; else c[f] = t.value;
+});
+$("#ed-cards").addEventListener("click", function (ev) {
+  var b = ev.target.closest("button"), card = ev.target.closest(".ed-card"); if (!b || !card) return;
+  var i = parseInt(card.getAttribute("data-i"), 10), a = b.getAttribute("data-a");
+  if (a === "del") { if (!window.confirm("Supprimer cette carte ?")) return; ed.cards.splice(i, 1); }
+  else if (a === "up" && i > 0) { var t = ed.cards[i - 1]; ed.cards[i - 1] = ed.cards[i]; ed.cards[i] = t; }
+  else if (a === "down" && i < ed.cards.length - 1) { var u = ed.cards[i + 1]; ed.cards[i + 1] = ed.cards[i]; ed.cards[i] = u; }
+  else return;
+  edRender(true);
+});
+
+/* ---------- Démarrage ---------- */
+var BUILTIN_SUBJECTS = SUBJECTS, BUILTIN_PAGES = PAGES;
+(function () {
+  var h = "";
+  try { h = location.hash.replace("#", ""); } catch (e) {}
+  var cached = null;
+  if (PB) { try { cached = JSON.parse(lsGet("tc-cat") || "null"); } catch (e) {} }
+  applyCatalog(cached && cached.courses && cached.courses.length ? cached : builtinCat());
+  setSubject(SUBJECTS[h] ? h : Object.keys(SUBJECTS)[0]);
+  netInit();
+  reloadCatalog().catch(noop);
+})();
+</script>
+
+
+</body>
+</html>
