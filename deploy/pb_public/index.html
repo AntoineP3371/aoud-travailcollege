@@ -88,8 +88,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .subjects { display: flex; gap: 22px; min-width: 0; }
 .subjects button { white-space: nowrap; }
 .ver { flex-shrink: 0; }
+.brandbtns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .brandr { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
 .sync { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 10px; min-height: 32px; white-space: nowrap; }
+#imp-toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; max-width: min(92vw, 520px); background: var(--ink); color: var(--btn-fg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+#imp-toast[hidden] { display: none; }
 .sync[data-s="ok"] { color: var(--ink); border-color: var(--ink); }
 .sync[data-s="err"] { color: var(--bad); border-color: var(--bad); }
 .sync[data-s="login"] { background: var(--ink); color: var(--btn-fg); border-color: var(--ink); }
@@ -246,7 +249,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <path d="M6 66 C 80 58, 190 72, 292 62" fill="none" stroke-width="5" stroke-linecap="round" class="lg-c"/>
       <text x="4" y="88" font-family="'Atkinson Hyperlegible', system-ui, sans-serif" font-weight="700" font-size="15" letter-spacing="7" textLength="98" lengthAdjust="spacing" class="lg-d">GIANNI</text>
     </svg>
-    <div class="brandr"><span class="ver" title="Version">v4.3</span><button type="button" class="sync" id="sync" hidden></button></div>
+    <div class="brandr"><span class="ver" title="Version">v4.3</span><div class="brandbtns"><button type="button" class="sync" id="import-open" hidden>⇪ Importer un cours</button><button type="button" class="sync" id="sync" hidden></button></div></div>
   </div>
   <div class="tabrow">
   <nav class="subjects" id="subjects" role="tablist" aria-label="Matières"></nav>
@@ -320,6 +323,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
   </form>
 </div>
 
+<div id="imp-toast" role="status" hidden></div>
 <div class="ed" id="ed" hidden role="dialog" aria-label="Modifier le cours">
   <div class="ed-bar">
     <button type="button" class="ink-b" id="ed-close">← Retour</button>
@@ -1639,8 +1643,15 @@ function reloadCatalog() {
 /* ---------- Éditeur de cours (réservé au compte parent) ---------- */
 var ed = { course: null, cards: [] };
 function esc(x) { return String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-function edMsg(t) { $("#ed-msg").textContent = t || ""; }
-function refreshEdit() { $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
+var toastT = 0;
+function edMsg(t) {
+  $("#ed-msg").textContent = t || "";
+  if ($("#ed").hidden && t) {
+    var el = $("#imp-toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT);
+    toastT = setTimeout(function () { el.hidden = true; }, 7000);
+  }
+}
+function refreshEdit() { $("#import-open").hidden = !net.parentToken; $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
 function edCardHtml(c, i) {
   var o = c.o || ["", "", "", ""];
   return '<div class="ed-card" data-i="' + i + '"><div class="ed-ch"><b>Carte ' + (i + 1) + '</b><span>' +
@@ -1797,13 +1808,14 @@ function edImport(file) {
     });
     return chain;
   }).then(function () { return reloadCatalog(); }).then(function () {
-    setSubject(key); openEditor(); edMsg("Cours importé.");
+    var wasOpen = !$("#ed").hidden; setSubject(key); if (wasOpen) openEditor(); edMsg("Cours importé : " + (meta.course.label || key) + ".");
   }, function (er) {
     if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; refreshEdit(); edMsg("Session parent expirée : ferme l'éditeur et saisis de nouveau le code."); }
     else edMsg(er && er.message && !/^http|^zip/.test(er.message) ? er.message : "Échec de l'import (fichier ou serveur).");
   });
 }
 $("#ed-import").addEventListener("click", function () { $("#ed-zip").click(); });
+$("#import-open").addEventListener("click", function () { $("#ed-zip").click(); });
 $("#ed-zip").addEventListener("change", function () { var f = this.files && this.files[0]; this.value = ""; edImport(f); });
 $("#edit-open").addEventListener("click", openEditor);
 $("#ed-close").addEventListener("click", function () { $("#ed").hidden = true; });
