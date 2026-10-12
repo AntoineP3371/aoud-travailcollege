@@ -238,6 +238,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .pw-card h2 { margin: 0; font-family: var(--display); font-size: 30px; color: var(--ink); }
 .pw-card p { margin: 0; color: var(--muted); }
 .pw-card input { font: inherit; font-size: 22px; letter-spacing: 0.3em; text-align: center; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--fg); min-height: 52px; }
+.hub-form { display: flex; flex-direction: column; gap: 14px; }
+.hub-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.hub-form input { width: 100%; box-sizing: border-box; font-size: 20px; min-height: 48px; }
+.hub-form input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 18%, transparent); }
+.pw-card input::-ms-reveal, .pw-card input::-ms-clear { display: none; }
 .hub-list { display: flex; flex-direction: column; gap: 8px; }
 .hub-list .btn { width: 100%; }
 .pw-card .row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -324,10 +329,10 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <button type="button" class="btn ghost" id="hub-corr">Voir le corrigé de cette feuille</button>
       <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
     </div>
-    <form id="hub-codeform" hidden>
-      <input type="password" id="hc-old" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Code actuel" placeholder="Code actuel">
-      <input type="password" id="hc-new" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Nouveau code" placeholder="Nouveau code">
-      <input type="password" id="hc-new2" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Nouveau code, encore une fois" placeholder="Nouveau code, encore">
+    <form id="hub-codeform" class="hub-form" hidden>
+      <label>Code actuel<input type="password" id="hc-old" inputmode="numeric" autocomplete="off" maxlength="12"></label>
+      <label>Nouveau code<input type="password" id="hc-new" inputmode="numeric" autocomplete="off" maxlength="12"></label>
+      <label>Nouveau code, encore une fois<input type="password" id="hc-new2" inputmode="numeric" autocomplete="off" maxlength="12"></label>
       <div class="row"><button type="submit" class="btn">Changer le code</button><button type="button" class="btn ghost" id="hc-cancel">Annuler</button></div>
     </form>
     <p id="hub-msg" role="status"></p>
