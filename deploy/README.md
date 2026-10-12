@@ -242,12 +242,19 @@ Le navigateur garde les travaux **par adresse de site**. Ceux qui ont été fait
 2. Sur la **nouvelle** adresse, connectez-vous (étape 8.2), puis bouton **Importer une sauvegarde** et choisissez ce fichier.
 3. Les travaux apparaissent et partent aussitôt sur le serveur. Vérifiez que la pastille indique **Synchronisé**.
 
-## 9. Modifier les cours
+## 9. Ajouter ou modifier des cours
 
-- **Cartes et textes** : espace parent, puis **✎ Modifier ce cours**. Vous pouvez corriger, ajouter, supprimer et réordonner les cartes, puis **Enregistrer**. Le bouton **+ Nouveau cours** crée un cours (et une matière si besoin).
-- **Feuille d'exercices (images des pages), PDF à imprimer** : à déposer dans le tableau de bord PocketBase, adresse `https://travail.gmpbordeaux.fr/_/`, collection `courses`, champs `pages` et `pdf`.
-- **Corrigé de la feuille** : collection `corriges` : un enregistrement par page, avec `sub` = la clé du cours (visible dans la collection `courses`, champ `key`), `page` = 1, 2, 3… et l'image.
-- Pour un cours complet avec feuille et corrigé prêts à l'emploi, envoyez le cours à Claude : il prépare les cartes, la feuille, le corrigé et les fichiers d'import.
+**Ajouter un cours complet (le plus simple).** Envoyez les photos du cours à Claude dans une conversation, avec la matière et le nom du cours. Claude vous rend un fichier `.zip` qui contient les cartes, la feuille d'exercices, le PDF et le corrigé. Ensuite :
+
+1. Ouvrez le site, **Espace parent**, saisissez le code.
+2. Touchez **✎ Modifier ce cours**, puis **⇪ Importer un cours (zip)** et choisissez le fichier.
+3. Attendez le message **Cours importé.** Le cours apparaît tout de suite, et sa matière est créée si besoin.
+
+Si le cours existe déjà (même clé), le site demande confirmation avant de le remplacer (cartes, feuille, PDF, corrigés). Aucune commande sur le serveur n'est nécessaire.
+
+**Corriger une carte ou un texte.** Espace parent, **✎ Modifier ce cours**, puis modifiez, ajoutez, supprimez ou réordonnez les cartes, et **Enregistrer**. Le bouton **+ Nouveau cours** crée un cours vide.
+
+**Cas particuliers (tableau de bord PocketBase, `/_/`).** Les images de la feuille et le PDF sont dans la collection `courses` (champs `pages`, `pdf`). Les corrigés sont dans la collection `corriges` : un enregistrement par page, avec `sub` = la clé du cours, `page` = 1, 2, 3… et l'image.
 
 ## 10. Mettre à jour le site
 

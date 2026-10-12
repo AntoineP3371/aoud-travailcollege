@@ -325,6 +325,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
     <button type="button" class="ink-b" id="ed-close">← Retour</button>
     <strong id="ed-title">Modifier le cours</strong>
     <button type="button" class="ink-b" id="ed-newbtn">+ Nouveau cours</button>
+    <button type="button" class="ink-b" id="ed-import">⇪ Importer un cours (zip)</button><input type="file" id="ed-zip" accept=".zip,application/zip" hidden>
     <span id="ed-msg" role="status"></span>
     <button type="button" class="ink-b solid" id="ed-save">Enregistrer</button>
   </div>
@@ -347,7 +348,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <label>Sous-titre<input id="ed-sub" maxlength="160"></label>
       <label>Description des exercices<textarea id="ed-exo" rows="2"></textarea></label>
       <label>Ordre du bouton (1 = premier)<input id="ed-pos" type="number" min="0" step="1"></label>
-      <p class="ed-help">Les feuilles d'exercices (images des pages), le PDF et les corrigés se déposent dans le tableau de bord PocketBase (adresse /_/ du serveur).</p>
+      <p class="ed-help">Pour ajouter un cours complet (cartes, feuille d'exercices, PDF, corrigés), utilise « Importer un cours (zip) » avec le fichier préparé par Claude.</p>
     </section>
     <h3>Cartes <button type="button" class="ink-b" id="ed-add">+ Ajouter une carte</button></h3>
     <p class="ed-help">La première réponse est la bonne : l'application mélange l'ordre à l'affichage. Gras : &lt;b&gt;mot&lt;/b&gt;.</p>
@@ -1716,6 +1717,94 @@ function edNewCreate() {
     setSubject(key); openEditor(); edMsg("Cours créé : ajoute tes cartes, puis dépose la feuille d'exercices dans PocketBase.");
   }, function (er) { edMsg(er && er.status === 400 ? "Création refusée (nom déjà utilisé ?)." : "Échec de la création."); });
 }
+/* ---------- Import d'un cours complet (zip préparé par Claude) ---------- */
+function zipRead(buf) {
+  var dv = new DataView(buf), u8 = new Uint8Array(buf), e = -1, i;
+  for (i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) { if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; } }
+  if (e < 0) return Promise.reject(new Error("zip"));
+  var n = dv.getUint16(e + 10, true), p = dv.getUint32(e + 16, true), out = {}, jobs = [];
+  for (i = 0; i < n; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) return Promise.reject(new Error("zip"));
+    var method = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true),
+        el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lho = dv.getUint32(p + 42, true),
+        name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl));
+    p += 46 + nl + el + cl;
+    if (name.charAt(name.length - 1) === "/") continue;
+    var st = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true), raw = u8.slice(st, st + cs);
+    (function (nm, m, r) {
+      if (m === 0) { out[nm] = r; return; }
+      if (m !== 8 || typeof DecompressionStream === "undefined") throw new Error("zipmethod");
+      jobs.push(new Response(new Blob([r]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()
+        .then(function (b) { out[nm] = new Uint8Array(b); }));
+    })(name.split("/").pop(), method, raw);
+  }
+  return Promise.all(jobs).then(function () { return out; });
+}
+function mimeOf(n) { n = n.toLowerCase(); return /\.png$/.test(n) ? "image/png" : /\.webp$/.test(n) ? "image/webp" : /\.pdf$/.test(n) ? "application/pdf" : "image/jpeg"; }
+function apiForm(method, path, form) {
+  return fetch(PB + path, { method: method, headers: { Authorization: net.parentToken }, body: form }).then(function (r) {
+    if (!r.ok) { var er = new Error("http " + r.status); er.status = r.status; throw er; }
+    return r.json().catch(function () { return {}; });
+  });
+}
+function edImport(file) {
+  var T = net.parentToken; if (!T || !file) return;
+  var meta, files, key, existing;
+  edMsg("Lecture du fichier…");
+  file.arrayBuffer().then(zipRead).then(function (f) {
+    files = f;
+    if (!f["cours.json"]) throw new Error("Ce fichier n'est pas un cours (cours.json absent).");
+    meta = JSON.parse(new TextDecoder().decode(f["cours.json"]));
+    var c = meta.course || {}, s = meta.subject || {};
+    key = c.key;
+    if (!/^[a-z0-9]{1,24}$/.test(key || "") || !/^[a-z0-9]{1,24}$/.test(s.key || "") || !Array.isArray(c.cards)) throw new Error("Fichier de cours invalide.");
+    c.cards.forEach(function (x, i) {
+      if (!x || !x.q || !x.e || !Array.isArray(x.o) || x.o.length !== 4 || x.o.some(function (o) { return !o; })) throw new Error("Carte " + (i + 1) + " invalide.");
+    });
+    (meta.pages || []).concat(meta.pdf ? [meta.pdf] : [], meta.corriges || []).forEach(function (n) { if (!f[n]) throw new Error("Fichier manquant dans le zip : " + n); });
+    existing = SUBJECTS[key] && SUBJECTS[key].id ? SUBJECTS[key] : null;
+    if (existing && !window.confirm("Le cours « " + (existing.label || key) + " » existe déjà. Le remplacer (cartes, feuille d'exercices, PDF et corrigés) ?")) throw new Error("Import annulé.");
+    edMsg("Matière…");
+    var have = CATSUB.some(function (x) { return x.key === s.key; });
+    return have ? null : api("POST", "/api/collections/subjects/records", { key: s.key, name: s.name || s.key, color: s.color || "#0b6e8a", position: CATSUB.length + 1 }, T);
+  }).then(function () {
+    var c = meta.course, fd = new FormData();
+    ["label", "eyebrow", "title", "sub", "exo", "file_name"].forEach(function (k) { fd.append(k, c[k] || ""); });
+    fd.append("cards", JSON.stringify(c.cards));
+    if (!existing) {
+      fd.append("key", key); fd.append("subject", meta.subject.key);
+      var sib = coursesOf(meta.subject.key);
+      fd.append("position", String(sib.length ? Math.max.apply(null, sib.map(function (x) { return x.position || 0; })) + 1 : 1));
+    }
+    if ((meta.pages || []).length) (meta.pages).forEach(function (n) { fd.append("pages", new Blob([files[n]], { type: mimeOf(n) }), n); });
+    else if (existing) fd.append("pages", "");
+    if (meta.pdf) fd.append("pdf", new Blob([files[meta.pdf]], { type: "application/pdf" }), meta.pdf);
+    edMsg("Envoi du cours…");
+    return existing ? apiForm("PATCH", "/api/collections/courses/records/" + existing.id, fd) : apiForm("POST", "/api/collections/courses/records", fd);
+  }).then(function () {
+    var list = meta.corriges || [], chain = Promise.resolve();
+    list.forEach(function (n, i) {
+      chain = chain.then(function () {
+        edMsg("Corrigé " + (i + 1) + "/" + list.length + "…");
+        return api("GET", "/api/collections/corriges/records?perPage=5&filter=" + q('sub="' + key + '" && page=' + (i + 1)), undefined, T);
+      }).then(function (d) {
+        return Promise.all((d.items || []).map(function (o) { return api("DELETE", "/api/collections/corriges/records/" + o.id, undefined, T); }));
+      }).then(function () {
+        var fd = new FormData(); fd.append("sub", key); fd.append("page", String(i + 1));
+        fd.append("img", new Blob([files[n]], { type: mimeOf(n) }), n);
+        return apiForm("POST", "/api/collections/corriges/records", fd);
+      });
+    });
+    return chain;
+  }).then(function () { return reloadCatalog(); }).then(function () {
+    setSubject(key); openEditor(); edMsg("Cours importé.");
+  }, function (er) {
+    if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; refreshEdit(); edMsg("Session parent expirée : ferme l'éditeur et saisis de nouveau le code."); }
+    else edMsg(er && er.message && !/^http|^zip/.test(er.message) ? er.message : "Échec de l'import (fichier ou serveur).");
+  });
+}
+$("#ed-import").addEventListener("click", function () { $("#ed-zip").click(); });
+$("#ed-zip").addEventListener("change", function () { var f = this.files && this.files[0]; this.value = ""; edImport(f); });
 $("#edit-open").addEventListener("click", openEditor);
 $("#ed-close").addEventListener("click", function () { $("#ed").hidden = true; });
 $("#ed-save").addEventListener("click", edSave);
