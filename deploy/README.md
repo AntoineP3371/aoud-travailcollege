@@ -246,9 +246,11 @@ Le navigateur garde les travaux **par adresse de site**. Ceux qui ont été fait
 
 **Ajouter un cours complet (le plus simple).** Envoyez les photos du cours à Claude dans une conversation, avec la matière et le nom du cours. Claude vous rend un fichier `.zip` qui contient les cartes, la feuille d'exercices, le PDF et le corrigé. Ensuite :
 
-1. Ouvrez le site, **Espace parent**, saisissez le code.
-2. Touchez **✎ Modifier ce cours**, puis **⇪ Importer un cours (zip)** et choisissez le fichier.
+1. Ouvrez le site, touchez **Espace parent** en haut à droite, puis saisissez le code.
+2. Touchez **⇪ Importer un cours (zip)** et choisissez le fichier.
 3. Attendez le message **Cours importé.** Le cours apparaît tout de suite, et sa matière est créée si besoin.
+
+Le même menu **Espace parent** permet aussi de modifier le cours affiché, de voir son corrigé et de **changer le code parent** (il faut saisir l'ancien code, puis le nouveau deux fois).
 
 Si le cours existe déjà (même clé), le site demande confirmation avant de le remplacer (cartes, feuille, PDF, corrigés). Aucune commande sur le serveur n'est nécessaire.
 

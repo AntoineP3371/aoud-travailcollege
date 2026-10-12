@@ -238,6 +238,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .pw-card h2 { margin: 0; font-family: var(--display); font-size: 30px; color: var(--ink); }
 .pw-card p { margin: 0; color: var(--muted); }
 .pw-card input { font: inherit; font-size: 22px; letter-spacing: 0.3em; text-align: center; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--fg); min-height: 52px; }
+.hub-list { display: flex; flex-direction: column; gap: 8px; }
+.hub-list .btn { width: 100%; }
 .pw-card .row { display: flex; gap: 10px; flex-wrap: wrap; }
 #pw-msg, #lg-msg { min-height: 1.4em; color: var(--bad); font-size: 14px; }
 </style>
@@ -249,7 +251,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <path d="M6 66 C 80 58, 190 72, 292 62" fill="none" stroke-width="5" stroke-linecap="round" class="lg-c"/>
       <text x="4" y="88" font-family="'Atkinson Hyperlegible', system-ui, sans-serif" font-weight="700" font-size="15" letter-spacing="7" textLength="98" lengthAdjust="spacing" class="lg-d">GIANNI</text>
     </svg>
-    <div class="brandr"><span class="ver" title="Version">v4.4</span><div class="brandbtns"><button type="button" class="sync" id="import-open" hidden>⇪ Importer un cours</button><button type="button" class="sync" id="sync" hidden></button></div></div>
+    <div class="brandr"><span class="ver" title="Version">v4.4</span><div class="brandbtns"><button type="button" class="sync" id="hub-open" hidden>Espace parent</button><button type="button" class="sync" id="sync" hidden></button></div></div>
   </div>
   <div class="tabrow">
   <nav class="subjects" id="subjects" role="tablist" aria-label="Matières"></nav>
@@ -313,10 +315,30 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
   </form>
 </div>
 
+<div class="pw" id="hub" hidden role="dialog" aria-label="Espace parent">
+  <div class="pw-card hub-card">
+    <h2>Espace parent</h2>
+    <div class="hub-list">
+      <button type="button" class="btn" id="hub-import">⇪ Importer un cours (zip)</button>
+      <button type="button" class="btn ghost" id="hub-edit">✎ Modifier ce cours</button>
+      <button type="button" class="btn ghost" id="hub-corr">Voir le corrigé de cette feuille</button>
+      <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
+    </div>
+    <form id="hub-codeform" hidden>
+      <input type="password" id="hc-old" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Code actuel" placeholder="Code actuel">
+      <input type="password" id="hc-new" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Nouveau code" placeholder="Nouveau code">
+      <input type="password" id="hc-new2" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Nouveau code, encore une fois" placeholder="Nouveau code, encore">
+      <div class="row"><button type="submit" class="btn">Changer le code</button><button type="button" class="btn ghost" id="hc-cancel">Annuler</button></div>
+    </form>
+    <p id="hub-msg" role="status"></p>
+    <div class="row"><button type="button" class="btn ghost" id="hub-lock">Verrouiller</button><button type="button" class="btn ghost" id="hub-close">Fermer</button></div>
+  </div>
+</div>
+
 <div class="pw" id="pw" hidden role="dialog" aria-label="Espace parent">
   <form class="pw-card" id="pw-form">
     <h2>Espace parent</h2>
-    <p>Entre le code pour afficher le corrigé à côté de la feuille de l'élève.</p>
+    <p id="pw-help">Entre le code pour afficher le corrigé à côté de la feuille de l'élève.</p>
     <input type="password" id="pw-in" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="Code parent">
     <p id="pw-msg" role="status"></p>
     <div class="row"><button type="submit" class="btn">Valider</button><button type="button" class="btn ghost" id="pw-cancel">Annuler</button></div>
@@ -977,6 +999,7 @@ function api(method, path, body, token) {
 }
 function setNet(state) {
   net.state = state;
+  var ho = $("#hub-open"); if (ho) ho.hidden = !PB;
   var b = $("#sync");
   if (!PB) { b.hidden = true; return; }
   b.hidden = false; b.setAttribute("data-s", state);
@@ -1436,7 +1459,7 @@ $("#ink-clear").addEventListener("click", function () {
 })();
 window.addEventListener("resize", function () { if (!$("#ink").hidden) sizeAll(); });
 document.addEventListener("selectstart", function (e) { if (!$("#ink").hidden && !(e.target && e.target.tagName === "INPUT")) e.preventDefault(); });
-document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (!$("#ed").hidden) $("#ed").hidden = true; else if (!$("#lg").hidden) $("#lg").hidden = true; else if (!$("#pw").hidden) $("#pw").hidden = true; else if (!$("#ink").hidden) closeInk(); } });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (!$("#hub").hidden) $("#hub").hidden = true; else if (!$("#ed").hidden) $("#ed").hidden = true; else if (!$("#lg").hidden) $("#lg").hidden = true; else if (!$("#pw").hidden) $("#pw").hidden = true; else if (!$("#ink").hidden) closeInk(); } });
 
 
 /* ---------- Espace parent : corrigé chiffré, affiché à côté de la feuille ---------- */
@@ -1455,8 +1478,10 @@ function unlockCorr(code) {
   }).then(function (buf) { return JSON.parse(new TextDecoder().decode(buf)); });
 }
 function pwMsg(t) { $("#pw-msg").textContent = t || ""; }
+var hubMode = false;
 function showPw() {
   pwMsg(!CORR && !PB ? "L'espace parent n'est disponible que depuis le serveur de la famille." : "");
+  $("#pw-help").textContent = hubMode ? "Entre le code parent pour importer des cours, modifier un cours ou changer le code." : "Entre le code pour afficher le corrigé à côté de la feuille de l'élève.";
   $("#pw-in").value = ""; $("#pw").hidden = false;
   setTimeout(function () { $("#pw-in").focus(); }, 50);
 }
@@ -1470,6 +1495,7 @@ function loadCorr(k) {
   });
 }
 function openPw() {
+  hubMode = false;
   if (corrPages && corrPages[subject]) { openParent(); return; }
   if (!CORR && net.parentToken) {
     loadCorr(subject).then(openParent, function () { net.parentToken = ""; showPw(); });
@@ -1481,7 +1507,7 @@ function openParent() {
   openInk(true);
 }
 $("#parent-open").addEventListener("click", openPw);
-$("#pw-cancel").addEventListener("click", function () { $("#pw").hidden = true; });
+$("#pw-cancel").addEventListener("click", function () { hubMode = false; $("#pw").hidden = true; });
 $("#pw-form").addEventListener("submit", function (e) {
   e.preventDefault();
   var code = $("#pw-in").value;
@@ -1491,9 +1517,10 @@ $("#pw-form").addEventListener("submit", function (e) {
     pwMsg("Vérification…");
     api("POST", "/api/collections/users/auth-with-password", { identity: PAR_EMAIL, password: "parent-" + code }).then(function (d) {
       if (d.record && d.record.role !== "parent") throw { status: 400 };
-      net.parentToken = d.token; refreshEdit();
+      net.parentToken = d.token; net.parentId = d.record && d.record.id; refreshEdit();
+      if (hubMode) { hubMode = false; $("#pw").hidden = true; openHub(); return "hub"; }
       return loadCorr(subject);
-    }).then(function () { $("#pw").hidden = true; openParent(); }, function (er) {
+    }).then(function (r) { if (r === "hub") return; $("#pw").hidden = true; openParent(); }, function (er) {
       pwMsg(er && er.status === 400 ? "Code incorrect." : er && er.status === 429 ? "Trop d'essais, réessaie dans une minute." :
             er && er.status === 404 ? "Pas de corrigé pour cette feuille." : "Serveur injoignable.");
       $("#pw-in").value = "";
@@ -1640,6 +1667,52 @@ function reloadCatalog() {
   });
 }
 
+/* ---------- Menu « Espace parent » (bouton de l'en-tête) ---------- */
+function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
+function openHub() {
+  var c = SUBJECTS[subject];
+  $("#hub-edit").hidden = !(c && c.id);
+  $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg("");
+  $("#hub").hidden = false;
+}
+$("#hub-open").addEventListener("click", function () {
+  if (net.parentToken) { openHub(); return; }
+  hubMode = true; showPw();
+});
+$("#hub-close").addEventListener("click", function () { $("#hub").hidden = true; });
+$("#hub-lock").addEventListener("click", function () { net.parentToken = ""; net.parentId = ""; corrPages = null; refreshEdit(); $("#hub").hidden = true; });
+$("#hub-import").addEventListener("click", function () { $("#hub").hidden = true; $("#ed-zip").click(); });
+$("#hub-edit").addEventListener("click", function () { $("#hub").hidden = true; openEditor(); });
+$("#hub-corr").addEventListener("click", function () {
+  hubMsg("Chargement…");
+  loadCorr(subject).then(function () { $("#hub").hidden = true; openParent(); }, function (er) {
+    hubMsg(er && er.status === 404 ? "Pas de corrigé pour cette feuille." : "Serveur injoignable.");
+  });
+});
+$("#hub-code").addEventListener("click", function () {
+  $(".hub-list").hidden = true; $("#hub-codeform").hidden = false; hubMsg("");
+  ["#hc-old", "#hc-new", "#hc-new2"].forEach(function (i) { $(i).value = ""; }); $("#hc-old").focus();
+});
+$("#hc-cancel").addEventListener("click", function () { $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
+$("#hub-codeform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var o = $("#hc-old").value, n = $("#hc-new").value, n2 = $("#hc-new2").value;
+  if (!o) { hubMsg("Saisis le code actuel."); return; }
+  if (n.length < 4) { hubMsg("Le nouveau code doit avoir au moins 4 caractères."); return; }
+  if (n !== n2) { hubMsg("Les deux nouveaux codes sont différents."); return; }
+  if (n === o) { hubMsg("Le nouveau code est identique à l'ancien."); return; }
+  hubMsg("Changement…");
+  api("PATCH", "/api/collections/users/records/" + net.parentId, { oldPassword: "parent-" + o, password: "parent-" + n, passwordConfirm: "parent-" + n }, net.parentToken).then(function () {
+    return api("POST", "/api/collections/users/auth-with-password", { identity: PAR_EMAIL, password: "parent-" + n });
+  }).then(function (d) {
+    net.parentToken = d.token; corrPages = null;
+    $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg("Code parent changé.");
+  }, function (er) {
+    hubMsg(er && er.status === 400 ? "Code actuel incorrect." : er && er.status === 429 ? "Trop d'essais, réessaie dans une minute." :
+           er && (er.status === 401 || er.status === 403) ? "Session expirée : ferme et saisis de nouveau le code." : "Échec du changement (serveur injoignable ?).");
+  });
+});
+
 /* ---------- Éditeur de cours (réservé au compte parent) ---------- */
 var ed = { course: null, cards: [] };
 function esc(x) { return String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
@@ -1651,7 +1724,7 @@ function edMsg(t) {
     toastT = setTimeout(function () { el.hidden = true; }, 7000);
   }
 }
-function refreshEdit() { $("#import-open").hidden = !net.parentToken; $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
+function refreshEdit() { $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
 function edCardHtml(c, i) {
   var o = c.o || ["", "", "", ""];
   return '<div class="ed-card" data-i="' + i + '"><div class="ed-ch"><b>Carte ' + (i + 1) + '</b><span>' +
@@ -1815,7 +1888,6 @@ function edImport(file) {
   });
 }
 $("#ed-import").addEventListener("click", function () { $("#ed-zip").click(); });
-$("#import-open").addEventListener("click", function () { $("#ed-zip").click(); });
 $("#ed-zip").addEventListener("change", function () { var f = this.files && this.files[0]; this.value = ""; edImport(f); });
 $("#edit-open").addEventListener("click", openEditor);
 $("#ed-close").addEventListener("click", function () { $("#ed").hidden = true; });
