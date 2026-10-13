@@ -292,9 +292,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
     <p id="exo-desc"></p>
     <div class="row">
       <button type="button" class="btn" id="ink-open">Faire les exercices à l'écran (Apple Pencil)</button>
-      <button type="button" class="btn ghost" id="parent-open">Espace parent</button>
       <button type="button" class="btn ghost" id="dl">Télécharger le PDF à imprimer</button>
-      <button type="button" class="btn ghost" id="edit-open" hidden>✎ Modifier ce cours</button>
       <span id="dlmsg" role="status"></span>
     </div>
   </section>
@@ -1004,7 +1002,7 @@ function api(method, path, body, token) {
 }
 function setNet(state) {
   net.state = state;
-  var ho = $("#hub-open"); if (ho) ho.hidden = !PB;
+  var ho = $("#hub-open"); if (ho) ho.hidden = !(PB || (typeof CORR !== "undefined" && CORR));
   var b = $("#sync");
   if (!PB) { b.hidden = true; return; }
   b.hidden = false; b.setAttribute("data-s", state);
@@ -1470,6 +1468,7 @@ document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if
 /* ---------- Espace parent : corrigé chiffré, affiché à côté de la feuille ---------- */
 var CORR = null;
 var corrPages = null;
+$("#hub-open").hidden = !(PB || CORR);
 function b64b(x) { var b = atob(x), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
 function unlockCorr(code) {
   var sub = window.crypto && window.crypto.subtle;
@@ -1511,7 +1510,6 @@ function openPw() {
 function openParent() {
   openInk(true);
 }
-$("#parent-open").addEventListener("click", openPw);
 $("#pw-cancel").addEventListener("click", function () { hubMode = false; $("#pw").hidden = true; });
 $("#pw-form").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -1681,6 +1679,7 @@ function openHub() {
   $("#hub").hidden = false;
 }
 $("#hub-open").addEventListener("click", function () {
+  if (!PB) { openPw(); return; }   /* version hors serveur : seul le corrigé chiffré est disponible */
   if (net.parentToken) { openHub(); return; }
   hubMode = true; showPw();
 });
@@ -1691,7 +1690,8 @@ $("#hub-edit").addEventListener("click", function () { $("#hub").hidden = true; 
 $("#hub-corr").addEventListener("click", function () {
   hubMsg("Chargement…");
   loadCorr(subject).then(function () { $("#hub").hidden = true; openParent(); }, function (er) {
-    hubMsg(er && er.status === 404 ? "Pas de corrigé pour cette feuille." : "Serveur injoignable.");
+    if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; hubMsg("Session expirée : ferme et saisis de nouveau le code."); }
+    else hubMsg(er && er.status === 404 ? "Pas de corrigé pour cette feuille." : "Serveur injoignable.");
   });
 });
 $("#hub-code").addEventListener("click", function () {
@@ -1729,7 +1729,7 @@ function edMsg(t) {
     toastT = setTimeout(function () { el.hidden = true; }, 7000);
   }
 }
-function refreshEdit() { $("#edit-open").hidden = !(net.parentToken && SUBJECTS[subject] && SUBJECTS[subject].id); }
+function refreshEdit() { var h = $("#hub-edit"); if (h) h.hidden = !(SUBJECTS[subject] && SUBJECTS[subject].id); }
 function edCardHtml(c, i) {
   var o = c.o || ["", "", "", ""];
   return '<div class="ed-card" data-i="' + i + '"><div class="ed-ch"><b>Carte ' + (i + 1) + '</b><span>' +
@@ -1894,7 +1894,6 @@ function edImport(file) {
 }
 $("#ed-import").addEventListener("click", function () { $("#ed-zip").click(); });
 $("#ed-zip").addEventListener("change", function () { var f = this.files && this.files[0]; this.value = ""; edImport(f); });
-$("#edit-open").addEventListener("click", openEditor);
 $("#ed-close").addEventListener("click", function () { $("#ed").hidden = true; });
 $("#ed-save").addEventListener("click", edSave);
 $("#ed-newbtn").addEventListener("click", edNewOpen);
