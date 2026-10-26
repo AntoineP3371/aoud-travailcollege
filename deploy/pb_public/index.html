@@ -245,6 +245,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .pw-card input::-ms-reveal, .pw-card input::-ms-clear { display: none; }
 .hub-list { display: flex; flex-direction: column; gap: 8px; }
 .hub-list .btn { width: 100%; }
+.hub-last { margin: 0 0 4px; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .pw-card .row { display: flex; gap: 10px; flex-wrap: wrap; }
 #pw-msg, #lg-msg { min-height: 1.4em; color: var(--bad); font-size: 14px; }
 </style>
@@ -322,16 +323,23 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
   <div class="pw-card hub-card">
     <h2>Espace parent</h2>
     <div class="hub-list">
+      <p class="hub-last" id="hub-last" role="status"></p>
       <button type="button" class="btn" id="hub-import">⇪ Importer un cours (zip)</button>
       <button type="button" class="btn ghost" id="hub-edit">✎ Modifier ce cours</button>
       <button type="button" class="btn ghost" id="hub-corr">Voir le corrigé de cette feuille</button>
       <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
+      <button type="button" class="btn ghost" id="hub-gcode">Changer le mot de passe de Gianni</button>
     </div>
     <form id="hub-codeform" class="hub-form" hidden>
       <label>Code actuel<input type="password" id="hc-old" inputmode="numeric" autocomplete="off" maxlength="12"></label>
       <label>Nouveau code<input type="password" id="hc-new" inputmode="numeric" autocomplete="off" maxlength="12"></label>
       <label>Nouveau code, encore une fois<input type="password" id="hc-new2" inputmode="numeric" autocomplete="off" maxlength="12"></label>
       <div class="row"><button type="submit" class="btn">Changer le code</button><button type="button" class="btn ghost" id="hc-cancel">Annuler</button></div>
+    </form>
+    <form id="hub-gform" class="hub-form" hidden>
+      <label>Nouveau mot de passe de Gianni (8 caractères minimum)<input type="password" id="hg-new" autocomplete="new-password" maxlength="72"></label>
+      <label>Nouveau mot de passe, encore une fois<input type="password" id="hg-new2" autocomplete="new-password" maxlength="72"></label>
+      <div class="row"><button type="submit" class="btn">Changer le mot de passe</button><button type="button" class="btn ghost" id="hg-cancel">Annuler</button></div>
     </form>
     <p id="hub-msg" role="status"></p>
     <div class="row"><button type="button" class="btn ghost" id="hub-lock">Verrouiller</button><button type="button" class="btn ghost" id="hub-close">Fermer</button></div>
@@ -1675,8 +1683,21 @@ function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
 function openHub() {
   var c = SUBJECTS[subject];
   $("#hub-edit").hidden = !(c && c.id);
-  $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg("");
+  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $(".hub-list").hidden = false; hubMsg("");
   $("#hub").hidden = false;
+  loadLast();
+}
+function loadLast() {
+  var el = $("#hub-last"); el.textContent = "Dernier cours ajouté : chargement…";
+  api("GET", "/api/collections/courses/records?sort=-updated&perPage=1&skipTotal=1&fields=label,title,subject,updated", undefined, net.parentToken).then(function (d) {
+    var r = d.items && d.items[0];
+    if (!r) { el.textContent = "Aucun cours sur le serveur."; return; }
+    var sj = CATSUB.filter(function (x) { return x.key === r.subject; })[0];
+    var name = "« " + (r.label || r.title) + " »" + (sj ? " (" + sj.name + ")" : "");
+    var dt = r.updated ? new Date(String(r.updated).replace(" ", "T")) : null;
+    if (!dt || isNaN(dt)) { el.textContent = "Dernier cours ajouté : la date apparaîtra dès le prochain import."; return; }
+    el.textContent = "Dernier cours ajouté ou mis à jour : " + name + ", le " + dt.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" }) + ".";
+  }, function () { el.textContent = ""; });
 }
 $("#hub-open").addEventListener("click", function () {
   if (!PB) { openPw(); return; }   /* version hors serveur : seul le corrigé chiffré est disponible */
@@ -1697,6 +1718,26 @@ $("#hub-corr").addEventListener("click", function () {
 $("#hub-code").addEventListener("click", function () {
   $(".hub-list").hidden = true; $("#hub-codeform").hidden = false; hubMsg("");
   ["#hc-old", "#hc-new", "#hc-new2"].forEach(function (i) { $(i).value = ""; }); $("#hc-old").focus();
+});
+$("#hub-gcode").addEventListener("click", function () {
+  $(".hub-list").hidden = true; $("#hub-gform").hidden = false; hubMsg("");
+  ["#hg-new", "#hg-new2"].forEach(function (i) { $(i).value = ""; }); $("#hg-new").focus();
+});
+$("#hg-cancel").addEventListener("click", function () { $("#hub-gform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
+$("#hub-gform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var n = $("#hg-new").value, n2 = $("#hg-new2").value;
+  if (n.length < 8) { hubMsg("Le mot de passe doit avoir au moins 8 caractères."); return; }
+  if (n !== n2) { hubMsg("Les deux mots de passe sont différents."); return; }
+  hubMsg("Changement…");
+  api("POST", "/api/parent/student-password", { password: n }, net.parentToken).then(function () {
+    $("#hub-gform").hidden = true; $(".hub-list").hidden = false;
+    hubMsg("Mot de passe de Gianni changé. Sur son iPad, il devra toucher « ☁ Se connecter » et saisir le nouveau mot de passe.");
+  }, function (er) {
+    hubMsg(er && er.status === 400 ? "Mot de passe refusé (8 à 72 caractères)." :
+           er && (er.status === 401 || er.status === 403) ? "Session expirée : ferme et saisis de nouveau le code." :
+           er && er.status === 404 ? "Le serveur n'est pas à jour : lance update.sh puis réessaie." : "Échec du changement (serveur injoignable ?).");
+  });
 });
 $("#hc-cancel").addEventListener("click", function () { $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hub-codeform").addEventListener("submit", function (e) {

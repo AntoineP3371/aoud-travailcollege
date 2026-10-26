@@ -250,7 +250,9 @@ Le navigateur garde les travaux **par adresse de site**. Ceux qui ont été fait
 2. Touchez **⇪ Importer un cours (zip)** et choisissez le fichier.
 3. Attendez le message **Cours importé.** Le cours apparaît tout de suite, et sa matière est créée si besoin.
 
-Le même menu **Espace parent** permet aussi de modifier le cours affiché, de voir son corrigé et de **changer le code parent** (il faut saisir l'ancien code, puis le nouveau deux fois).
+Le même menu **Espace parent** affiche le **dernier cours ajouté ou mis à jour** (nom, matière, date et heure). Il permet aussi de modifier le cours affiché, de voir son corrigé, de **changer le code parent** (il faut saisir l'ancien code, puis le nouveau deux fois) et de **changer le mot de passe de Gianni** (8 caractères minimum, sans connaître l'ancien : Gianni devra ensuite toucher **☁ Se connecter** sur son iPad et saisir le nouveau).
+
+Ces deux fonctions demandent une mise à jour du serveur (étape 10) : elle ajoute les dates aux cours et le script `pb_hooks` qui change le mot de passe. La date d'un cours n'apparaît qu'après son prochain import ou sa prochaine modification.
 
 Si le cours existe déjà (même clé), le site demande confirmation avant de le remplacer (cartes, feuille, PDF, corrigés). Aucune commande sur le serveur n'est nécessaire.
 
