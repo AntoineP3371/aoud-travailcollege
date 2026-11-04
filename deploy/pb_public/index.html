@@ -206,10 +206,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .ink-page img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .ink-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pinch-zoom; -webkit-touch-callout: none; }
 .ink-split { position: relative; }
-.ink-ruler { position: absolute; left: 0; top: 0; z-index: 5; transform-origin: 0 0; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+.ink-ruler { position: absolute; left: 0; top: 0; z-index: 5; transform-origin: 0 0; touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair;
   background: rgba(255, 236, 150, 0.82); border: 1.5px solid #8a6d00; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 .ink-ruler[hidden] { display: none; }
 .ink-ruler svg { display: block; width: 100%; height: 100%; pointer-events: none; }
+.ruler-grip { position: absolute; left: 2px; top: 50%; margin-top: -22px; width: 44px; height: 44px; border-radius: 50%; background: #8a6d00; color: #fff; font-size: 22px; line-height: 44px; text-align: center; cursor: grab; touch-action: none; opacity: 0.9; }
 .ruler-rot { position: absolute; right: 2px; top: 50%; margin-top: -22px; width: 44px; height: 44px; opacity: 0.9; border-radius: 50%; background: #8a6d00; color: #fff; font-size: 24px; line-height: 44px; text-align: center; cursor: crosshair; touch-action: none; }
 .ink-split { flex: 1; display: flex; min-height: 0; }
 .ink-split .ink-scroll { flex: 1; min-width: 0; }
@@ -424,7 +425,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
     <span id="ink-msg" role="status"></span>
   </div>
   <div class="ink-split" id="ink-split">
-    <div class="ink-ruler ink-draw" id="ruler" hidden aria-label="Règle graduée (déplace-la, tourne-la avec la poignée)"><svg id="ruler-svg" aria-hidden="true"></svg><span class="ruler-rot" id="ruler-rot" aria-label="Tourner la règle">↻</span></div>
+    <div class="ink-ruler ink-draw" id="ruler" hidden aria-label="Règle graduée (déplace-la, tourne-la avec la poignée)"><svg id="ruler-svg" aria-hidden="true"></svg><span class="ruler-grip" id="ruler-grip" aria-label="Déplacer la règle">✥</span><span class="ruler-rot" id="ruler-rot" aria-label="Tourner la règle">↻</span></div>
     <div class="ink-scroll" id="ink-scroll"><p class="ink-cap ink-par">Feuille de l'élève</p><div id="ink-pages"></div></div>
     <div class="ink-scroll" id="ink-corr" hidden><p class="ink-cap">Corrigé</p><div id="ink-corr-pages"></div></div>
   </div>
@@ -1279,6 +1280,8 @@ function bindCanvas(cv, i) {
     try { cv.setPointerCapture(e.pointerId); } catch (x) {}
     var pt = inkPos(cv, e);
     ink.cur = { i: i, id: e.pointerId };
+    var edge = ink.erase ? null : rulerEdgeNear(e.clientX, e.clientY, true);
+    if (edge !== null) { rulerStroke(i, cv, e, edge); return; }
     if (ink.erase) { ink.cur.del = eraseAt(i, pt); }
     else {
       ink.cur.s = { c: ink.color, w: ink.width, p: [pt] };
@@ -1295,6 +1298,7 @@ function bindCanvas(cv, i) {
     }
     var c = ink.cur; if (!c || c.id !== e.pointerId || c.i !== i) return;
     e.preventDefault();
+    if (c.rs) { rulerMove(e); return; }
     var evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
     if (!evs.length) evs = [e];
     for (var k = 0; k < evs.length; k++) {
@@ -1316,10 +1320,7 @@ function bindCanvas(cv, i) {
       if (ink.touches[e.pointerId] !== undefined) { delete ink.touches[e.pointerId]; ink.ntouch = Math.max(0, ink.ntouch - 1); }
       return;
     }
-    var c = ink.cur; if (!c || c.id !== e.pointerId) return;
-    ink.cur = null;
-    if (c.s) { ink.strokes[c.i].push(c.s); ink.hist.push({ t: "add", i: c.i, s: c.s }); inkSave(); }
-    else if (c.del && c.del.length) { ink.hist.push({ t: "del", i: c.i, list: c.del }); inkSave(); }
+    finishStroke(e);
   }
   cv.addEventListener("pointerup", end);
   cv.addEventListener("pointercancel", end);
@@ -1330,6 +1331,12 @@ function bindCanvas(cv, i) {
     if ((t && t.touchType === "stylus") || ink.finger) e.preventDefault();
   }, { passive: false });
   cv.addEventListener("dblclick", function (e) { e.preventDefault(); });
+}
+function finishStroke(e) {
+  var c = ink.cur; if (!c || c.id !== e.pointerId) return;
+  ink.cur = null;
+  if (c.s) { ink.strokes[c.i].push(c.s); ink.hist.push({ t: "add", i: c.i, s: c.s }); inkSave(); }
+  else if (c.del && c.del.length) { ink.hist.push({ t: "del", i: c.i, list: c.del }); inkSave(); }
 }
 function inkUndo() {
   var h = ink.hist.pop(); if (!h) return;
@@ -1467,6 +1474,37 @@ function rulerDraw() {
   var el = $("#ruler"); el.style.width = L + "px"; el.style.height = H + "px";
   rulerPlace();
 }
+function rulerLocal(cx, cy) {
+  var r = $("#ink-split").getBoundingClientRect(), dx = cx - r.left - rul.x, dy = cy - r.top - rul.y, c = Math.cos(rul.a), s = Math.sin(rul.a);
+  return [dx * c + dy * s, -dx * s + dy * c];
+}
+function rulerClient(u, v) {
+  var r = $("#ink-split").getBoundingClientRect(), c = Math.cos(rul.a), s = Math.sin(rul.a);
+  return { clientX: r.left + rul.x + u * c - v * s, clientY: r.top + rul.y + u * s + v * c };
+}
+/* bord de la règle (0 = haut, 1 = bas) si le point est sur la règle ou à moins de 4 mm de son long bord ; sinon null */
+function rulerEdgeNear(cx, cy, marginOnly) {
+  if (!rul.on || !rul.ppm) return null;
+  var l = rulerLocal(cx, cy), H = 16 * rul.ppm, L = rul.len * rul.ppm, m = 4 * rul.ppm;
+  if (l[0] < -m || l[0] > L + m || l[1] < -m || l[1] > H + m) return null;
+  if (marginOnly && l[1] >= 0 && l[1] <= H && l[0] >= 0 && l[0] <= L) return null;
+  return l[1] < H / 2 ? 0 : 1;
+}
+function rulerSnap(e, edge) {
+  var l = rulerLocal(e.clientX, e.clientY), L = rul.len * rul.ppm, H = 16 * rul.ppm;
+  return rulerClient(Math.max(0, Math.min(L, l[0])), edge ? H : 0);
+}
+function rulerStroke(i, cv, e, edge) {
+  var pt = inkPos(cv, rulerSnap(e, edge));
+  try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+  ink.cur = { i: i, id: e.pointerId, rs: { edge: edge, cv: cv }, s: { c: ink.color, w: ink.width, p: [pt, pt.slice()] } };
+  var ctx = cv.getContext("2d"); drawStroke(ctx, { c: ink.color, w: ink.width, p: [pt] }, cv.width, cv.height);
+}
+function rulerMove(e) {
+  var c = ink.cur; if (!c || !c.rs || c.id !== e.pointerId) return;
+  var cv = c.rs.cv, pt = inkPos(cv, rulerSnap(e, c.rs.edge));
+  c.s.p[1] = pt; redraw(c.i); drawStroke(cv.getContext("2d"), c.s, cv.width, cv.height);
+}
 function rulerPlace() {
   $("#ruler").style.transform = "translate(" + rul.x + "px," + rul.y + "px) rotate(" + rul.a + "rad)";
 }
@@ -1476,8 +1514,19 @@ function rulerShow(on) {
 }
 (function () {
   var el = $("#ruler"), rot = $("#ruler-rot"), drag = null;
+  var grip = $("#ruler-grip");
   el.addEventListener("pointerdown", function (e) {
     if (e.target === rot) return;
+    if (e.target !== grip && e.pointerType !== "touch") {   /* crayon ou souris sur la règle : trait droit le long du bord */
+      e.preventDefault();
+      if (ink.erase || ink.cur) return;
+      var edge = rulerEdgeNear(e.clientX, e.clientY, false); if (edge === null) return;
+      var els = document.elementsFromPoint(e.clientX, e.clientY), k, cv = null;
+      for (k = 0; k < ink.pg.length; k++) if (els.indexOf(ink.pg[k].cv) >= 0) { cv = ink.pg[k].cv; break; }
+      if (!cv) return;
+      try { el.setPointerCapture(e.pointerId); } catch (x) {}
+      rulerStroke(k, cv, e, edge); return;
+    }
     e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {}
     var r0 = $("#ink-split").getBoundingClientRect();
     drag = { id: e.pointerId, mode: "move", ox: r0.left, oy: r0.top, dx: e.clientX - r0.left - rul.x, dy: e.clientY - r0.top - rul.y };
@@ -1488,6 +1537,7 @@ function rulerShow(on) {
     drag = { id: e.pointerId, mode: "rot" };
   });
   function mv(e) {
+    if (ink.cur && ink.cur.rs && ink.cur.id === e.pointerId) { e.preventDefault(); rulerMove(e); return; }
     if (!drag || drag.id !== e.pointerId) return; e.preventDefault();
     if (drag.mode === "move") { rul.x = e.clientX - drag.ox - drag.dx; rul.y = e.clientY - drag.oy - drag.dy; }
     else {
@@ -1496,7 +1546,7 @@ function rulerShow(on) {
     }
     rulerPlace();
   }
-  function up(e) { if (drag && drag.id === e.pointerId) { drag = null; el.style.cursor = ""; } }
+  function up(e) { if (ink.cur && ink.cur.rs && ink.cur.id === e.pointerId) { finishStroke(e); return; } if (drag && drag.id === e.pointerId) { drag = null; el.style.cursor = ""; } }
   [el, rot].forEach(function (n) { n.addEventListener("pointermove", mv); n.addEventListener("pointerup", up); n.addEventListener("pointercancel", up); });
   $("#ink-ruler").addEventListener("click", function () { rulerShow(!rul.on); });
 })();
