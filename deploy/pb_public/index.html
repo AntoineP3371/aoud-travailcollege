@@ -205,6 +205,12 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .ink-page { background-size: 100% 100%; background-repeat: no-repeat; background-color: #fff; }
 .ink-page img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .ink-page canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pinch-zoom; -webkit-touch-callout: none; }
+.ink-split { position: relative; }
+.ink-ruler { position: absolute; left: 0; top: 0; z-index: 5; transform-origin: 0 0; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+  background: rgba(255, 236, 150, 0.82); border: 1.5px solid #8a6d00; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.ink-ruler[hidden] { display: none; }
+.ink-ruler svg { display: block; width: 100%; height: 100%; pointer-events: none; }
+.ruler-rot { position: absolute; right: 2px; top: 50%; margin-top: -22px; width: 44px; height: 44px; opacity: 0.9; border-radius: 50%; background: #8a6d00; color: #fff; font-size: 24px; line-height: 44px; text-align: center; cursor: crosshair; touch-action: none; }
 .ink-split { flex: 1; display: flex; min-height: 0; }
 .ink-split .ink-scroll { flex: 1; min-width: 0; }
 #ink-corr[hidden] { display: none; }
@@ -408,6 +414,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <button type="button" class="ink-b" data-w="0.0028" aria-pressed="true">Moyen</button>
       <button type="button" class="ink-b" data-w="0.0055" aria-pressed="false">Épais</button>
     </span>
+    <button type="button" class="ink-b ink-draw" id="ink-ruler" aria-pressed="false">Règle</button>
     <button type="button" class="ink-b ink-draw" id="ink-erase" aria-pressed="false">Gomme</button>
     <button type="button" class="ink-b ink-draw" id="ink-undo">Annuler</button>
     <button type="button" class="ink-b ink-draw" id="ink-clear">Tout effacer</button>
@@ -416,7 +423,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
     <label class="ink-opt ink-par"><input type="checkbox" id="ink-link" checked> Défilement lié</label>
     <span id="ink-msg" role="status"></span>
   </div>
-  <div class="ink-split">
+  <div class="ink-split" id="ink-split">
+    <div class="ink-ruler ink-draw" id="ruler" hidden aria-label="Règle graduée (déplace-la, tourne-la avec la poignée)"><svg id="ruler-svg" aria-hidden="true"></svg><span class="ruler-rot" id="ruler-rot" aria-label="Tourner la règle">↻</span></div>
     <div class="ink-scroll" id="ink-scroll"><p class="ink-cap ink-par">Feuille de l'élève</p><div id="ink-pages"></div></div>
     <div class="ink-scroll" id="ink-corr" hidden><p class="ink-cap">Corrigé</p><div id="ink-corr-pages"></div></div>
   </div>
@@ -1373,7 +1381,7 @@ function openInk(parent) {
   if (par) parentPullInk(subject); else if (net.token) syncInk(subject);
 }
 function closeInk() {
-  $("#ink").hidden = true; ink.cur = null;
+  $("#ink").hidden = true; ink.cur = null; rulerShow(false);
   $("#ink").classList.remove("parent"); $("#ink-corr").hidden = true; $("#ink-corr-pages").innerHTML = "";
   try { document.body.style.overflow = ""; document.body.style.webkitUserSelect = ""; document.body.style.userSelect = ""; } catch (e) {}
 }
@@ -1438,6 +1446,61 @@ function inkExport() {
   });
 }
 
+
+/* ---------- Règle graduée : l'échelle vient de la largeur de la feuille A4 (210 mm) ---------- */
+var rul = { on: false, x: 40, y: 60, a: 0, ppm: 0, len: 0 };
+function rulerDraw() {
+  var pg = ink.pg[0]; if (!pg) return;
+  var w = pg.div.getBoundingClientRect().width; if (!w) return;
+  var ppm = w / 210, sp = $("#ink-split").getBoundingClientRect().width;
+  var len = Math.max(100, Math.min(200, Math.floor((sp - 90) / ppm / 10) * 10));
+  if (Math.abs(ppm - rul.ppm) < 0.001 && len === rul.len) return;
+  rul.ppm = ppm; rul.len = len;
+  var H = 16 * ppm, L = len * ppm, NS = "http://www.w3.org/2000/svg", svg = $("#ruler-svg"), h = "";
+  for (var m = 0; m <= len; m++) {
+    var x = m * ppm, t = m % 10 === 0 ? 0.55 : (m % 5 === 0 ? 0.4 : 0.26);
+    h += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="' + t * H + '" stroke="#3a2e00" stroke-width="' + (m % 10 === 0 ? 1.4 : 1) + '"/>';
+    if (m % 10 === 0 && m > 0 && m < len) h += '<text x="' + x + '" y="' + (0.55 * H + 0.3 * H) + '" font-size="' + (0.3 * H) + '" text-anchor="middle" fill="#3a2e00" font-family="sans-serif">' + (m / 10) + '</text>';
+  }
+  h += '<text x="' + (L - 4) + '" y="' + (0.92 * H) + '" font-size="' + (0.26 * H) + '" text-anchor="end" fill="#3a2e00" font-family="sans-serif">cm</text>';
+  svg.setAttribute("viewBox", "0 0 " + L + " " + H); svg.innerHTML = h;
+  var el = $("#ruler"); el.style.width = L + "px"; el.style.height = H + "px";
+  rulerPlace();
+}
+function rulerPlace() {
+  $("#ruler").style.transform = "translate(" + rul.x + "px," + rul.y + "px) rotate(" + rul.a + "rad)";
+}
+function rulerShow(on) {
+  rul.on = on; $("#ruler").hidden = !on; $("#ink-ruler").setAttribute("aria-pressed", String(on));
+  if (on) { rul.ppm = 0; rulerDraw(); }
+}
+(function () {
+  var el = $("#ruler"), rot = $("#ruler-rot"), drag = null;
+  el.addEventListener("pointerdown", function (e) {
+    if (e.target === rot) return;
+    e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    var r0 = $("#ink-split").getBoundingClientRect();
+    drag = { id: e.pointerId, mode: "move", ox: r0.left, oy: r0.top, dx: e.clientX - r0.left - rul.x, dy: e.clientY - r0.top - rul.y };
+    el.style.cursor = "grabbing";
+  });
+  rot.addEventListener("pointerdown", function (e) {
+    e.preventDefault(); e.stopPropagation(); try { rot.setPointerCapture(e.pointerId); } catch (x) {}
+    drag = { id: e.pointerId, mode: "rot" };
+  });
+  function mv(e) {
+    if (!drag || drag.id !== e.pointerId) return; e.preventDefault();
+    if (drag.mode === "move") { rul.x = e.clientX - drag.ox - drag.dx; rul.y = e.clientY - drag.oy - drag.dy; }
+    else {
+      var r = $("#ink-split").getBoundingClientRect();
+      rul.a = Math.atan2(e.clientY - r.top - rul.y, e.clientX - r.left - rul.x);
+    }
+    rulerPlace();
+  }
+  function up(e) { if (drag && drag.id === e.pointerId) { drag = null; el.style.cursor = ""; } }
+  [el, rot].forEach(function (n) { n.addEventListener("pointermove", mv); n.addEventListener("pointerup", up); n.addEventListener("pointercancel", up); });
+  $("#ink-ruler").addEventListener("click", function () { rulerShow(!rul.on); });
+})();
+
 $("#ink-open").addEventListener("click", openInk);
 $("#ink-close").addEventListener("click", closeInk);
 $("#ink-undo").addEventListener("click", inkUndo);
@@ -1468,7 +1531,7 @@ $("#ink-clear").addEventListener("click", function () {
     ink.width = parseFloat(this.getAttribute("data-w")); setPressed("[data-w]", this);
   });
 })();
-window.addEventListener("resize", function () { if (!$("#ink").hidden) sizeAll(); });
+window.addEventListener("resize", function () { if (!$("#ink").hidden) { sizeAll(); if (rul.on) rulerDraw(); } });
 document.addEventListener("selectstart", function (e) { if (!$("#ink").hidden && !(e.target && e.target.tagName === "INPUT")) e.preventDefault(); });
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (!$("#hub").hidden) $("#hub").hidden = true; else if (!$("#ed").hidden) $("#ed").hidden = true; else if (!$("#lg").hidden) $("#lg").hidden = true; else if (!$("#pw").hidden) $("#pw").hidden = true; else if (!$("#ink").hidden) closeInk(); } });
 
