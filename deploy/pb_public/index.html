@@ -253,6 +253,13 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .hub-list { display: flex; flex-direction: column; gap: 8px; }
 .hub-list .btn { width: 100%; }
 .hub-last { margin: 0 0 4px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.hub-help { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+#ord-list { max-height: 52vh; overflow: auto; }
+.ord-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
+.ord-row .ord-btns { display: inline-flex; gap: 6px; flex: none; }
+.ord-row .ink-b:disabled { opacity: 0.3; }
+.ord-sub { font-weight: 700; color: var(--ink); border-top: 1.5px solid var(--border); margin-top: 8px; padding-top: 10px; }
+.ord-co { padding-left: 16px; font-size: 15px; }
 .pw-card .row { display: flex; gap: 10px; flex-wrap: wrap; }
 #pw-msg, #lg-msg { min-height: 1.4em; color: var(--bad); font-size: 14px; }
 </style>
@@ -335,6 +342,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <button type="button" class="btn ghost" id="hub-edit">✎ Modifier ce cours</button>
       <button type="button" class="btn ghost" id="hub-corr">Voir le corrigé de cette feuille</button>
       <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
+      <button type="button" class="btn ghost" id="hub-order-btn">⇅ Ordre des matières et des cours</button>
       <button type="button" class="btn ghost" id="hub-gcode">Changer le mot de passe de Gianni</button>
     </div>
     <form id="hub-codeform" class="hub-form" hidden>
@@ -348,6 +356,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <label>Nouveau mot de passe, encore une fois<input type="password" id="hg-new2" autocomplete="new-password" maxlength="72"></label>
       <div class="row"><button type="submit" class="btn">Changer le mot de passe</button><button type="button" class="btn ghost" id="hg-cancel">Annuler</button></div>
     </form>
+    <div id="hub-order" class="hub-form" hidden>
+      <p class="hub-help">Utilise ↑ et ↓ pour changer l'ordre des matières (lignes en gras) et celui des cours dans chaque matière. C'est enregistré tout de suite.</p>
+      <div id="ord-list"></div>
+      <div class="row"><button type="button" class="btn ghost" id="ord-back">Retour</button></div>
+    </div>
     <p id="hub-msg" role="status"></p>
     <div class="row"><button type="button" class="btn ghost" id="hub-lock">Verrouiller</button><button type="button" class="btn ghost" id="hub-close">Fermer</button></div>
   </div>
@@ -1796,7 +1809,7 @@ function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
 function openHub() {
   var c = SUBJECTS[subject];
   $("#hub-edit").hidden = !(c && c.id);
-  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $(".hub-list").hidden = false; hubMsg("");
+  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $(".hub-list").hidden = false; hubMsg("");
   $("#hub").hidden = false;
   loadLast();
 }
@@ -1852,6 +1865,49 @@ $("#hub-gform").addEventListener("submit", function (e) {
            er && er.status === 404 ? "Le serveur n'est pas à jour : lance update.sh puis réessaie." : "Échec du changement (serveur injoignable ?).");
   });
 });
+/* ---------- Ordre des matières et des cours ---------- */
+var ordBusy = false;
+function ordRow(cls, label, i, n, onMove) {
+  var d = document.createElement("div"); d.className = "ord-row " + cls;
+  var t = document.createElement("span"); t.textContent = label; d.appendChild(t);
+  var g = document.createElement("span"); g.className = "ord-btns";
+  [["↑", -1, "Monter"], ["↓", 1, "Descendre"]].forEach(function (x) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "ink-b"; b.textContent = x[0];
+    b.setAttribute("aria-label", x[2] + " : " + label);
+    b.disabled = ordBusy || i + x[1] < 0 || i + x[1] >= n;
+    b.addEventListener("click", function () { onMove(x[1]); });
+    g.appendChild(b);
+  });
+  d.appendChild(g); return d;
+}
+function ordRender() {
+  var box = $("#ord-list"); box.innerHTML = "";
+  var subs = CATSUB.filter(function (s) { return coursesOf(s.key).length; });
+  subs.forEach(function (sj, si) {
+    box.appendChild(ordRow("ord-sub", sj.name, si, subs.length, function (d) { ordMove("subjects", subs, si, d, CATSUB.filter(function (s) { return subs.indexOf(s) < 0; })); }));
+    var cs = coursesOf(sj.key);
+    cs.forEach(function (c, ci) {
+      box.appendChild(ordRow("ord-co", c.label || c.title, ci, cs.length, function (d) { ordMove("courses", cs, ci, d, []); }));
+    });
+  });
+}
+function ordMove(coll, list, i, d, extra) {
+  var arr = list.slice(), t = arr[i]; arr[i] = arr[i + d]; arr[i + d] = t;
+  arr = arr.concat(extra);
+  var jobs = [];
+  arr.forEach(function (x, k) { if (x.id && x.position !== k + 1) jobs.push([x.id, k + 1]); });
+  ordBusy = true; ordRender(); hubMsg("Enregistrement…");
+  var chain = Promise.resolve();
+  jobs.forEach(function (j) { chain = chain.then(function () { return api("PATCH", "/api/collections/" + coll + "/records/" + j[0], { position: j[1] }, net.parentToken); }); });
+  chain.then(function () { return reloadCatalog(); }).then(function () { ordBusy = false; ordRender(); hubMsg("Ordre enregistré."); }, function (er) {
+    ordBusy = false;
+    if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; hubMsg("Session expirée : ferme et saisis de nouveau le code."); }
+    else hubMsg("Échec de l'enregistrement (serveur injoignable ?).");
+    reloadCatalog().then(ordRender, ordRender);
+  });
+}
+$("#hub-order-btn").addEventListener("click", function () { $(".hub-list").hidden = true; $("#hub-order").hidden = false; hubMsg(""); ordBusy = false; ordRender(); });
+$("#ord-back").addEventListener("click", function () { $("#hub-order").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hc-cancel").addEventListener("click", function () { $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hub-codeform").addEventListener("submit", function (e) {
   e.preventDefault();
