@@ -2017,7 +2017,7 @@ function edImport(file) {
     if (!existing) {
       fd.append("key", key); fd.append("subject", meta.subject.key);
       var sib = coursesOf(meta.subject.key);
-      fd.append("position", String(sib.length ? Math.max.apply(null, sib.map(function (x) { return x.position || 0; })) + 1 : 1));
+      fd.append("position", String(typeof c.position === "number" ? c.position : (sib.length ? Math.max.apply(null, sib.map(function (x) { return x.position || 0; })) + 1 : 1)));
     }
     if ((meta.pages || []).length) (meta.pages).forEach(function (n) { fd.append("pages", new Blob([files[n]], { type: mimeOf(n) }), n); });
     else if (existing) fd.append("pages", "");
