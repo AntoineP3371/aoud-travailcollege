@@ -318,3 +318,10 @@ Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `r
 - **Pause mouvement** : après chaque paire de défis, un mini-défi physique de 30 secondes (+5 Berries).
 - **Coffre de récompenses** : les parents l'alimentent dans *Espace parent → Coffre de récompenses* (icône, nom, prix en Berries). Gianni débloque une récompense depuis la page Défis ; les parents voient la demande et la marquent « Donné ». Dépenser des Berries ne fait pas baisser le rang.
 - **Relis** : sur les fiches à l'Apple Pencil, le bouton « Relis ✓ » ouvre une liste de contrôle ; « Enregistrer en PDF » la propose si elle n'est pas complète (on peut enregistrer quand même).
+
+### Page Défis : onglets, traversée du jour, activités avec un parent
+
+- L'accueil a quatre onglets : **Défis**, **Échauffer**, **En famille**, **Butin** (coffre et réussites). Le dernier onglet ouvert est mémorisé.
+- **Traversée du jour** : parcours guidé en étapes (échauffement du jour, séance, défi du jour, puis un moment facultatif avec un parent). Terminer les 3 premières étapes donne +25 Berries une fois par jour et la réussite « Capitaine de la traversée ». L'avancement est enregistré par jour (clés `daily` `…v0` à `…v3`) et synchronisé.
+- **En famille** : chasse à l'erreur lue à voix haute par le parent, perroquet à deux, duel Trésor ou requin. +15 Berries (« Bonus équipage ») la première fois de la journée.
+- Jeux d'échauffement (1 minute) : plafond de 40 Berries par jour.
