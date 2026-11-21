@@ -376,9 +376,9 @@ function home() {
     WARMS.forEach(function (w) { h += '<button type="button" class="btn" data-wg="' + w[0] + '">' + w[3] + " " + w[1] + (w[4] ? '<span class="tag g">👪 avec un parent</span>' : "") + "<small>" + w[2] + "</small></button>"; });
   } else if (tab === "famille") {
     h += '<div class="famnote">👪 À faire avec un parent. ' + (S.daily[t + "p"] ? "Bonus équipage du jour déjà pris ✓" : "<b>+15 Berries</b> la première fois de la journée !") + "</div>";
-    h += '<button type="button" class="btn" data-wg="chasse" data-wm="duo">🔎 Chasse à l\'erreur<small>Le parent lit la phrase à voix haute, Gianni trouve le mot faux</small></button>';
-    h += '<button type="button" class="btn" data-wg="perroquet" data-wm="duo">🦜 Le perroquet à deux<small>Chacun son tour, qui a la meilleure mémoire ?</small></button>';
-    h += '<button type="button" class="btn" data-wg="gonogo" data-wm="duo">🦈 Duel Trésor ou requin<small>Gianni joue, puis le parent joue la même partie</small></button>';
+    h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<small>Seul, ou à deux : le parent lit la phrase à voix haute</small></button>';
+    h += '<button type="button" class="btn" data-wg="perroquet">🦜 Le perroquet<small>Seul, ou à deux : qui a la meilleure mémoire ?</small></button>';
+    h += '<button type="button" class="btn" data-wg="gonogo">🦈 Trésor ou requin<small>Seul, ou en duel avec un parent</small></button>';
   } else {
     h += '<button type="button" class="btn" data-go="coffre">🎁 Mon coffre<small>' + Math.max(0, S.berries - (S.spent || 0)) + " Berries à dépenser · récompenses choisies par tes parents</small></button>";
     h += '<button type="button" class="btn" data-go="trophy">🏆 Mes réussites et trésors<small>' + Object.keys(S.badges).length + " / " + BADGES.length + " réussites · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button>";
@@ -419,7 +419,7 @@ function travOpen() {
 function travGo(i) {
   if (!POOL.length) return; var steps = travSteps(), w = WARMS[dayNum() % 3];
   TRAV = { i: i }; inTrav = false;
-  if (i === 0) startGame(w[0], "solo"); else if (i === 1) start("seance"); else if (i === 2) start(dayFormat()); else startGame("chasse", "duo");
+  if (i === 0) { if (w[4]) intro(w[0]); else startGame(w[0], "solo"); } else if (i === 1) start("seance"); else if (i === 2) start(dayFormat()); else intro("chasse");
 }
 /* après la fin d'une activité de la traversée : on coche l'étape et on propose la suite */
 function travHook() {
