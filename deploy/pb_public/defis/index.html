@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Défis de l'équipage · Travail collège Gianni</title>
+<meta name="theme-color" content="#0b2a4a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%E2%9A%93%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --sea: #0b2a4a; --sea2: #14507d; --sand: #f6e7c1; --sand2: #ecd49b; --wood: #3b2a14; --gold: #e0a526; --gold-d: #a8740c;
+  --red: #b3261e; --green: #1e7a4a; --ink: #12304f; --muted: #6b5a3c;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color: var(--wood); background: linear-gradient(180deg, var(--sea) 0%, var(--sea2) 100%) fixed; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 12px 14px 40px; padding-top: max(12px, env(safe-area-inset-top)); }
+header { display: flex; align-items: center; gap: 10px; color: #fff; margin-bottom: 12px; }
+header .logo { width: 44px; height: 44px; flex: none; }
+header h1 { margin: 0; font-size: 20px; line-height: 1.1; letter-spacing: 0.02em; flex: 1; }
+header h1 small { display: block; font-size: 12px; font-weight: 400; opacity: 0.8; letter-spacing: 0; }
+.pill { background: rgba(255,255,255,0.14); color: #fff; border: 1.5px solid rgba(255,255,255,0.45); border-radius: 999px; padding: 0 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; text-decoration: none; }
+.card { background: var(--sand); border: 3px solid var(--gold-d); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 0 rgba(0,0,0,0.25), inset 0 0 0 2px var(--sand2); }
+.card h2 { margin: 0 0 8px; font-size: 18px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.rank { display: flex; align-items: center; gap: 12px; }
+.rank .em { font-size: 40px; line-height: 1; }
+.rank b { font-size: 20px; }
+.bar { height: 12px; border-radius: 8px; background: rgba(59,42,20,0.18); overflow: hidden; margin-top: 6px; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #f4cb55); border-radius: 8px; transition: width 0.4s; }
+.week { display: flex; gap: 6px; margin-top: 10px; }
+.week span { flex: 1; text-align: center; border-radius: 10px; padding: 6px 0 4px; background: rgba(59,42,20,0.1); font-size: 12px; font-weight: 700; }
+.week span.on { background: var(--gold); color: var(--wood); }
+.week span.today { outline: 3px solid var(--sea2); }
+.week span em { display: block; font-style: normal; font-size: 18px; }
+.btn { display: block; width: 100%; min-height: 60px; border: 3px solid var(--wood); border-radius: 14px; background: #fff7dd; font-weight: 800; font-size: 18px; text-align: left; padding: 10px 14px; box-shadow: 0 4px 0 var(--wood); margin-bottom: 12px; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--wood); }
+.btn small { display: block; font-weight: 500; font-size: 13px; color: var(--muted); }
+.btn.star { background: linear-gradient(180deg, #ffe48a, var(--gold)); }
+.btn.go { background: var(--sea2); color: #fff; border-color: var(--sea); box-shadow: 0 4px 0 var(--sea); text-align: center; }
+.btn.go small { color: #dbeaf7; }
+.tag { display: inline-block; background: var(--red); color: #fff; font-size: 12px; border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: middle; }
+.crew { font-style: italic; color: var(--muted); margin: 0 0 4px; }
+/* jeu */
+.top { display: flex; align-items: center; gap: 10px; color: #fff; margin-bottom: 10px; }
+.top .dots { flex: 1; display: flex; gap: 6px; }
+.dots i { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.25); }
+.dots i.ok { background: #5fd38d; } .dots i.ko { background: #ff8a80; } .dots i.cur { background: #fff; }
+.timer { height: 14px; border-radius: 8px; background: rgba(255,255,255,0.22); overflow: hidden; margin-bottom: 12px; }
+.timer > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #f4cb55, var(--gold)); transform-origin: left; }
+.timer.low > i { background: #ff8a80; }
+.q { font-size: 21px; line-height: 1.35; font-weight: 700; margin: 4px 0 14px; }
+.tagline { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.opt { display: flex; gap: 10px; align-items: center; width: 100%; min-height: 58px; text-align: left; background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; font-size: 17px; font-weight: 600; }
+.opt b { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--wood); color: var(--sand); display: grid; place-items: center; font-size: 15px; }
+.opt.right { background: #c9f0d9; border-color: var(--green); }
+.opt.wrong { background: #ffd2cd; border-color: var(--red); }
+.opt:disabled { cursor: default; }
+.tf { display: flex; gap: 12px; }
+.tf .btn { text-align: center; margin: 0; font-size: 22px; min-height: 70px; }
+.fb { border-radius: 12px; padding: 12px 14px; margin-top: 4px; font-size: 16px; line-height: 1.4; }
+.fb.good { background: #c9f0d9; border: 2px solid var(--green); }
+.fb.bad { background: #ffe3df; border: 2px solid var(--red); }
+.fb b.t { display: block; font-size: 18px; margin-bottom: 2px; }
+.next { margin-top: 12px; }
+.proposal { background: #fff; border: 2.5px dashed var(--gold-d); border-radius: 12px; padding: 12px; margin-bottom: 14px; font-size: 19px; font-weight: 700; }
+.answer { background: #fff; border: 2.5px solid var(--green); border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 18px; }
+/* résultat */
+.big { font-size: 56px; text-align: center; line-height: 1.1; margin: 4px 0; }
+.res { text-align: center; }
+.res h2 { font-size: 24px; }
+.gain { font-size: 28px; font-weight: 800; color: var(--gold-d); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 10px 0; }
+.chip { background: #fff; border: 2px solid var(--gold-d); border-radius: 12px; padding: 8px 12px; font-weight: 700; }
+.pop { animation: pop 0.5s ease-out; }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pop { animation: none; } .bar > i, .timer > i { transition: none; } }
+/* trésors */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; padding: 10px 8px; text-align: center; min-height: 118px; }
+.tile .em { font-size: 36px; line-height: 1.1; }
+.tile b { display: block; font-size: 14px; margin-top: 4px; }
+.tile small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.tile.lock { opacity: 0.55; background: rgba(255,247,221,0.6); border-style: dashed; }
+.tile.lock .em { filter: grayscale(1); }
+dialog, .modal { position: fixed; inset: 0; background: rgba(5,20,40,0.6); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal[hidden] { display: none; }
+.modal .card { width: min(420px, 100%); margin: 0; }
+.modal input { width: 100%; font-size: 20px; min-height: 48px; border: 2.5px solid var(--wood); border-radius: 10px; padding: 0 12px; background: #fff; margin: 8px 0; }
+.small { font-size: 13px; color: var(--muted); }
+#ver { opacity: 0.7; font-size: 12px; color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="16" fill="none" stroke="#e0a526" stroke-width="6"/><circle cx="32" cy="32" r="5" fill="#e0a526"/><g stroke="#e0a526" stroke-width="5" stroke-linecap="round"><path d="M32 4v12M32 48v12M4 32h12M48 32h12M12 12l8 8M44 44l8 8M52 12l-8 8M20 44l-8 8"/></g></svg>
+    <h1>Défis de l'équipage<small>Révise en petits coups de vent <span id="ver">v5.0</span></small></h1>
+    <a class="pill" href="../" id="back">← Révisions</a>
+    <button class="pill" id="sync" type="button" hidden></button>
+  </header>
+  <main id="app" aria-live="polite"></main>
+</div>
+<div class="modal" id="lg" hidden role="dialog" aria-label="Connexion">
+  <form class="card" id="lg-form">
+    <h2>Se connecter</h2>
+    <p class="small">Saisis le mot de passe de Gianni pour sauvegarder ta progression sur tous tes appareils.</p>
+    <input type="password" id="lg-in" autocomplete="current-password" aria-label="Mot de passe">
+    <p class="small" id="lg-msg" role="status"></p>
+    <div class="row"><button class="btn go" type="submit" style="width:auto;margin:0;padding:10px 22px">Connexion</button><button class="btn" id="lg-x" type="button" style="width:auto;margin:0;padding:10px 22px">Annuler</button></div>
+  </form>
+</div>
+<script>
+(function () {
+"use strict";
+var PB = location.origin;
+function $(s) { return document.querySelector(s); }
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function ds(d) { function z(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()); }
+function today() { return ds(new Date()); }
+function dayNum() { var d = new Date(); return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
+
+/* ---------- données du jeu ---------- */
+var RANKS = [[0, "Mousse", "🧒"], [100, "Matelot", "⚓"], [300, "Gabier", "🪢"], [600, "Second", "🧭"], [1000, "Capitaine", "🏴‍☠️"], [2000, "Amiral de la flotte", "👑"]];
+var TREASURES = [["🧭", "Boussole dorée"], ["🗺️", "Carte mystérieuse"], ["🔭", "Longue-vue"], ["💎", "Diamant bleu"], ["🦜", "Perroquet bavard"], ["🪙", "Pièce d'or"],
+  ["📜", "Parchemin secret"], ["🐚", "Coquillage rare"], ["🦀", "Crabe farceur"], ["🐙", "Poulpe géant"], ["🏝️", "Île secrète"], ["⛵", "Petit voilier"],
+  ["🍖", "Gigot de fête"], ["🪵", "Épave légendaire"], ["🌋", "Île au volcan"], ["🐳", "Baleine amie"]];
+var BADGES = [
+  ["first", "🏁", "Premier voyage", "Terminer ton premier défi"],
+  ["s3", "🔥", "Trois jours en mer", "3 jours de suite avec un défi"],
+  ["s7", "🌊", "Une semaine de traversée", "7 jours de suite avec un défi"],
+  ["perfect", "🎯", "Tir parfait", "Réussir un défi sans aucune erreur"],
+  ["combo10", "⚡", "Éclair de la Grande Ligne", "10 bonnes réponses d'affilée"],
+  ["speed", "⏱️", "Vent en poupe", "Finir un mini-défi en moins de 90 secondes"],
+  ["all", "🗺️", "Tour du monde", "Répondre à une question de chaque matière"],
+  ["marathon", "⛵", "Triple traversée", "Faire 3 défis dans la même journée"],
+  ["eclair", "💥", "Vrai ou faux de légende", "8 sur 8 au défi éclair"],
+  ["mystere", "🔮", "Mémoire de capitaine", "5 sur 5 à la carte mystère"],
+  ["b500", "💰", "Coffre bien rempli", "Gagner 500 Berries"],
+  ["coll", "🏺", "Chasseur de trésors", "Trouver 5 trésors"]
+];
+var CREW = ["Cap sur la réussite, matelot !", "Un petit défi, et l'équipage est fier de toi.", "Le vent se lève : 3 minutes suffisent !", "Même les capitaines apprennent un peu chaque jour.",
+  "Un trésor t'attend peut-être au prochain défi…", "Pas besoin d'être parfait : il suffit de naviguer.", "Aujourd'hui, on hisse les voiles en douceur.",
+  "Chaque bonne réponse, c'est un coup de rame de plus.", "Les meilleurs équipages s'entraînent un peu tous les jours.", "Une erreur ? Juste une vague, on repart !",
+  "Respire, souris, on y va.", "L'île au trésor se rapproche !"];
+var DEF = function () { return { days: {}, berries: 0, badges: {}, treasures: {}, subs: {}, stats: { ok: 0, tot: 0, combo: 0, maxCombo: 0, perfect: 0 }, daily: {}, ts: 0 }; };
+var S = DEF();
+function loadLocal() { try { var d = JSON.parse(lsGet("qd-state") || "null"); if (d && d.days) { var b = DEF(); for (var k in b) if (!(k in d)) d[k] = b[k]; S = d; } } catch (e) {} }
+function saveLocal() { S.ts = Date.now(); lsSet("qd-state", JSON.stringify(S)); pushLater(); }
+function merge(a, b) {          /* a = local, b = serveur : on garde le meilleur des deux */
+  var o = DEF();
+  ["days"].forEach(function (k) {
+    var ks = {}; Object.keys(a[k] || {}).concat(Object.keys(b[k] || {})).forEach(function (x) { ks[x] = 1; });
+    Object.keys(ks).forEach(function (x) { var p = (a[k] || {})[x] || {}, q = (b[k] || {})[x] || {}; o[k][x] = { n: Math.max(p.n || 0, q.n || 0), ok: Math.max(p.ok || 0, q.ok || 0), tot: Math.max(p.tot || 0, q.tot || 0) }; });
+  });
+  o.berries = Math.max(a.berries || 0, b.berries || 0);
+  ["badges", "treasures", "subs", "daily"].forEach(function (k) {
+    var u = {}; [a[k] || {}, b[k] || {}].forEach(function (m) { for (var x in m) u[x] = (u[x] && typeof u[x] === "string" && typeof m[x] === "string" && u[x] < m[x]) ? u[x] : m[x]; });
+    o[k] = u;
+  });
+  ["ok", "tot", "maxCombo", "perfect"].forEach(function (k) { o.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0); });
+  o.stats.combo = (a.ts || 0) >= (b.ts || 0) ? ((a.stats || {}).combo || 0) : ((b.stats || {}).combo || 0);
+  o.ts = Math.max(a.ts || 0, b.ts || 0);
+  return o;
+}
+/* ---------- réseau ---------- */
+var net = { token: "", id: "", state: "off" };
+function api(method, path, body, token) {
+  var h = {}; if (body !== undefined) h["Content-Type"] = "application/json"; if (token) h.Authorization = token;
+  return fetch(PB + path, { method: method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) }).then(function (r) {
+    return r.text().then(function (t) { var d = {}; try { d = t ? JSON.parse(t) : {}; } catch (e) {} if (!r.ok) { var er = new Error("http " + r.status); er.status = r.status; throw er; } return d; });
+  });
+}
+function setNet(s) {
+  net.state = s; var b = $("#sync"); b.hidden = false;
+  b.textContent = s === "ok" ? "☁ Sauvegardé" : s === "busy" ? "☁ …" : s === "err" ? "☁ Hors connexion" : "☁ Se connecter";
+}
+var pushT = 0;
+function pushLater() { if (!net.token) return; clearTimeout(pushT); pushT = setTimeout(push, 800); }
+function push() {
+  if (!net.token) return Promise.resolve();
+  var body = { key: "game", data: S, ts: S.ts };
+  var p = net.id ? api("PATCH", "/api/collections/quest/records/" + net.id, body, net.token)
+                 : api("POST", "/api/collections/quest/records", body, net.token);
+  return p.then(function (r) { net.id = r.id; setNet("ok"); }, function (e) {
+    if (e && (e.status === 401 || e.status === 403)) { net.token = ""; lsDel("tc-auth"); setNet("login"); } else setNet("err");
+  });
+}
+function pull() {
+  if (!net.token) return Promise.resolve();
+  setNet("busy");
+  return api("GET", "/api/collections/quest/records?perPage=1&filter=" + encodeURIComponent('key="game"'), undefined, net.token).then(function (d) {
+    var r = d.items && d.items[0];
+    if (r) { net.id = r.id; S = merge(S, r.data || {}); lsSet("qd-state", JSON.stringify(S)); }
+    return push();
+  }, function (e) { if (e && (e.status === 401 || e.status === 403)) { net.token = ""; lsDel("tc-auth"); setNet("login"); } else setNet("err"); });
+}
+function netInit() {
+  var a = null; try { a = JSON.parse(lsGet("tc-auth") || "null"); } catch (e) {}
+  if (!a || !a.token) { setNet("login"); return Promise.resolve(); }
+  net.token = a.token; setNet("busy");
+  return api("POST", "/api/collections/users/auth-refresh", {}, a.token).then(function (d) {
+    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token }));
+    return pull();
+  }, function (e) { if (e && (e.status === 401 || e.status === 403 || e.status === 400)) { net.token = ""; lsDel("tc-auth"); setNet("login"); } else setNet("err"); });
+}
+$("#sync").addEventListener("click", function () { if (net.state === "login") { $("#lg-msg").textContent = ""; $("#lg-in").value = ""; $("#lg").hidden = false; $("#lg-in").focus(); } else netInit().then(refresh); });
+$("#lg-x").addEventListener("click", function () { $("#lg").hidden = true; });
+$("#lg-form").addEventListener("submit", function (e) {
+  e.preventDefault(); var pw = $("#lg-in").value; if (!pw) return; $("#lg-msg").textContent = "Connexion…";
+  api("POST", "/api/collections/users/auth-with-password", { identity: "gianni@travail.local", password: pw }).then(function (d) {
+    if (d.record && d.record.role !== "student") { $("#lg-msg").textContent = "Ce compte n'est pas celui de l'élève."; return; }
+    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token })); $("#lg").hidden = true; return pull().then(refresh);
+  }, function (er) { $("#lg-msg").textContent = er && er.status === 400 ? "Mot de passe incorrect." : "Serveur injoignable."; $("#lg-in").value = ""; });
+});
+
+/* ---------- questions ---------- */
+var POOL = [], SUBNAMES = {};
+function buildPool(cs, subs) {
+  POOL = []; subs.forEach(function (s) { SUBNAMES[s.key] = s.name; });
+  cs.forEach(function (c) { (c.cards || []).forEach(function (k) { if (k && k.q && k.e && k.o && k.o.length === 4) POOL.push({ sub: c.subject, course: c.label || c.title || c.key, tag: k.tag || "", q: k.q, o: k.o, e: k.e }); }); });
+}
+function loadPool() {
+  return Promise.all([api("GET", "/api/collections/courses/records?perPage=200&fields=subject,label,title,key,cards"), api("GET", "/api/collections/subjects/records?perPage=100&fields=key,name")]).then(function (r) {
+    lsSet("qd-pool", JSON.stringify({ c: r[0].items, s: r[1].items })); buildPool(r[0].items, r[1].items);
+  }, function () {
+    try { var d = JSON.parse(lsGet("qd-pool") || "null"); if (d) buildPool(d.c, d.s); } catch (e) {}
+  });
+}
+function pick(n) {   /* n questions, de matières variées */
+  var by = {}; shuffle(POOL).forEach(function (c) { (by[c.sub] = by[c.sub] || []).push(c); });
+  var keys = shuffle(Object.keys(by)), out = [], i = 0;
+  while (out.length < n && keys.length) { var k = keys[i % keys.length], c = by[k].pop(); if (c) out.push(c); else keys.splice(i % keys.length, 1); i++; }
+  return out;
+}
+
+/* ---------- séries, rangs ---------- */
+function streak() {
+  var d = new Date(), n = 0; if (!S.days[ds(d)]) d.setDate(d.getDate() - 1);
+  while (S.days[ds(d)]) { n++; d.setDate(d.getDate() - 1); } return n;
+}
+function rankOf(b) { var r = RANKS[0], nx = null; for (var i = 0; i < RANKS.length; i++) if (b >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; } return { r: r, next: nx }; }
+var FORMATS = [["mini", "Mini-défi", "5 questions en 3 minutes", "⏱️"], ["eclair", "Défi éclair", "8 vrai ou faux, 8 secondes chacun", "⚡"], ["mystere", "Carte mystère", "5 cartes à deviner, à ton rythme", "🔮"]];
+function dayFormat() { return FORMATS[dayNum() % 3][0]; }
+
+/* ---------- écrans ---------- */
+var app = $("#app"), G = null, timerH = 0;
+function esc(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+function render() { clearInterval(timerH); G = null; home(); }
+function refresh() { if (!G) home(); }
+function home() {
+  var rk = rankOf(S.berries), st = streak(), t = today(), df = dayFormat();
+  var pct = rk.next ? Math.round((S.berries - rk.r[0]) / (rk.next[0] - rk.r[0]) * 100) : 100;
+  var wk = ""; var d = new Date(); d.setDate(d.getDate() - 6);
+  var names = ["D", "L", "M", "M", "J", "V", "S"];
+  for (var i = 0; i < 7; i++) { var k = ds(d), on = !!S.days[k]; wk += '<span class="' + (on ? "on " : "") + (k === t ? "today" : "") + '"><em>' + (on ? "✓" : "·") + "</em>" + names[d.getDay()] + "</span>"; d.setDate(d.getDate() + 1); }
+  var h = '<div class="card"><p class="crew">' + esc(CREW[dayNum() % CREW.length]) + '</p><div class="rank"><span class="em">' + rk.r[2] + '</span><div style="flex:1"><b>' + esc(rk.r[1]) + '</b><div class="small">' + S.berries + " Berries" + (rk.next ? " · prochain rang à " + rk.next[0] : "") + '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div></div>' +
+    '<div class="week" aria-label="Les 7 derniers jours">' + wk + '</div><p class="small" style="margin:8px 0 0">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite" + (S.days[t] ? "" : (st ? " · un défi aujourd'hui pour continuer !" : " · lance ta série aujourd'hui !")) + "</p></div>";
+  if (!POOL.length) h += '<div class="card"><p>Les questions ne sont pas encore chargées. Vérifie la connexion puis réessaie.</p></div>';
+  else {
+    FORMATS.forEach(function (f) {
+      var isDay = f[0] === df, done = S.daily[t] && isDay;
+      h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +30") + "</span>" : "") + "<small>" + f[2] + "</small></button>";
+    });
+  }
+  h += '<button type="button" class="btn" data-go="trophy">🏆 Mes réussites et trésors<small>' + Object.keys(S.badges).length + " / " + BADGES.length + " réussites · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button>";
+  app.innerHTML = h;
+}
+app.addEventListener("click", function (e) {
+  var b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.play) start(b.dataset.play);
+  else if (b.dataset.go === "trophy") trophies();
+  else if (b.dataset.go === "home") render();
+  else if (b.dataset.opt !== undefined) answerQcm(+b.dataset.opt);
+  else if (b.dataset.tf !== undefined) answerTf(b.dataset.tf === "1");
+  else if (b.dataset.next) nextQ();
+  else if (b.dataset.reveal) reveal();
+  else if (b.dataset.rate) rate(b.dataset.rate);
+  else if (b.dataset.quit) { if (G && G.n && !confirm("Quitter ce défi ? Ta progression de ce défi ne sera pas gardée.")) return; render(); }
+});
+document.addEventListener("keydown", function (e) {
+  if (!G) return; var k = e.key;
+  if (G.type !== "eclair" && G.type !== "mystere" && /^[1-4]$/.test(k) && !G.done) answerQcm(+k - 1);
+  else if (G.type === "eclair" && !G.done && (k === "v" || k === "f")) answerTf(k === "v");
+  else if (k === "Enter" && G.done) nextQ();
+});
+
+function start(type) {
+  var n = type === "eclair" ? 8 : 5, cs = pick(n); if (!cs.length) return;
+  G = { type: type, items: cs, i: 0, ok: 0, n: 0, res: [], done: false, t0: Date.now(), left: 180, subs: {} };
+  if (type === "eclair") G.items = cs.map(function (c) { var good = Math.random() < 0.5, wr = c.o[1 + Math.floor(Math.random() * 3)]; return { c: c, shown: good ? c.o[0] : wr, truth: good }; });
+  else if (type === "mini") G.items = cs.map(function (c) { return { c: c, opts: shuffle(c.o.map(function (t, j) { return { t: t, ok: j === 0 }; })) }; });
+  else G.items = cs.map(function (c) { return { c: c }; });
+  showQ();
+}
+function dots() { var h = ""; for (var i = 0; i < G.items.length; i++) h += '<i class="' + (G.res[i] === 1 ? "ok" : G.res[i] === 0 ? "ko" : i === G.i ? "cur" : "") + '"></i>'; return h; }
+function showQ() {
+  clearInterval(timerH); G.done = false;
+  var it = G.items[G.i], c = it.c, h = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + dots() + "</div></div>";
+  if (G.type === "mini" || G.type === "eclair") h += '<div class="timer" id="tm"><i id="tmi"></i></div>';
+  h += '<div class="card"><div class="tagline">' + esc(SUBNAMES[c.sub] || c.sub) + (c.tag ? " · " + esc(c.tag) : "") + "</div>";
+  if (G.type === "mini") {
+    h += '<div class="q">' + c.q + "</div>" + it.opts.map(function (o, j) { return '<button type="button" class="opt" data-opt="' + j + '"><b>' + "ABCD".charAt(j) + "</b><span>" + o.t + "</span></button>"; }).join("") + '<div id="fb"></div></div>';
+  } else if (G.type === "eclair") {
+    h += '<div class="q">' + c.q + '</div><div class="proposal">👉 ' + it.shown + '</div><div class="tf"><button type="button" class="btn go" data-tf="1">✓ Vrai</button><button type="button" class="btn" data-tf="0">✗ Faux</button></div><div id="fb"></div></div>';
+  } else {
+    h += '<div class="q">' + c.q + '</div><button type="button" class="btn go" data-reveal="1">🔮 Je révèle la réponse</button><div id="fb"></div></div>';
+  }
+  app.innerHTML = h; window.scrollTo(0, 0);
+  if (G.type === "mini") { G.tick = Date.now(); runTimer(180000, "mini"); }
+  else if (G.type === "eclair") { runTimer(8000, "eclair"); }
+}
+function runTimer(ms, kind) {
+  var t0 = Date.now(), tm = $("#tm"), tmi = $("#tmi");
+  if (kind === "mini") { var used = G.used || 0; t0 = Date.now() - used; }
+  clearInterval(timerH);
+  timerH = setInterval(function () {
+    var el = Date.now() - t0, r = Math.max(0, 1 - el / ms);
+    if (tmi) tmi.style.transform = "scaleX(" + r + ")"; if (tm) tm.classList.toggle("low", r < 0.25);
+    if (kind === "mini") G.used = el;
+    if (el >= ms) { clearInterval(timerH); if (kind === "mini") { G.timeUp = true; if (!G.done) finish(); } else if (!G.done) answerTf(null); }
+  }, 120);
+}
+function mark(ok, sub) {
+  G.res[G.i] = ok ? 1 : 0; G.n++; if (ok) G.ok++;
+  S.stats.tot++; if (ok) { S.stats.ok++; S.stats.combo++; if (S.stats.combo > S.stats.maxCombo) S.stats.maxCombo = S.stats.combo; } else S.stats.combo = 0;
+  S.subs[sub] = 1; G.done = true;
+}
+function fbHtml(ok, txt, e, last) {
+  return '<div class="fb ' + (ok ? "good" : "bad") + '"><b class="t">' + (ok ? "✓ Bien joué !" : "✗ " + txt) + "</b>" + (e ? "<div>" + e + "</div>" : "") + "</div>" +
+    '<button type="button" class="btn go next" data-next="1">' + (last ? "Voir mon butin 🏴‍☠️" : "Question suivante →") + "</button>";
+}
+function answerQcm(j) {
+  if (G.done || G.type !== "mini") return; var it = G.items[G.i], ok = it.opts[j].ok;
+  mark(ok, it.c.sub);
+  var bs = document.querySelectorAll(".opt"); bs.forEach(function (b, k) { b.disabled = true; if (it.opts[k].ok) b.classList.add("right"); else if (k === j) b.classList.add("wrong"); });
+  var good = it.opts.filter(function (o) { return o.ok; })[0].t;
+  $("#fb").innerHTML = fbHtml(ok, "Pas tout à fait. La bonne réponse : " + good, it.c.e, G.i === G.items.length - 1);
+  clearInterval(timerH); if (G.timeUp) { /* temps écoulé pendant la lecture : on termine à la suite */ }
+}
+function answerTf(v) {
+  if (G.done || G.type !== "eclair") return; var it = G.items[G.i], ok = v === it.truth, late = v === null;
+  mark(ok, it.c.sub); clearInterval(timerH);
+  document.querySelectorAll(".tf .btn").forEach(function (b) { b.disabled = true; });
+  var msg = late ? "Trop lent ! " : "";
+  $("#fb").innerHTML = fbHtml(ok, msg + (it.truth ? "C'était vrai." : "C'était faux. La bonne réponse : " + it.c.o[0]), it.c.e, G.i === G.items.length - 1);
+}
+function reveal() {
+  var it = G.items[G.i], c = it.c;
+  $("#fb").innerHTML = '<div class="answer"><b>Réponse :</b> ' + c.o[0] + '</div><div class="fb good" style="background:#fff7dd;border-color:var(--gold-d)">' + c.e + '</div><p class="q" style="font-size:17px;margin:12px 0 6px">Tu le savais ?</p><div class="tf"><button type="button" class="btn go" data-rate="yes">😎 Je savais</button><button type="button" class="btn" data-rate="no">🤔 Pas encore</button></div>';
+  document.querySelector("[data-reveal]").remove();
+}
+function rate(r) {
+  if (G.done) return; mark(r === "yes", G.items[G.i].c.sub);
+  document.querySelectorAll("#fb .tf .btn").forEach(function (b) { b.disabled = true; });
+  $("#fb").insertAdjacentHTML("beforeend", '<button type="button" class="btn go next" data-next="1">' + (G.i === G.items.length - 1 ? "Voir mon butin 🏴‍☠️" : "Carte suivante →") + "</button>");
+}
+function nextQ() { if (!G.done) return; if (G.i >= G.items.length - 1 || G.timeUp) finish(); else { G.i++; showQ(); } }
+
+function unlocked(id) { return !!S.badges[id]; }
+function finish() {
+  clearInterval(timerH); if (!G || G.finished) return; G.finished = true;
+  if (!G.n) { render(); return; }
+  var t = today(), secs = Math.round((Date.now() - G.t0) / 1000), tot = G.n, ok = G.ok, perfect = tot === G.items.length && ok === tot;
+  var day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += ok; day.tot += tot; S.days[t] = day;
+  var gain = ok * 10 + (perfect ? 20 : 0), bonusDay = false;
+  if (G.type === dayFormat() && !S.daily[t] && tot) { gain += 30; S.daily[t] = 1; bonusDay = true; }
+  S.berries += gain; if (perfect) S.stats.perfect++;
+  var nw = [], add = function (id) { if (!unlocked(id)) { S.badges[id] = t; nw.push(BADGES.filter(function (b) { return b[0] === id; })[0]); } };
+  var st = streak(), subsAll = Object.keys(SUBNAMES).length > 0 && Object.keys(SUBNAMES).every(function (k) { return S.subs[k]; });
+  if (tot) add("first");
+  if (st >= 3) add("s3"); if (st >= 7) add("s7");
+  if (perfect) add("perfect");
+  if (S.stats.maxCombo >= 10) add("combo10");
+  if (G.type === "mini" && perfect && secs < 90) add("speed");
+  if (subsAll) add("all");
+  if (day.n >= 3) add("marathon");
+  if (G.type === "eclair" && perfect && tot === 8) add("eclair");
+  if (G.type === "mystere" && perfect) add("mystere");
+  if (S.berries >= 500) add("b500");
+  var found = null, free = TREASURES.filter(function (x) { return !S.treasures[x[1]]; });
+  if (tot && ok >= Math.ceil(tot / 2) && free.length && Math.random() < 0.5) { found = free[Math.floor(Math.random() * free.length)]; S.treasures[found[1]] = t; }
+  if (Object.keys(S.treasures).length >= 5) add("coll");
+  var before = S.berries - gain, rb = rankOf(before).r[1], ra = rankOf(S.berries).r;
+  saveLocal();
+  var msg = perfect ? "Parfait, capitaine !" : ok >= Math.ceil(tot / 2) ? "Belle traversée !" : "Bon voyage d'entraînement !";
+  var h = '<div class="card res"><div class="big pop">' + (perfect ? "🏆" : ok >= Math.ceil(tot / 2) ? "⛵" : "🌊") + "</div><h2>" + msg + '</h2><p>' + ok + " bonne" + (ok > 1 ? "s" : "") + " réponse" + (ok > 1 ? "s" : "") + " sur " + tot + '</p><div class="gain pop">+' + gain + " Berries</div>" +
+    (bonusDay ? '<p class="small">dont +30 pour le défi du jour 🌟</p>' : "") + '<div class="chips">';
+  h += '<span class="chip">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite</span>";
+  if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
+  nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
+  if (found) h += '<span class="chip pop">' + found[0] + " Trésor trouvé : " + esc(found[1]) + "</span>";
+  h += '</div><button type="button" class="btn go" data-go="home">⚓ Retour au pont</button><button type="button" class="btn" data-play="' + G.type + '">🔁 Un autre défi comme celui-ci</button></div>';
+  app.innerHTML = h; window.scrollTo(0, 0); G = null;
+}
+function trophies() {
+  var h = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>🏆 Mes réussites</h2><div class="grid">';
+  BADGES.forEach(function (b) { var on = S.badges[b[0]]; h += '<div class="tile ' + (on ? "" : "lock") + '"><div class="em">' + b[1] + "</div><b>" + esc(b[2]) + "</b><small>" + (on ? "Obtenu le " + on.split("-").reverse().join("/") : esc(b[3])) + "</small></div>"; });
+  h += '</div></div><div class="card"><h2>🏺 Mes trésors</h2><p class="small">Un trésor peut apparaître quand tu réussis un défi. Lesquels trouveras-tu ?</p><div class="grid">';
+  TREASURES.forEach(function (x) { var on = S.treasures[x[1]]; h += '<div class="tile ' + (on ? "" : "lock") + '"><div class="em">' + (on ? x[0] : "❔") + "</div><b>" + (on ? esc(x[1]) : "Trésor caché") + "</b></div>"; });
+  app.innerHTML = h + "</div></div>"; window.scrollTo(0, 0);
+}
+
+loadLocal(); home();
+loadPool().then(refresh).then(netInit).then(refresh);
+window.addEventListener("online", function () { netInit(); });
+})();
+</script>
+</body>
+</html>

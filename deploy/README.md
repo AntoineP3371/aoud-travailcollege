@@ -301,3 +301,10 @@ Une sauvegarde sur le même serveur ne protège pas d'un vol ou d'un incendie : 
 | Voir les messages du serveur | `sudo journalctl -u aoud-travailcollege -n 50 --no-pager` |
 | Mot de passe de Gianni oublié | Refaire l'étape 6 (saisie des secrets, puis `bootstrap.py` sans l'option `--corriges`) : le mot de passe est mis à jour. |
 | Code parent à changer | Même commande : `PARENT_CODE` avec le nouveau code. |
+
+## 10. Page « Défis de l'équipage » (`/defis/`)
+
+Page séparée de l'appli de révision, servie par le même PocketBase (`deploy/pb_public/defis/index.html`).
+Elle lit les cours et les cartes de l'appli principale (aucune donnée en double) et garde la progression de Gianni
+(jours de série, Berries, réussites, trésors) dans la collection `quest` (migration `1760000500_quest.js`, appliquée par `update.sh`).
+Le bouton « Défis » de l'appli principale y mène. Pour la retirer : supprimer le dossier `pb_public/defis/` et le bouton `#defis-open`.
