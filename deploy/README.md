@@ -325,3 +325,8 @@ Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `r
 - **Traversée du jour** : parcours guidé en étapes (échauffement du jour, séance, défi du jour, puis un moment facultatif avec un parent). Terminer les 3 premières étapes donne +25 Berries une fois par jour et la réussite « Capitaine de la traversée ». L'avancement est enregistré par jour (clés `daily` `…v0` à `…v3`) et synchronisé.
 - **En famille** : chasse à l'erreur lue à voix haute par le parent, perroquet à deux, duel Trésor ou requin. +15 Berries (« Bonus équipage ») la première fois de la journée.
 - Jeux d'échauffement (1 minute) : plafond de 40 Berries par jour.
+
+### Page Sommaire (page d'ouverture)
+
+- Le site s'ouvre sur le **Sommaire** : une carte par matière (icône, nombre de cours), qui se déplie pour lister ses cours avec le nombre de cartes, la présence d'exercices et de PDF, et le meilleur score. Un cours s'ouvre d'un toucher ; le bouton **Sommaire** de l'en-tête y ramène. Les anciens liens `…/#maths` ouvrent toujours directement le cours.
+- Icône d'une matière : champ facultatif `icon` de la collection `subjects` (migration `1760000700_subject_icon.js`, à modifier dans l'interface d'administration de PocketBase). Sans valeur : 📐 maths, 🤝 EMC, 🏺 histoire-géo, 🌍 SVT, 📘 autre matière.

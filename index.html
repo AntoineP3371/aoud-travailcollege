@@ -90,6 +90,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ver { flex-shrink: 0; }
 .brandbtns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .brandr { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+
+.som-h1 { margin: 18px 0 2px; }
+#som { padding-bottom: 8px; }
+#som h1 { font-family: inherit; margin: 18px 0 2px; color: var(--brand-blue); }
+.som-sub { color: var(--muted); margin: 0 0 14px; }
+.som-s { background: var(--card); border: 1px solid var(--border); border-left: 6px solid var(--c); border-radius: 14px; margin: 0 0 10px; overflow: hidden; }
+.som-h { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; padding: 12px 14px; min-height: 56px; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.som-i { font-size: 26px; line-height: 1; flex: none; }
+.som-n { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 20px; font-weight: 700; color: var(--c); }
+.som-c { font-size: 13px; font-weight: 700; color: var(--c); white-space: nowrap; }
+.som-c:after { content: " ▸"; }
+.som-h[aria-expanded="true"] .som-c:after { content: " ▾"; }
+.som-body { padding: 0 14px 6px; }
+.som-s .som-body[hidden] { display: none; }
+.som-r { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-top: 1px solid var(--line); padding: 11px 0; min-height: 56px; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.som-r:hover b, .som-r:focus-visible b { color: var(--c); }
+.som-t { flex: 1; min-width: 0; }
+.som-t b { display: block; font-size: 16px; }
+.som-t small { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.som-t small span { border: 1px solid var(--border); border-radius: 7px; padding: 1px 7px; font-size: 12px; color: var(--muted); background: var(--card); }
+.som-p { flex: none; width: 74px; text-align: right; font-family: Georgia, serif; font-weight: 700; color: var(--c); font-size: 14px; }
+.som-bar { display: block; height: 6px; border-radius: 4px; background: var(--line); margin-top: 5px; overflow: hidden; }
+.som-bar i { display: block; height: 100%; background: var(--c); }
+#som[hidden], #courseview[hidden] { display: none; }
 .sync { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 10px; min-height: 32px; white-space: nowrap; }
 a.sync { text-decoration: none; display: inline-flex; align-items: center; }
 a.sync[hidden] { display: none; }
@@ -281,8 +305,14 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <path d="M6 66 C 80 58, 190 72, 292 62" fill="none" stroke-width="5" stroke-linecap="round" class="lg-c"/>
       <text x="4" y="88" font-family="'Atkinson Hyperlegible', system-ui, sans-serif" font-weight="700" font-size="15" letter-spacing="7" textLength="98" lengthAdjust="spacing" class="lg-d">GIANNI</text>
     </svg>
-    <div class="brandr"><span class="ver" title="Version">v7.1</span><div class="brandbtns"><a class="sync" id="defis-open" href="defis/" hidden aria-label="Défis de l'équipage"><svg viewBox="0 0 64 64" aria-hidden="true" style="width:18px;height:18px;flex:none;margin-right:6px"><circle cx="32" cy="32" r="16" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="32" cy="32" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M32 4v12M32 48v12M4 32h12M48 32h12M12 12l8 8M44 44l8 8M52 12l-8 8M20 44l-8 8"/></g></svg>Défis</a><button type="button" class="sync" id="hub-open" hidden>Espace parent</button><button type="button" class="sync" id="sync" hidden></button></div></div>
+    <div class="brandr"><span class="ver" title="Version">v7.1</span><div class="brandbtns"><button type="button" class="sync" id="som-open" hidden>Sommaire</button><a class="sync" id="defis-open" href="defis/" hidden aria-label="Défis de l'équipage"><svg viewBox="0 0 64 64" aria-hidden="true" style="width:18px;height:18px;flex:none;margin-right:6px"><circle cx="32" cy="32" r="16" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="32" cy="32" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M32 4v12M32 48v12M4 32h12M48 32h12M12 12l8 8M44 44l8 8M52 12l-8 8M20 44l-8 8"/></g></svg>Défis</a><button type="button" class="sync" id="hub-open" hidden>Espace parent</button><button type="button" class="sync" id="sync" hidden></button></div></div>
   </div>
+  <section id="som" hidden aria-label="Sommaire">
+    <h1>Sommaire</h1>
+    <p class="som-sub" id="som-sub"></p>
+    <div id="som-list"></div>
+  </section>
+  <div id="courseview">
   <div class="tabrow">
   <nav class="subjects" id="subjects" role="tablist" aria-label="Matières"></nav>
   </div>
@@ -331,6 +361,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <span id="bk-msg" role="status"></span>
     </div>
   </section>
+  </div>
 </div>
 
 <div class="pw" id="lg" hidden role="dialog" aria-label="Connexion au serveur">
@@ -989,7 +1020,7 @@ document.addEventListener("keydown", function (ev) {
   if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
   var tg = ev.target && ev.target.tagName;
   if (tg === "INPUT" || tg === "TEXTAREA") return;
-  if (!$("#ink").hidden || !$("#pw").hidden || !$("#ed").hidden) return;
+  if (!$("#ink").hidden || !$("#pw").hidden || !$("#ed").hidden || !$("#som").hidden) return;
   var k = "1234".indexOf(ev.key);
   if (k >= 0) choose(k);
 });
@@ -1820,7 +1851,7 @@ function loadCatalog() {
                       api("GET", "/api/collections/courses/records?perPage=200&sort=position")]).then(function (r) {
     if (!r[1].items.length) return null;
     return {
-      subjects: r[0].items.map(function (x) { return { id: x.id, key: x.key, name: x.name, color: x.color, position: x.position }; }),
+      subjects: r[0].items.map(function (x) { return { id: x.id, key: x.key, name: x.name, color: x.color, icon: x.icon || "", position: x.position }; }),
       courses: r[1].items.map(function (c) {
         var base = PB + "/api/files/courses/" + c.id + "/";
         return { id: c.id, key: c.key, subject: c.subject, label: c.label, position: c.position, eyebrow: c.eyebrow, title: c.title, sub: c.sub, exo: c.exo,
@@ -1831,6 +1862,7 @@ function loadCatalog() {
   });
 }
 function setSubject(k, keep) {
+  $("#som").hidden = true; $("#courseview").hidden = false; $("#som-open").hidden = false;
   var S = SUBJECTS[k];
   if (!S) { k = Object.keys(SUBJECTS)[0]; S = SUBJECTS[k]; }
   subject = k;
@@ -1847,7 +1879,7 @@ function setSubject(k, keep) {
   $("#ink-open").hidden = !(S.pages && S.pages.length);
   refreshEdit();
   dlMsg("");
-  try { location.hash = k; } catch (e) {}
+  try { if (location.hash !== "#" + k) location.hash = k; } catch (e) {}
   if (!keep) newRun();
 }
 function reloadCatalog() {
@@ -1856,6 +1888,7 @@ function reloadCatalog() {
     lsSet("tc-cat", JSON.stringify(cat));
     var cur = subject, before = JSON.stringify((SUBJECTS[cur] || {}).cards || []);
     applyCatalog(cat);
+    if (!$("#som").hidden) { somRender(); return; }
     var k = SUBJECTS[cur] ? cur : Object.keys(SUBJECTS)[0];
     setSubject(k, k === cur && JSON.stringify(SUBJECTS[k].cards) === before);
   });
@@ -1865,7 +1898,7 @@ function reloadCatalog() {
 function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
 function openHub() {
   var c = SUBJECTS[subject];
-  $("#hub-edit").hidden = !(c && c.id);
+  $("#hub-edit").hidden = !(c && c.id) || !$("#som").hidden;
   $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $("#hub-coffre").hidden = true; $(".hub-list").hidden = false; hubMsg("");
   $("#hub").hidden = false;
   loadLast();
@@ -2234,6 +2267,57 @@ $("#ed-cards").addEventListener("click", function (ev) {
   edRender(true);
 });
 
+
+/* ---------- Sommaire : page d'ouverture ---------- */
+var SUBICON = { maths: "📐", emc: "🤝", hg: "🏺", svt: "🌍" };
+function subIcon(sj) { return (sj && sj.icon) || (sj && SUBICON[sj.key]) || "📘"; }
+function subColor(sj) {
+  var v = { maths: "var(--brand-blue)", emc: "var(--ink-emc)", svt: "var(--ink-svt)", hg: "var(--ink-hg)" };
+  if (v[sj.key]) return v[sj.key];
+  if (/^#[0-9a-fA-F]{6}$/.test(sj.color || "")) return isDark() ? mixHex(sj.color, "#ffffff", 0.55) : sj.color;
+  return "var(--ink)";
+}
+function somOpenSet() { try { var a = JSON.parse(lsGet("tc-som-open") || "null"); return Array.isArray(a) ? a : null; } catch (e) { return null; } }
+function somRender() {
+  var vis = CATSUB.filter(function (sj) { return coursesOf(sj.key).length; }), open = somOpenSet(), nC = 0, h = "";
+  if (!open) open = vis.length ? [vis[0].key] : [];
+  vis.forEach(function (sj) {
+    var cs = coursesOf(sj.key), isO = open.indexOf(sj.key) >= 0; nC += cs.length;
+    h += '<section class="som-s" style="--c:' + subColor(sj) + '"><button type="button" class="som-h" data-sk="' + esc(sj.key) + '" aria-expanded="' + isO + '"><span class="som-i" aria-hidden="true">' + esc(subIcon(sj)) + '</span><span class="som-n">' + esc(sj.name) + '</span><span class="som-c">' + cs.length + " cours</span></button>";
+    h += '<div class="som-body"' + (isO ? "" : " hidden") + ">";
+    cs.forEach(function (c, i) {
+      var tot = (c.cards || []).length, best = parseInt(lsGet("best-" + c.key), 10) || 0, pct = tot ? Math.min(100, Math.round(best / tot * 100)) : 0, chips = "";
+      if (tot) chips += "<span>🃏 " + tot + " cartes</span>";
+      if (c.pages && c.pages.length) chips += "<span>✏️ Exercices</span>";
+      if (c.pdf) chips += "<span>📄 PDF</span>";
+      h += '<button type="button" class="som-r" data-ck="' + esc(c.key) + '"><span class="som-t"><b>' + (i + 1) + ". " + esc(c.label || c.title) + "</b><small>" + chips + '</small></span><span class="som-p">' + (best ? best + "/" + tot + (best >= tot ? " ✓" : "") : "—") + '<span class="som-bar"><i style="width:' + pct + '%"></i></span></span></button>';
+    });
+    h += "</div></section>";
+  });
+  $("#som-list").innerHTML = h || '<p class="som-sub">Aucun cours pour le moment.</p>';
+  $("#som-sub").textContent = vis.length + " matière" + (vis.length > 1 ? "s" : "") + " · " + nC + " cours";
+}
+function showSom() {
+  $("#som").hidden = false; $("#courseview").hidden = true; $("#som-open").hidden = true;
+  applyAccent("maths"); somRender();
+  if (location.hash.replace("#", "")) { try { location.hash = ""; } catch (e) {} }
+  window.scrollTo(0, 0);
+}
+$("#som-open").addEventListener("click", showSom);
+$("#som-list").addEventListener("click", function (ev) {
+  var b = ev.target.closest("button"); if (!b) return;
+  if (b.getAttribute("data-ck")) { setSubject(b.getAttribute("data-ck")); window.scrollTo(0, 0); return; }
+  var k = b.getAttribute("data-sk"); if (!k) return;
+  var vis = CATSUB.filter(function (sj) { return coursesOf(sj.key).length; }).map(function (sj) { return sj.key; }), open = somOpenSet() || vis.slice(0, 1), i = open.indexOf(k);
+  if (i >= 0) open.splice(i, 1); else open.push(k);
+  lsSet("tc-som-open", JSON.stringify(open)); somRender();
+});
+window.addEventListener("hashchange", function () {
+  var h = ""; try { h = location.hash.replace("#", ""); } catch (e) {}
+  if (SUBJECTS[h]) { if (!$("#som").hidden || h !== subject) setSubject(h); }
+  else if ($("#som").hidden) showSom();
+});
+
 /* ---------- Démarrage ---------- */
 var BUILTIN_SUBJECTS = SUBJECTS, BUILTIN_PAGES = PAGES;
 (function () {
@@ -2242,7 +2326,7 @@ var BUILTIN_SUBJECTS = SUBJECTS, BUILTIN_PAGES = PAGES;
   var cached = null;
   if (PB) { try { cached = JSON.parse(lsGet("tc-cat") || "null"); } catch (e) {} }
   applyCatalog(cached && cached.courses && cached.courses.length ? cached : builtinCat());
-  setSubject(SUBJECTS[h] ? h : Object.keys(SUBJECTS)[0]);
+  if (SUBJECTS[h]) setSubject(h); else showSom();
   netInit();
   reloadCatalog().catch(noop);
 })();
