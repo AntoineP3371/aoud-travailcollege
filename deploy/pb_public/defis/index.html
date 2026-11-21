@@ -92,6 +92,29 @@ header h1 small { display: block; font-size: 12px; font-weight: 400; opacity: 0.
 .rw.lock { opacity: 0.8; background: rgba(255,247,221,0.6); }
 .rw .btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
 .hist { font-size: 15px; margin: 4px 0; }
+/* jeux d'échauffement et chasse à l'erreur */
+.sentence { font-size: 20px; line-height: 1.75; margin: 8px 0 14px; }
+.tok { display: inline-block; padding: 5px 7px; margin: 2px 1px; border-radius: 8px; border: 2px solid transparent; background: transparent; font: inherit; font-size: 20px; line-height: 1.3; color: inherit; cursor: pointer; }
+.tok.glue { margin-left: -4px; }
+.tok:active { background: rgba(224,165,38,0.35); }
+.tok.ok { background: #c9f0d9; border-color: var(--green); }
+.tok.ko { background: #ffd2cd; border-color: var(--red); }
+.tok:disabled { cursor: default; }
+mark.err { background: #ffd2cd; border-radius: 4px; padding: 0 3px; font-weight: 700; }
+.stim { display: grid; place-items: center; width: 100%; min-height: 260px; border: 3px solid var(--wood); border-radius: 18px; background: #fff7dd; font-size: 120px; line-height: 1; margin-bottom: 12px; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.stim.hit { background: #c9f0d9; } .stim.bad { background: #ffd2cd; }
+.gridz { display: grid; gap: 8px; margin: 8px 0; }
+.cellz { display: grid; place-items: center; min-height: 48px; aspect-ratio: 1; background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; font-weight: 700; color: var(--wood); padding: 0; }
+.cellz.ko { background: #ffd2cd; border-color: var(--red); } .cellz.ok { background: #c9f0d9; border-color: var(--green); }
+.pads { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 14px; }
+.pad { min-height: 120px; border-radius: 18px; border: 4px solid rgba(0,0,0,0.35); font-size: 34px; color: rgba(255,255,255,0.9); transition: filter 0.1s, transform 0.1s; }
+.pad.lit { filter: brightness(1.6); transform: scale(1.04); box-shadow: 0 0 0 6px #fff; }
+.pad:disabled { opacity: 0.55; }
+.who { text-align: center; font-weight: 800; font-size: 21px; margin: 4px 0 10px; }
+.top .who { margin: 0; color: #fff; flex: 1; text-align: left; }
+.pbox { background: #fff; border: 2.5px dashed var(--gold-d); border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
+.tag.g { background: var(--green); }
+.pill.sm { min-height: 40px; padding: 0 12px; }
 /* trésors */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .tile { background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; padding: 10px 8px; text-align: center; min-height: 118px; }
@@ -160,7 +183,10 @@ var BADGES = [
   ["coll", "🏺", "Chasseur de trésors", "Trouver 5 trésors"],
   ["revise", "🐘", "Mémoire d'éléphant", "Réussir 5 cartes qui étaient à revoir"],
   ["pause", "🏃", "Marin en forme", "Faire 3 pauses mouvement"],
-  ["gift", "🎁", "Premier cadeau", "Débloquer une récompense du coffre"]
+  ["gift", "🎁", "Premier cadeau", "Débloquer une récompense du coffre"],
+  ["hunt", "🔎", "Œil de lynx", "Trouver 10 erreurs dans la chasse à l'erreur"],
+  ["parent", "👪", "Équipage complet", "Jouer 3 fois avec un parent"],
+  ["warm", "🎯", "Bien échauffé", "Faire 5 mini-jeux d'échauffement"]
 ];
 var PAUSES = ["10 sauts les bras en l'air 🙌", "Fais le tour de la pièce en marchant comme un crabe 🦀", "10 squats : monte à bord du mât ! 🏴‍☠️", "Étire-toi comme si tu attrapais les voiles ⛵",
   "Marche sur place en levant bien les genoux 🥁", "Tourne les bras comme les rames d'un bateau 🚣", "Tiens en équilibre sur une jambe pendant 20 secondes, comme sur le pont par gros temps 🌊",
@@ -169,7 +195,7 @@ var CREW = ["Cap sur la réussite, matelot !", "Un petit défi, et l'équipage e
   "Un trésor t'attend peut-être au prochain défi…", "Pas besoin d'être parfait : il suffit de naviguer.", "Aujourd'hui, on hisse les voiles en douceur.",
   "Chaque bonne réponse, c'est un coup de rame de plus.", "Les meilleurs équipages s'entraînent un peu tous les jours.", "Une erreur ? Juste une vague, on repart !",
   "Respire, souris, on y va.", "L'île au trésor se rapproche !"];
-var DEF = function () { return { days: {}, berries: 0, spent: 0, miss: {}, badges: {}, treasures: {}, subs: {}, stats: { ok: 0, tot: 0, combo: 0, maxCombo: 0, perfect: 0, revised: 0, pauses: 0 }, daily: {}, ts: 0 }; };
+var DEF = function () { return { days: {}, berries: 0, spent: 0, miss: {}, warm: {}, badges: {}, treasures: {}, subs: {}, stats: { ok: 0, tot: 0, combo: 0, maxCombo: 0, perfect: 0, revised: 0, pauses: 0, hunt: 0, withParent: 0, warmups: 0 }, daily: {}, ts: 0 }; };
 var S = DEF();
 function loadLocal() { try { var d = JSON.parse(lsGet("qd-state") || "null"); if (d && d.days) { var b = DEF(); for (var k in b) if (!(k in d)) d[k] = b[k]; S = d; } } catch (e) {} }
 function saveLocal() { S.ts = Date.now(); lsSet("qd-state", JSON.stringify(S)); pushLater(); }
@@ -181,6 +207,7 @@ function merge(a, b) {          /* a = local, b = serveur : on garde le meilleur
   });
   o.berries = Math.max(a.berries || 0, b.berries || 0);
   o.spent = Math.max(a.spent || 0, b.spent || 0);
+  (function () { var ks = {}; Object.keys(a.warm || {}).concat(Object.keys(b.warm || {})).forEach(function (x) { ks[x] = 1; }); Object.keys(ks).forEach(function (x) { o.warm[x] = Math.max((a.warm || {})[x] || 0, (b.warm || {})[x] || 0); }); })();
   (function () {   /* cartes à revoir : la fiche la plus récente gagne (b = -1 : maîtrisée) */
     var u = {}; [a.miss || {}, b.miss || {}].forEach(function (m) { for (var x in m) if (!u[x] || (m[x].t || 0) > (u[x].t || 0)) u[x] = m[x]; });
     o.miss = u;
@@ -189,7 +216,7 @@ function merge(a, b) {          /* a = local, b = serveur : on garde le meilleur
     var u = {}; [a[k] || {}, b[k] || {}].forEach(function (m) { for (var x in m) u[x] = (u[x] && typeof u[x] === "string" && typeof m[x] === "string" && u[x] < m[x]) ? u[x] : m[x]; });
     o[k] = u;
   });
-  ["ok", "tot", "maxCombo", "perfect", "revised", "pauses"].forEach(function (k) { o.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0); });
+  ["ok", "tot", "maxCombo", "perfect", "revised", "pauses", "hunt", "withParent", "warmups"].forEach(function (k) { o.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0); });
   o.stats.combo = (a.ts || 0) >= (b.ts || 0) ? ((a.stats || {}).combo || 0) : ((b.stats || {}).combo || 0);
   o.ts = Math.max(a.ts || 0, b.ts || 0);
   return o;
@@ -291,6 +318,7 @@ function streak() {
   while (S.days[ds(d)]) { n++; d.setDate(d.getDate() - 1); } return n;
 }
 function rankOf(b) { var r = RANKS[0], nx = null; for (var i = 0; i < RANKS.length; i++) if (b >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; } return { r: r, next: nx }; }
+var WARMS = [["gonogo", "Trésor ou requin ?", "Tape sur le trésor, ne touche pas au requin", "🦈", true], ["intrus", "Chasse à l'intrus", "Trouve le symbole différent dans la grille", "🔍", false], ["perroquet", "Le perroquet", "Rejoue la suite de couleurs sans te tromper", "🦜", true]];
 var FORMATS = [["mini", "Mini-défi", "5 questions en 3 minutes", "⏱️"], ["eclair", "Défi éclair", "8 vrai ou faux, 8 secondes chacun", "⚡"], ["mystere", "Carte mystère", "5 cartes à deviner, à ton rythme", "🔮"]];
 function dayFormat() { return FORMATS[dayNum() % 3][0]; }
 
@@ -298,7 +326,7 @@ function dayFormat() { return FORMATS[dayNum() % 3][0]; }
 var app = $("#app"), G = null, timerH = 0;
 function esc(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
 var pauseH = 0;
-function render() { clearInterval(timerH); clearInterval(pauseH); G = null; home(); }
+function render() { clearInterval(timerH); clearInterval(pauseH); wClear(); G = null; home(); }
 function refresh() { if (!G) home(); }
 function home() {
   var rk = rankOf(S.berries), st = streak(), t = today(), df = dayFormat();
@@ -317,14 +345,24 @@ function home() {
       var isDay = f[0] === df, done = S.daily[t] && isDay;
       h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +30") + "</span>" : "") + "<small>" + f[2] + "</small></button>";
     });
+    h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<span class="tag g">👪 avec un parent</span><small>Trouve le mot faux dans une phrase de tes cours</small></button>';
   }
+  h += '<div class="sub-h">Échauffements · 1 minute</div>';
+  WARMS.forEach(function (w) { h += '<button type="button" class="btn" data-wg="' + w[0] + '">' + w[3] + " " + w[1] + (w[4] ? '<span class="tag g">👪 avec un parent</span>' : "") + "<small>" + w[2] + "</small></button>"; });
   h += '<button type="button" class="btn" data-go="coffre">🎁 Mon coffre<small>' + Math.max(0, S.berries - (S.spent || 0)) + " Berries à dépenser · récompenses choisies par tes parents</small></button>";
   h += '<button type="button" class="btn" data-go="trophy">🏆 Mes réussites et trésors<small>' + Object.keys(S.badges).length + " / " + BADGES.length + " réussites · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button>";
   app.innerHTML = h;
 }
 app.addEventListener("click", function (e) {
   var b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.play) start(b.dataset.play);
+  if (b.dataset.wm) startGame(b.dataset.wg, b.dataset.wm);
+  else if (b.dataset.wg) intro(b.dataset.wg);
+  else if (b.dataset.gn) gnRun();
+  else if (b.dataset.tk !== undefined) huntAnswer(b.dataset.tk);
+  else if (b.dataset.hp !== undefined) huntParent(b.dataset.hp === "1");
+  else if (b.dataset.hn) huntNext();
+  else if (b.dataset.mute) { lsSet("qd-mute", lsGet("qd-mute") === "1" ? "0" : "1"); b.textContent = lsGet("qd-mute") === "1" ? "🔇" : "🔊"; }
+  else if (b.dataset.play) start(b.dataset.play);
   else if (b.dataset.go === "trophy") trophies();
   else if (b.dataset.go === "coffre") coffre();
   else if (b.dataset.claim) claim(b.dataset.claim);
@@ -342,7 +380,7 @@ document.addEventListener("keydown", function (e) {
   if (!G) return; var k = e.key;
   if (G.type !== "eclair" && G.type !== "mystere" && /^[1-4]$/.test(k) && !G.done) answerQcm(+k - 1);
   else if (G.type === "eclair" && !G.done && (k === "v" || k === "f")) answerTf(k === "v");
-  else if (k === "Enter" && G.done) nextQ();
+  else if (k === "Enter" && G.done && G.items) nextQ();
 });
 
 function start(type) {
@@ -466,6 +504,261 @@ function trophies() {
   h += '</div></div><div class="card"><h2>🏺 Mes trésors</h2><p class="small">Un trésor peut apparaître quand tu réussis un défi. Lesquels trouveras-tu ?</p><div class="grid">';
   TREASURES.forEach(function (x) { var on = S.treasures[x[1]]; h += '<div class="tile ' + (on ? "" : "lock") + '"><div class="em">' + (on ? x[0] : "❔") + "</div><b>" + (on ? esc(x[1]) : "Trésor caché") + "</b></div>"; });
   app.innerHTML = h + "</div></div>"; window.scrollTo(0, 0);
+}
+
+/* ---------- jeux d'échauffement et chasse à l'erreur ---------- */
+var wT = 0, wAudio = null;
+function wClear() { clearTimeout(wT); }
+function topBar(extra) { return '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button>' + (extra || "") + "</div>"; }
+function parentBonus(yes) {
+  var t = today(); if (!yes) return 0;
+  S.stats.withParent = (S.stats.withParent || 0) + 1;
+  if (S.daily[t + "p"]) return 0; S.daily[t + "p"] = 1; return 15;
+}
+function gotBadge(id, list) { if (!S.badges[id]) { S.badges[id] = today(); list.push(BADGES.filter(function (b) { return b[0] === id; })[0]); } }
+function wFinish(o) {
+  /* o : emoji, title, lines[], g (Berries déjà ajoutés), bonus, nw (réussites), again {wg, wm}, warm (échauffement ?), parent */
+  var nw = o.nw || [], tot = o.g + o.bonus, rb = rankOf(S.berries - tot).r[1], ra = rankOf(S.berries).r;
+  if (o.warm) { S.stats.warmups = (S.stats.warmups || 0) + 1; if (S.stats.warmups >= 5) gotBadge("warm", nw); }
+  if ((S.stats.withParent || 0) >= 3) gotBadge("parent", nw);
+  saveLocal();
+  var h = '<div class="card res"><div class="big pop">' + o.emoji + "</div><h2>" + o.title + "</h2>" + o.lines.map(function (l) { return "<p>" + l + "</p>"; }).join("") + '<div class="gain pop">+' + tot + " Berries</div>";
+  h += '<div class="chips">';
+  if (o.bonus) h += '<span class="chip">👪 Bonus équipage +' + o.bonus + "</span>";
+  if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
+  nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
+  h += '</div><button type="button" class="btn go" data-go="home">⚓ Retour au pont</button>' + (o.again ? '<button type="button" class="btn" data-wg="' + o.again.wg + '" data-wm="' + o.again.wm + '">🔁 Rejouer</button>' : "") + "</div>";
+  wClear(); G = null; app.innerHTML = h; window.scrollTo(0, 0);
+}
+function wGain(base, parent) {      /* échauffement : 40 Berries par jour au maximum, bonus parent à part */
+  var t = today(), got = S.warm[t] || 0, g = Math.min(base, Math.max(0, 40 - got));
+  S.warm[t] = got + g; var bonus = parentBonus(parent); S.berries += g + bonus; return { g: g, bonus: bonus };
+}
+var INTRO = {
+  gonogo: ["🦈", "Trésor ou requin ?", "Des images apparaissent une à une pendant environ une minute. Tape vite sur le trésor (🪙 ou 💎) et ne touche surtout pas le requin (🦈) !", "Duel avec un parent", "Gianni joue, puis le parent joue la même partie."],
+  intrus: ["🔍", "Chasse à l'intrus", "Dans chaque grille, un seul symbole est différent des autres. Touche-le le plus vite possible. 8 grilles, de plus en plus grandes.", null, null],
+  perroquet: ["🦜", "Le perroquet", "Regarde la suite de couleurs, puis rejoue-la dans le même ordre. Tu as trois vies.", "À deux avec un parent", "Chacun son tour : rejoue toute la suite puis ajoute une couleur. Pas de suite affichée : c'est la mémoire qui joue !"],
+  chasse: ["🔎", "Chasse à l'erreur", "Une phrase de tes cours a parfois un mot remplacé par un mot faux. Lis bien, puis touche le mot faux. Si tout est juste, touche « Tout est juste ». 5 phrases.", "Un parent lit à voix haute", "Le parent lit la phrase à voix haute, Gianni écoute sans regarder l'écran et dit où est l'erreur."]
+};
+function intro(g) {
+  var d = INTRO[g]; if (!d) return;
+  app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>' + d[0] + " " + d[1] + "</h2><p>" + d[2] + '</p><button type="button" class="btn go" data-wg="' + g + '" data-wm="solo">▶ Je joue seul</button>' +
+    (d[3] ? '<button type="button" class="btn" data-wg="' + g + '" data-wm="duo">👪 ' + d[3] + "<small>" + d[4] + "</small></button>" : "") + "</div>";
+  window.scrollTo(0, 0);
+}
+function startGame(g, m) {
+  wClear(); clearInterval(timerH);
+  if (g === "gonogo") gnStart(m); else if (g === "intrus") inStart(); else if (g === "perroquet") ppStart(m); else if (g === "chasse") huntStart(m);
+}
+
+/* --- Trésor ou requin (Go / No-Go) --- */
+function gnStart(m) {
+  G = { type: "warm", game: "gonogo", mode: m, players: m === "duo" ? ["Gianni", "Le parent"] : ["Gianni"], p: 0, res: [] };
+  gnReady();
+}
+function gnReady() {
+  var who = G.players[G.p];
+  app.innerHTML = topBar() + '<div class="card"><div class="who">' + esc(who) + '</div><p style="text-align:center;font-size:18px">Tape sur 🪙 et 💎.<br>Ne touche pas 🦈 !</p><button type="button" class="btn go" data-gn="1" style="text-align:center">' + (G.p ? "C'est parti !" : "Prêt ? Lance !") + "</button></div>";
+  window.scrollTo(0, 0);
+}
+function gnRun() {
+  if (!G || G.game !== "gonogo") return;
+  var N = 40, seq = []; for (var i = 0; i < N; i++) seq.push(i < 2 || Math.random() < 0.7 ? 1 : 0);
+  G.st = { seq: seq, i: -1, hits: 0, miss: 0, cr: 0, fa: 0, streak: 0, dur: G.mode === "duo" ? 900 : 950, visible: false, tapped: false, cur: 1 };
+  app.innerHTML = topBar('<div class="who">' + esc(G.players[G.p]) + "</div>") + '<div class="timer"><i id="tmi"></i></div><button type="button" class="stim" id="stim" aria-label="Touche ici si tu vois un trésor"></button><p class="small" style="color:#fff;text-align:center">🪙 💎 = tape &nbsp;·&nbsp; 🦈 = ne touche pas</p>';
+  $("#stim").addEventListener("pointerdown", gnTap);
+  wT = setTimeout(gnNext, 600);
+}
+function gnTap(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  var st = G && G.game === "gonogo" && G.st; if (!st || !st.visible || st.tapped) return; st.tapped = true; var el = $("#stim"); if (!el) return;
+  if (st.cur) { st.hits++; st.streak++; el.className = "stim hit"; } else { st.fa++; st.streak = 0; el.className = "stim bad"; }
+}
+document.addEventListener("keydown", function (e) { if (e.key === " " && G && G.game === "gonogo") gnTap(e); });
+function gnNext() {
+  var st = G && G.game === "gonogo" && G.st; if (!st) return; var el = $("#stim"), tmi = $("#tmi"); if (!el) return;
+  st.i++; if (st.i >= st.seq.length) { gnEnd(); return; }
+  tmi.style.transform = "scaleX(" + (1 - st.i / st.seq.length) + ")";
+  st.cur = st.seq[st.i]; st.tapped = false; st.visible = true;
+  el.textContent = st.cur ? (Math.random() < 0.5 ? "🪙" : "💎") : "🦈"; el.className = "stim";
+  wT = setTimeout(function () {
+    var e2 = $("#stim"); if (!e2) return;
+    if (!st.tapped) { if (st.cur) { st.miss++; st.streak = 0; } else { st.cr++; st.streak++; } }
+    if (G.mode === "solo") { if (st.streak >= 4) { st.dur = Math.max(600, st.dur - 50); st.streak = 0; } else if (!st.streak) st.dur = Math.min(1100, st.dur + 40); }
+    st.visible = false; e2.textContent = ""; e2.className = "stim";
+    wT = setTimeout(gnNext, 450);
+  }, st.dur);
+}
+function gnEnd() {
+  var st = G.st, correct = st.hits + st.cr, N = st.seq.length;
+  G.res.push({ name: G.players[G.p], correct: correct, hits: st.hits, miss: st.miss, cr: st.cr, fa: st.fa });
+  if (G.mode === "duo" && G.p === 0) { G.p = 1; app.innerHTML = topBar() + '<div class="card res"><div class="big pop">👪</div><h2>À ton parent !</h2><p>Gianni a fait <b>' + correct + " sur " + N + '</b>. Passe l\'iPad : le parent joue la même partie.</p><button type="button" class="btn go" data-gn="1" style="text-align:center">C\'est parti !</button></div>'; window.scrollTo(0, 0); return; }
+  var r0 = G.res[0], acc = r0.correct / N, w = wGain(5 + Math.round(acc * 15), G.mode === "duo"), lines = [];
+  G.res.forEach(function (r) { lines.push("<b>" + esc(r.name) + "</b> : " + r.correct + " sur " + N + " (" + r.hits + " trésors attrapés, " + r.fa + " requin" + (r.fa > 1 ? "s" : "") + " touché" + (r.fa > 1 ? "s" : "") + ")"); });
+  if (G.res[1]) { var d = G.res[0].correct - G.res[1].correct; lines.push(d > 0 ? "Gianni gagne le duel ! 🏆" : d < 0 ? "Le parent gagne cette fois… revanche ? 😏" : "Égalité parfaite ! 🤝"); }
+  var mode = G.mode; wFinish({ emoji: acc >= 0.9 ? "🏆" : acc >= 0.7 ? "⛵" : "🌊", title: acc >= 0.9 ? "Œil de faucon !" : "Bien joué !", lines: lines, g: w.g, bonus: w.bonus, warm: true, again: { wg: "gonogo", wm: mode } });
+}
+
+/* --- Chasse à l'intrus --- */
+var PAIRS_E = [["🐙", "🦑"], ["🐚", "🐌"], ["⭐", "🌟"], ["🧭", "⏱️"], ["🦀", "🦞"], ["⚓", "🎣"]];
+var PAIRS_L = [["b", "d"], ["p", "q"], ["6", "9"], ["E", "F"], ["n", "u"], ["O", "Q"], ["m", "w"], ["R", "B"]];
+function inStart() {
+  var sizes = [3, 3, 4, 4, 4, 5, 5, 5], pe = shuffle(PAIRS_E), pl = shuffle(PAIRS_L), rounds = [];
+  for (var i = 0; i < 8; i++) { var pr = i < 4 ? pe[i] : pl[i - 4]; if (Math.random() < 0.5) pr = [pr[1], pr[0]]; rounds.push({ n: sizes[i], base: pr[0], odd: pr[1], at: 0 }); rounds[i].at = Math.floor(Math.random() * sizes[i] * sizes[i]); }
+  G = { type: "warm", game: "intrus", rounds: rounds, i: 0, errs: 0, found: 0, t0: Date.now(), res: [] };
+  inShow();
+}
+function inShow() {
+  var r = G.rounds[G.i], dots = ""; for (var k = 0; k < 8; k++) dots += '<i class="' + (G.res[k] === 1 ? "ok" : k === G.i ? "cur" : "") + '"></i>';
+  var cells = ""; for (var j = 0; j < r.n * r.n; j++) cells += '<button type="button" class="cellz" data-ic="' + j + '" style="font-size:' + (r.n === 3 ? 44 : r.n === 4 ? 36 : 30) + 'px">' + (j === r.at ? r.odd : r.base) + "</button>";
+  app.innerHTML = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + dots + '</div></div><div class="card"><div class="tagline">Grille ' + (G.i + 1) + " sur 8</div><p class=\"small\" style=\"margin:4px 0\">Touche le symbole <b>différent</b>.</p><div class=\"gridz\" style=\"grid-template-columns:repeat(" + r.n + ',1fr)">' + cells + "</div></div>";
+  window.scrollTo(0, 0);
+}
+app.addEventListener("click", function (e) {
+  var b = e.target.closest(".cellz"); if (!b || !G || G.game !== "intrus" || G.lock) return;
+  var r = G.rounds[G.i], j = +b.dataset.ic;
+  if (j === r.at) { G.lock = true; b.classList.add("ok"); G.res[G.i] = 1; G.found++; wT = setTimeout(function () { G.lock = false; if (G.i >= 7) inEnd(); else { G.i++; inShow(); } }, 450); }
+  else { b.classList.add("ko"); b.disabled = true; G.errs++; }
+});
+function inEnd() {
+  var secs = Math.round((Date.now() - G.t0) / 1000), w = wGain(6 + Math.max(0, 14 - G.errs * 2), false);
+  wFinish({ emoji: G.errs <= 1 ? "🏆" : "🔍", title: G.errs <= 1 ? "Regard de lynx !" : "Bien cherché !", lines: ["8 grilles en <b>" + secs + " secondes</b>", G.errs ? G.errs + " erreur" + (G.errs > 1 ? "s" : "") + " en route, ce n'est pas grave." : "Aucune erreur, bravo !"], g: w.g, bonus: w.bonus, warm: true, again: { wg: "intrus", wm: "solo" } });
+}
+
+/* --- Le perroquet (suite de couleurs) --- */
+var PADS = [["#d64545", "▲"], ["#2e9b5a", "●"], ["#2f6fd0", "■"], ["#e6b422", "◆"]];
+function tone(i) {
+  if (lsGet("qd-mute") === "1") return;
+  try { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; wAudio = wAudio || new AC(); var o = wAudio.createOscillator(), g = wAudio.createGain();
+    o.type = "sine"; o.frequency.value = [262, 330, 392, 523][i]; g.gain.value = 0.08; o.connect(g); g.connect(wAudio.destination); o.start(); o.stop(wAudio.currentTime + 0.22); } catch (e) {}
+}
+function padsHtml(on) { return '<div class="pads">' + PADS.map(function (p, i) { return '<button type="button" class="pad" data-pp="' + i + '" style="background:' + p[0] + '"' + (on ? "" : " disabled") + ' aria-label="Couleur ' + (i + 1) + '">' + p[1] + "</button>"; }).join("") + "</div>"; }
+function muteBtn() { return '<button class="pill sm" type="button" data-mute="1" aria-label="Son">' + (lsGet("qd-mute") === "1" ? "🔇" : "🔊") + "</button>"; }
+function flash(i, ms) { var b = document.querySelector('.pad[data-pp="' + i + '"]'); if (!b) return; b.classList.add("lit"); tone(i); setTimeout(function () { b.classList.remove("lit"); }, ms || 350); }
+function ppStart(m) {
+  G = { type: "warm", game: "perroquet", mode: m, seq: [], idx: 0, lives: 3, len: 2, maxLen: 0, who: 0, players: ["Le parent", "Gianni"], over: false };
+  if (m === "solo") { for (var i = 0; i < 2; i++) G.seq.push(Math.floor(Math.random() * 4)); ppSoloPlay(); } else ppDuoDraw("");
+}
+function hearts() { var h = ""; for (var i = 0; i < 3; i++) h += i < G.lives ? "❤️" : "🖤"; return h; }
+function ppSoloPlay(msg) {
+  G.idx = 0; G.busy = true;
+  app.innerHTML = topBar('<div class="who">🦜 Suite de ' + G.seq.length + "</div>" + muteBtn()) + '<div class="card"><div class="who" id="pm">' + (msg || "Regarde bien…") + '</div><div style="text-align:center;font-size:24px">' + hearts() + "</div>" + padsHtml(false) + "</div>";
+  window.scrollTo(0, 0); var k = 0;
+  function step() { if (!G || G.game !== "perroquet") return; if (k >= G.seq.length) { G.busy = false; document.querySelectorAll(".pad").forEach(function (b) { b.disabled = false; }); var pm = $("#pm"); if (pm) pm.textContent = "À toi !"; return; }
+    flash(G.seq[k], 450); k++; wT = setTimeout(step, 750); }
+  wT = setTimeout(step, 900);
+}
+function ppDuoDraw(msg) {
+  var who = G.players[G.who], n = G.seq.length;
+  app.innerHTML = topBar('<div class="who">🦜 Suite de ' + n + "</div>" + muteBtn()) + '<div class="card"><div class="who">' + esc(who) + (msg ? "" : "") + '</div><p style="text-align:center;margin:0 0 6px">' + (msg || (n ? "Rejoue les <b>" + n + "</b> couleurs, puis ajoute-en <b>une nouvelle</b>." : "Choisis la <b>première couleur</b> de la suite.")) + "</p>" + padsHtml(true) + '<p class="small" style="text-align:center">Aucune aide : il faut s\'en souvenir !</p></div>';
+  window.scrollTo(0, 0);
+}
+app.addEventListener("click", function (e) {
+  var b = e.target.closest(".pad"); if (!b || !G || G.game !== "perroquet" || G.busy || G.over) return;
+  var i = +b.dataset.pp; flash(i, 220);
+  if (G.mode === "solo") {
+    if (G.seq[G.idx] === i) { G.idx++; if (G.idx >= G.seq.length) { G.maxLen = G.seq.length; G.busy = true; if (G.seq.length >= 7) { ppEnd(); return; } G.seq.push(Math.floor(Math.random() * 4)); wT = setTimeout(function () { ppSoloPlay("Bravo ! Une couleur de plus"); }, 700); } }
+    else { G.lives--; G.busy = true; if (G.lives <= 0) { wT = setTimeout(ppEnd, 500); } else wT = setTimeout(function () { ppSoloPlay("Oups ! Regarde encore"); }, 700); }
+  } else {
+    if (G.idx < G.seq.length) { if (G.seq[G.idx] === i) G.idx++; else { G.over = true; G.loser = G.who; wT = setTimeout(ppEnd, 500); } }
+    else { G.seq.push(i); G.who = 1 - G.who; G.idx = 0; G.busy = true; wT = setTimeout(function () { G.busy = false; ppDuoDraw(""); }, 500); }
+  }
+});
+function ppEnd() {
+  if (!G) return; var duo = G.mode === "duo", len = duo ? G.seq.length : G.maxLen, base = duo ? Math.min(20, 5 + 2 * len) : Math.min(20, len ? 5 + 3 * (len - 1) : 5);
+  var w = wGain(base, duo), lines = [];
+  if (duo) { lines.push("La suite faisait <b>" + len + " couleur" + (len > 1 ? "s" : "") + "</b> !"); lines.push(G.loser === 1 ? "Gianni s'est trompé cette fois : le parent a la meilleure mémoire… aujourd'hui 😉" : "Le parent s'est trompé : bravo Gianni, belle mémoire ! 🏆"); }
+  else lines.push(len ? "Tu as rejoué une suite de <b>" + len + " couleurs</b>." : "Pas encore de suite complète : on réessaie, tu vas y arriver !");
+  var m = G.mode; wFinish({ emoji: len >= 6 ? "🏆" : "🦜", title: len >= 6 ? "Mémoire de perroquet !" : "Bien joué !", lines: lines, g: w.g, bonus: w.bonus, warm: true, again: { wg: "perroquet", wm: m } });
+}
+
+/* --- Chasse à l'erreur --- */
+function boldSegs(e) { var m, out = [], re = /<b>([^<]{2,40})<\/b>/g; while ((m = re.exec(e))) out.push(m[1]); return out; }
+function plainText(html) { var d = document.createElement("div"); d.innerHTML = html.replace(/<br\s*\/?>/g, " "); return d.textContent; }
+var SEGS = null;
+function segIndex() { SEGS = {}; POOL.forEach(function (c) { boldSegs(c.e).forEach(function (sg) { (SEGS[c.course] = SEGS[c.course] || []).push({ id: c.id, t: sg }); }); }); }
+function stripArt(x) { var m = x.match(/^(le |la |les |l'|l’|un |une |des |du |de la |de l'|d'|de )(.+)$/i); return m ? [m[1], m[2]] : ["", x]; }
+function shapeOf(x) { return /\d/.test(x) ? "n" : x.split(/\s+/).length <= 2 ? "w" : "l"; }
+/* Mot de remplacement : une mauvaise réponse de la carte (écrite pour être crédible) quand le terme est court, ou un autre nombre du même cours. */
+function isNum(x) { return /^[−\-–]?\d[\d\s.,]*\s?(ans|cm|mm|m|km|°C|%|siècles?)?$/.test(x.trim()); }
+var DETS = /(^|[\s'’])(le|la|les|l|un|une|des|du|de|d|ce|cet|cette|ces|son|sa|ses|leur|leurs|au|aux|en|quel|quelle)$/i;
+function pickRepl(c, orig, plain, before) {
+  var A = stripArt(orig), o0 = stripArt(plainText(c.o[0]).toLowerCase().trim())[1], bo = A[1].toLowerCase(), cand = [];
+  if (/^[A-ZÉÈÀ]/.test(orig) && !/^\s*$/.test(before) && !/[.!?:]\s*$/.test(before)) return null;
+  if (bo.length >= 2 && orig.split(/\s+/).length <= 3 && (o0.indexOf(bo) >= 0 || bo.indexOf(o0) >= 0)) {
+    if (!A[0] && DETS.test(before.trim())) { /* déterminant devant : le genre risque de ne pas coller */ }
+    else c.o.slice(1).forEach(function (w) {
+      w = plainText(w).trim(); var W = stripArt(w);
+      if (A[0]) { if (W[0].toLowerCase() !== A[0].toLowerCase()) return; } else if (W[0]) return;
+      if (w.split(/\s+/).length > 3 || w.length > 28 || w.toLowerCase() === orig.toLowerCase() || plain.indexOf(w.toLowerCase()) >= 0) return;
+      if (/^[A-ZÉÈÀ]/.test(w) !== /^[A-ZÉÈÀ]/.test(orig)) return;
+      var bw = before.trim().toLowerCase().split(/\s+/).slice(-2).join(" "), ww = w.toLowerCase().split(/\s+/).slice(0, 2).join(" "); if (bw && bw === ww) return;
+      cand.push(w); });
+  }
+  if (!cand.length && isNum(orig)) {
+    (SEGS[c.course] || []).forEach(function (x) { if (x.id !== c.id && x.t !== orig && isNum(x.t) && plain.indexOf(x.t.toLowerCase()) < 0 && Math.abs(x.t.length - orig.length) <= 4) cand.push(x.t); });
+  }
+  return cand.length ? cand[Math.floor(Math.random() * cand.length)] : null;
+}
+function huntRound(c, withErr) {
+  var segs = boldSegs(c.e), html = c.e, bad = null, orig = null, plain = plainText(c.e).toLowerCase();
+  if (withErr) {
+    if (!segs.length) return null;
+    orig = segs[Math.floor(Math.random() * segs.length)]; bad = pickRepl(c, orig, plain, plainText(c.e.split("<b>" + orig + "</b>")[0])); if (!bad) return null;
+    html = html.replace("<b>" + orig + "</b>", "<b>" + bad + "</b>");
+  }
+  var d = document.createElement("div"), toks = []; d.innerHTML = html.replace(/<br\s*\/?>/g, " ");
+  var trail = true;
+  d.childNodes.forEach(function (n) { var isErr = !!withErr && n.nodeType === 1 && n.tagName === "B" && n.textContent === bad, txt = n.textContent, first = true;
+    txt.split(/\s+/).filter(Boolean).forEach(function (w) { toks.push({ t: w, err: isErr, sp: first ? (trail || /^\s/.test(txt)) : true }); first = false; }); if (txt.trim()) trail = /\s$/.test(txt); });
+  if (toks.length < 6 || toks.length > 48) return null;
+  return { c: c, toks: toks, hasErr: !!withErr, orig: orig, bad: bad };
+}
+function huntStart(m) {
+  if (!POOL.length) { app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><p>Les questions ne sont pas chargées. Vérifie la connexion puis réessaie.</p></div>'; return; }
+  if (!SEGS) segIndex();
+  var rounds = [], seen = {}, pool = shuffle(POOL).filter(function (c) { var k = plainText(c.e).slice(0, 60); if (seen[k]) return false; seen[k] = 1; return true; }), errs = 0, i, r;
+  for (i = 0; i < pool.length && errs < 4; i++) { r = huntRound(pool[i], true); if (r) { rounds.push(r); errs++; } }
+  for (i = 0; i < pool.length && rounds.length < 5; i++) { if (rounds.some(function (x) { return x.c === pool[i]; })) continue; r = huntRound(pool[i], false); if (r) rounds.push(r); }
+  if (errs < 2) { app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><p>Pas assez de phrases adaptées dans les cours pour ce jeu. Importe d\'autres cours !</p></div>'; return; }
+  rounds = shuffle(rounds);
+  G = { type: "chasse", mode: m, rounds: rounds, i: 0, found: 0, res: [], done: false };
+  huntShow();
+}
+function huntDots() { var h = ""; for (var i = 0; i < G.rounds.length; i++) h += '<i class="' + (G.res[i] === 1 ? "ok" : G.res[i] === 0 ? "ko" : i === G.i ? "cur" : "") + '"></i>'; return h; }
+function huntShow() {
+  var r = G.rounds[G.i], solo = G.mode === "solo", h = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + huntDots() + "</div></div>"; G.done = false;
+  if (solo) {
+    h += '<div class="card"><div class="tagline">' + esc(SUBNAMES[r.c.sub] || r.c.sub) + ' · phrase ' + (G.i + 1) + " sur " + G.rounds.length + '</div><p class="small" style="margin:4px 0">Lis bien. Si un mot est faux, touche-le. Sinon touche « Tout est juste ».</p><div class="sentence">' +
+      r.toks.map(function (t, i) { return (t.sp ? " " : "") + '<button type="button" class="tok' + (t.sp ? "" : " glue") + '" data-tk="' + i + '">' + esc(t.t) + "</button>"; }).join("") + '</div><div id="fb"></div><button type="button" class="btn go" data-tk="ok" id="allok" style="text-align:center">✓ Tout est juste</button></div>';
+  } else {
+    h += '<div class="card"><h2>👪 Le parent lit à voix haute</h2><p class="small" style="margin:0 0 6px">Gianni ne regarde pas l\'écran. Lis la phrase lentement, exactement comme elle est écrite. Il dit s\'il y a une erreur et laquelle.</p><div class="sentence" style="font-size:19px">' +
+      r.toks.map(function (t) { return (t.sp ? " " : "") + esc(t.t); }).join("").trim() + '</div><div class="pbox"><b>Réponse (cache l\'écran à Gianni)</b><br>' +
+      (r.hasErr ? "⚠️ Il y a une erreur : <mark class=\"err\">« " + esc(r.bad) + " »</mark> à la place de <b>« " + esc(r.orig) + " »</b>." : "✅ La phrase est juste, il n'y a pas d'erreur.") + '</div><div class="tf"><button type="button" class="btn go" data-hp="1">✓ Il a trouvé</button><button type="button" class="btn" data-hp="0">✗ Pas trouvé</button></div></div>';
+  }
+  app.innerHTML = h; window.scrollTo(0, 0);
+}
+function huntAnswer(k) {
+  if (!G || G.type !== "chasse" || G.done || G.mode !== "solo") return;
+  var r = G.rounds[G.i], ok = k === "ok" ? !r.hasErr : (r.hasErr && r.toks[+k].err);
+  document.querySelectorAll(".tok").forEach(function (b, i) { b.disabled = true; if (r.toks[i].err) b.classList.add("ok"); else if (String(i) === k) b.classList.add("ko"); });
+  $("#allok").remove();
+  var last = G.i >= G.rounds.length - 1;
+  $("#fb").innerHTML = '<div class="fb ' + (ok ? "good" : "bad") + '"><b class="t">' + (ok ? "✓ Bien vu !" : "✗ Pas tout à fait.") + "</b>" + (r.hasErr ? "Le mot faux était « " + esc(r.bad) + " ». La phrase juste dit « " + esc(r.orig) + " »." : "Cette phrase était juste.") + '</div><button type="button" class="btn go next" data-hn="1">' + (last ? "Voir mon butin 🏴‍☠️" : "Phrase suivante →") + "</button>";
+  G.res[G.i] = ok ? 1 : 0; if (ok) G.found++; G.done = true;
+}
+function huntParent(ok) { if (!G || G.type !== "chasse") return; G.res[G.i] = ok ? 1 : 0; if (ok) G.found++; G.done = true; huntNext(); }
+function huntNext() {
+  if (!G || !G.done) return;
+  if (G.i >= G.rounds.length - 1) huntFinish(); else { G.i++; huntShow(); }
+}
+function huntFinish() {
+  var found = G.found, n = G.rounds.length, t = today(), parent = G.mode === "parent" || G.mode === "duo", m = G.mode;
+  var day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += found; day.tot += n; S.days[t] = day;
+  var gain = found * 8 + (found === n ? 10 : 0), bonus = parentBonus(parent); S.berries += gain + bonus; S.stats.hunt = (S.stats.hunt || 0) + found;
+  var nw = [], st = streak(); gotBadge("first", nw); if (st >= 3) gotBadge("s3", nw); if (st >= 7) gotBadge("s7", nw); if (day.n >= 3) gotBadge("marathon", nw);
+  if ((S.stats.hunt || 0) >= 10) gotBadge("hunt", nw); if (S.berries >= 500) gotBadge("b500", nw);
+  wFinish({ emoji: found === n ? "🏆" : found >= 3 ? "🔎" : "🌊", title: found === n ? "Œil de lynx !" : "Bien cherché !", lines: [found + " erreur" + (found > 1 ? "s" : "") + " ou phrase" + (found > 1 ? "s" : "") + " bien repérée" + (found > 1 ? "s" : "") + " sur " + n], g: gain, bonus: bonus, nw: nw, again: { wg: "chasse", wm: m } });
 }
 
 /* ---------- pause mouvement ---------- */
