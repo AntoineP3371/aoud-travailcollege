@@ -76,6 +76,22 @@ header h1 small { display: block; font-size: 12px; font-weight: 400; opacity: 0.
 .pop { animation: pop 0.5s ease-out; }
 @keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pop { animation: none; } .bar > i, .timer > i { transition: none; } }
+/* séance, pause, coffre */
+.btn.big { min-height: 78px; font-size: 21px; }
+.sub-h { color: #fff; opacity: 0.85; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin: 16px 2px 8px; }
+.status { color: #fff; text-align: center; font-weight: 700; margin: -2px 0 10px; min-height: 24px; }
+.status.hot { color: #f4cb55; font-size: 19px; }
+.pause { background: #e3f4e8; border-color: var(--green); box-shadow: none; margin: 12px 0; text-align: center; }
+.pause .count { font-size: 64px; font-weight: 800; color: var(--green); line-height: 1; margin: 6px 0; }
+.pause .bar > i { background: var(--green); }
+.rw { display: flex; align-items: center; gap: 12px; background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; text-align: left; }
+.rw .em { font-size: 34px; line-height: 1; flex: none; }
+.rw .tx { flex: 1; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.rw small { display: block; font-weight: 500; color: var(--muted); }
+.rw .btn { width: auto; margin: 0; min-height: 48px; padding: 6px 14px; font-size: 16px; text-align: center; flex: none; }
+.rw.lock { opacity: 0.8; background: rgba(255,247,221,0.6); }
+.rw .btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+.hist { font-size: 15px; margin: 4px 0; }
 /* trésors */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .tile { background: #fff7dd; border: 2.5px solid var(--wood); border-radius: 12px; padding: 10px 8px; text-align: center; min-height: 118px; }
@@ -141,13 +157,19 @@ var BADGES = [
   ["eclair", "💥", "Vrai ou faux de légende", "8 sur 8 au défi éclair"],
   ["mystere", "🔮", "Mémoire de capitaine", "5 sur 5 à la carte mystère"],
   ["b500", "💰", "Coffre bien rempli", "Gagner 500 Berries"],
-  ["coll", "🏺", "Chasseur de trésors", "Trouver 5 trésors"]
+  ["coll", "🏺", "Chasseur de trésors", "Trouver 5 trésors"],
+  ["revise", "🐘", "Mémoire d'éléphant", "Réussir 5 cartes qui étaient à revoir"],
+  ["pause", "🏃", "Marin en forme", "Faire 3 pauses mouvement"],
+  ["gift", "🎁", "Premier cadeau", "Débloquer une récompense du coffre"]
 ];
+var PAUSES = ["10 sauts les bras en l'air 🙌", "Fais le tour de la pièce en marchant comme un crabe 🦀", "10 squats : monte à bord du mât ! 🏴‍☠️", "Étire-toi comme si tu attrapais les voiles ⛵",
+  "Marche sur place en levant bien les genoux 🥁", "Tourne les bras comme les rames d'un bateau 🚣", "Tiens en équilibre sur une jambe pendant 20 secondes, comme sur le pont par gros temps 🌊",
+  "10 pompes contre le mur 💪", "Va boire un verre d'eau, puis reviens ! 💧", "5 grandes respirations : gonfle le ventre comme une voile 🌬️"];
 var CREW = ["Cap sur la réussite, matelot !", "Un petit défi, et l'équipage est fier de toi.", "Le vent se lève : 3 minutes suffisent !", "Même les capitaines apprennent un peu chaque jour.",
   "Un trésor t'attend peut-être au prochain défi…", "Pas besoin d'être parfait : il suffit de naviguer.", "Aujourd'hui, on hisse les voiles en douceur.",
   "Chaque bonne réponse, c'est un coup de rame de plus.", "Les meilleurs équipages s'entraînent un peu tous les jours.", "Une erreur ? Juste une vague, on repart !",
   "Respire, souris, on y va.", "L'île au trésor se rapproche !"];
-var DEF = function () { return { days: {}, berries: 0, badges: {}, treasures: {}, subs: {}, stats: { ok: 0, tot: 0, combo: 0, maxCombo: 0, perfect: 0 }, daily: {}, ts: 0 }; };
+var DEF = function () { return { days: {}, berries: 0, spent: 0, miss: {}, badges: {}, treasures: {}, subs: {}, stats: { ok: 0, tot: 0, combo: 0, maxCombo: 0, perfect: 0, revised: 0, pauses: 0 }, daily: {}, ts: 0 }; };
 var S = DEF();
 function loadLocal() { try { var d = JSON.parse(lsGet("qd-state") || "null"); if (d && d.days) { var b = DEF(); for (var k in b) if (!(k in d)) d[k] = b[k]; S = d; } } catch (e) {} }
 function saveLocal() { S.ts = Date.now(); lsSet("qd-state", JSON.stringify(S)); pushLater(); }
@@ -158,11 +180,16 @@ function merge(a, b) {          /* a = local, b = serveur : on garde le meilleur
     Object.keys(ks).forEach(function (x) { var p = (a[k] || {})[x] || {}, q = (b[k] || {})[x] || {}; o[k][x] = { n: Math.max(p.n || 0, q.n || 0), ok: Math.max(p.ok || 0, q.ok || 0), tot: Math.max(p.tot || 0, q.tot || 0) }; });
   });
   o.berries = Math.max(a.berries || 0, b.berries || 0);
+  o.spent = Math.max(a.spent || 0, b.spent || 0);
+  (function () {   /* cartes à revoir : la fiche la plus récente gagne (b = -1 : maîtrisée) */
+    var u = {}; [a.miss || {}, b.miss || {}].forEach(function (m) { for (var x in m) if (!u[x] || (m[x].t || 0) > (u[x].t || 0)) u[x] = m[x]; });
+    o.miss = u;
+  })();
   ["badges", "treasures", "subs", "daily"].forEach(function (k) {
     var u = {}; [a[k] || {}, b[k] || {}].forEach(function (m) { for (var x in m) u[x] = (u[x] && typeof u[x] === "string" && typeof m[x] === "string" && u[x] < m[x]) ? u[x] : m[x]; });
     o[k] = u;
   });
-  ["ok", "tot", "maxCombo", "perfect"].forEach(function (k) { o.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0); });
+  ["ok", "tot", "maxCombo", "perfect", "revised", "pauses"].forEach(function (k) { o.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0); });
   o.stats.combo = (a.ts || 0) >= (b.ts || 0) ? ((a.stats || {}).combo || 0) : ((b.stats || {}).combo || 0);
   o.ts = Math.max(a.ts || 0, b.ts || 0);
   return o;
@@ -220,9 +247,10 @@ $("#lg-form").addEventListener("submit", function (e) {
 
 /* ---------- questions ---------- */
 var POOL = [], SUBNAMES = {};
+function hid(x) { var h = 5381; for (var i = 0; i < x.length; i++) h = ((h << 5) + h + x.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
 function buildPool(cs, subs) {
   POOL = []; subs.forEach(function (s) { SUBNAMES[s.key] = s.name; });
-  cs.forEach(function (c) { (c.cards || []).forEach(function (k) { if (k && k.q && k.e && k.o && k.o.length === 4) POOL.push({ sub: c.subject, course: c.label || c.title || c.key, tag: k.tag || "", q: k.q, o: k.o, e: k.e }); }); });
+  cs.forEach(function (c) { (c.cards || []).forEach(function (k) { if (k && k.q && k.e && k.o && k.o.length === 4) POOL.push({ id: hid((c.key || c.label || c.title || "") + "|" + k.q), sub: c.subject, course: c.label || c.title || c.key, tag: k.tag || "", q: k.q, o: k.o, e: k.e }); }); });
 }
 function loadPool() {
   return Promise.all([api("GET", "/api/collections/courses/records?perPage=200&fields=subject,label,title,key,cards"), api("GET", "/api/collections/subjects/records?perPage=100&fields=key,name")]).then(function (r) {
@@ -238,6 +266,25 @@ function pick(n) {   /* n questions, de matières variées */
   return out;
 }
 
+/* ---------- cartes à revoir (révision espacée) ---------- */
+var INTERVALS = [1, 3, 7, 14], revIds = {};
+function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return ds(d); }
+function track(c, ok) {
+  var t = today(), m = S.miss[c.id];
+  if (!ok) { S.miss[c.id] = { b: 0, d: addDays(1), t: Date.now() }; return; }
+  if (m && m.b >= 0 && m.d <= t) {
+    var b = m.b + 1; S.stats.revised = (S.stats.revised || 0) + 1;
+    S.miss[c.id] = b >= INTERVALS.length ? { b: -1, d: "", t: Date.now() } : { b: b, d: addDays(INTERVALS[b]), t: Date.now() };
+  }
+}
+function dueCards() { var t = today(); return POOL.filter(function (c) { var m = S.miss[c.id]; return m && m.b >= 0 && m.d <= t; }); }
+function pickSeance(n) {
+  var due = shuffle(dueCards()).slice(0, 3), ids = {}; revIds = {};
+  due.forEach(function (c) { ids[c.id] = 1; revIds[c.id] = 1; });
+  var rest = pick(n + 3).filter(function (c) { return !ids[c.id]; }).slice(0, n - due.length);
+  return shuffle(due.concat(rest));
+}
+
 /* ---------- séries, rangs ---------- */
 function streak() {
   var d = new Date(), n = 0; if (!S.days[ds(d)]) d.setDate(d.getDate() - 1);
@@ -250,7 +297,8 @@ function dayFormat() { return FORMATS[dayNum() % 3][0]; }
 /* ---------- écrans ---------- */
 var app = $("#app"), G = null, timerH = 0;
 function esc(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
-function render() { clearInterval(timerH); G = null; home(); }
+var pauseH = 0;
+function render() { clearInterval(timerH); clearInterval(pauseH); G = null; home(); }
 function refresh() { if (!G) home(); }
 function home() {
   var rk = rankOf(S.berries), st = streak(), t = today(), df = dayFormat();
@@ -262,11 +310,15 @@ function home() {
     '<div class="week" aria-label="Les 7 derniers jours">' + wk + '</div><p class="small" style="margin:8px 0 0">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite" + (S.days[t] ? "" : (st ? " · un défi aujourd'hui pour continuer !" : " · lance ta série aujourd'hui !")) + "</p></div>";
   if (!POOL.length) h += '<div class="card"><p>Les questions ne sont pas encore chargées. Vérifie la connexion puis réessaie.</p></div>';
   else {
+    var due = dueCards().length, sDone = !!S.daily[t + "s"];
+    h += '<button type="button" class="btn star big" data-play="seance">▶ Ma séance du jour<span class="tag">' + (sDone ? "Bonus pris ✓" : "Bonus +30") + "</span><small>8 questions, environ 5 minutes, une à la fois" + (due ? " · dont " + Math.min(due, 3) + " carte" + (Math.min(due, 3) > 1 ? "s" : "") + " à revoir" : "") + "</small></button>";
+    h += '<div class="sub-h">Ou choisis un autre défi</div>';
     FORMATS.forEach(function (f) {
       var isDay = f[0] === df, done = S.daily[t] && isDay;
       h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +30") + "</span>" : "") + "<small>" + f[2] + "</small></button>";
     });
   }
+  h += '<button type="button" class="btn" data-go="coffre">🎁 Mon coffre<small>' + Math.max(0, S.berries - (S.spent || 0)) + " Berries à dépenser · récompenses choisies par tes parents</small></button>";
   h += '<button type="button" class="btn" data-go="trophy">🏆 Mes réussites et trésors<small>' + Object.keys(S.badges).length + " / " + BADGES.length + " réussites · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button>";
   app.innerHTML = h;
 }
@@ -274,6 +326,10 @@ app.addEventListener("click", function (e) {
   var b = e.target.closest("button"); if (!b) return;
   if (b.dataset.play) start(b.dataset.play);
   else if (b.dataset.go === "trophy") trophies();
+  else if (b.dataset.go === "coffre") coffre();
+  else if (b.dataset.claim) claim(b.dataset.claim);
+  else if (b.dataset.pause) pauseStart();
+  else if (b.dataset.pskip) { clearInterval(pauseH); var pz = $("#pz"); if (pz) pz.remove(); }
   else if (b.dataset.go === "home") render();
   else if (b.dataset.opt !== undefined) answerQcm(+b.dataset.opt);
   else if (b.dataset.tf !== undefined) answerTf(b.dataset.tf === "1");
@@ -290,10 +346,10 @@ document.addEventListener("keydown", function (e) {
 });
 
 function start(type) {
-  var n = type === "eclair" ? 8 : 5, cs = pick(n); if (!cs.length) return;
+  var n = type === "eclair" || type === "seance" ? 8 : 5, cs = type === "seance" ? pickSeance(n) : pick(n); if (!cs.length) return;
   G = { type: type, items: cs, i: 0, ok: 0, n: 0, res: [], done: false, t0: Date.now(), left: 180, subs: {} };
   if (type === "eclair") G.items = cs.map(function (c) { var good = Math.random() < 0.5, wr = c.o[1 + Math.floor(Math.random() * 3)]; return { c: c, shown: good ? c.o[0] : wr, truth: good }; });
-  else if (type === "mini") G.items = cs.map(function (c) { return { c: c, opts: shuffle(c.o.map(function (t, j) { return { t: t, ok: j === 0 }; })) }; });
+  else if (type === "mini" || type === "seance") G.items = cs.map(function (c) { return { c: c, opts: shuffle(c.o.map(function (t, j) { return { t: t, ok: j === 0 }; })) }; });
   else G.items = cs.map(function (c) { return { c: c }; });
   showQ();
 }
@@ -302,8 +358,9 @@ function showQ() {
   clearInterval(timerH); G.done = false;
   var it = G.items[G.i], c = it.c, h = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + dots() + "</div></div>";
   if (G.type === "mini" || G.type === "eclair") h += '<div class="timer" id="tm"><i id="tmi"></i></div>';
-  h += '<div class="card"><div class="tagline">' + esc(SUBNAMES[c.sub] || c.sub) + (c.tag ? " · " + esc(c.tag) : "") + "</div>";
-  if (G.type === "mini") {
+  if (G.type === "seance") { var left = G.items.length - G.i; h += '<div class="status' + (left <= 2 ? " hot" : "") + '">' + (left === 1 ? "Dernière question ! 🏁" : left === 2 ? "Plus que 2 questions !" : "Question " + (G.i + 1) + " sur " + G.items.length) + "</div>"; }
+  h += '<div class="card"><div class="tagline">' + esc(SUBNAMES[c.sub] || c.sub) + (c.tag ? " · " + esc(c.tag) : "") + (G.type === "seance" && revIds[c.id] ? ' <span class="tag" style="margin-left:6px">🔁 À revoir</span>' : "") + "</div>";
+  if (G.type === "mini" || G.type === "seance") {
     h += '<div class="q">' + c.q + "</div>" + it.opts.map(function (o, j) { return '<button type="button" class="opt" data-opt="' + j + '"><b>' + "ABCD".charAt(j) + "</b><span>" + o.t + "</span></button>"; }).join("") + '<div id="fb"></div></div>';
   } else if (G.type === "eclair") {
     h += '<div class="q">' + c.q + '</div><div class="proposal">👉 ' + it.shown + '</div><div class="tf"><button type="button" class="btn go" data-tf="1">✓ Vrai</button><button type="button" class="btn" data-tf="0">✗ Faux</button></div><div id="fb"></div></div>';
@@ -325,7 +382,8 @@ function runTimer(ms, kind) {
     if (el >= ms) { clearInterval(timerH); if (kind === "mini") { G.timeUp = true; if (!G.done) finish(); } else if (!G.done) answerTf(null); }
   }, 120);
 }
-function mark(ok, sub) {
+function mark(ok, sub, c) {
+  if (c) track(c, ok);
   G.res[G.i] = ok ? 1 : 0; G.n++; if (ok) G.ok++;
   S.stats.tot++; if (ok) { S.stats.ok++; S.stats.combo++; if (S.stats.combo > S.stats.maxCombo) S.stats.maxCombo = S.stats.combo; } else S.stats.combo = 0;
   S.subs[sub] = 1; G.done = true;
@@ -335,8 +393,8 @@ function fbHtml(ok, txt, e, last) {
     '<button type="button" class="btn go next" data-next="1">' + (last ? "Voir mon butin 🏴‍☠️" : "Question suivante →") + "</button>";
 }
 function answerQcm(j) {
-  if (G.done || G.type !== "mini") return; var it = G.items[G.i], ok = it.opts[j].ok;
-  mark(ok, it.c.sub);
+  if (G.done || (G.type !== "mini" && G.type !== "seance")) return; var it = G.items[G.i], ok = it.opts[j].ok;
+  mark(ok, it.c.sub, it.c);
   var bs = document.querySelectorAll(".opt"); bs.forEach(function (b, k) { b.disabled = true; if (it.opts[k].ok) b.classList.add("right"); else if (k === j) b.classList.add("wrong"); });
   var good = it.opts.filter(function (o) { return o.ok; })[0].t;
   $("#fb").innerHTML = fbHtml(ok, "Pas tout à fait. La bonne réponse : " + good, it.c.e, G.i === G.items.length - 1);
@@ -344,7 +402,7 @@ function answerQcm(j) {
 }
 function answerTf(v) {
   if (G.done || G.type !== "eclair") return; var it = G.items[G.i], ok = v === it.truth, late = v === null;
-  mark(ok, it.c.sub); clearInterval(timerH);
+  mark(ok, it.c.sub, it.c); clearInterval(timerH);
   document.querySelectorAll(".tf .btn").forEach(function (b) { b.disabled = true; });
   var msg = late ? "Trop lent ! " : "";
   $("#fb").innerHTML = fbHtml(ok, msg + (it.truth ? "C'était vrai." : "C'était faux. La bonne réponse : " + it.c.o[0]), it.c.e, G.i === G.items.length - 1);
@@ -355,7 +413,7 @@ function reveal() {
   document.querySelector("[data-reveal]").remove();
 }
 function rate(r) {
-  if (G.done) return; mark(r === "yes", G.items[G.i].c.sub);
+  if (G.done) return; mark(r === "yes", G.items[G.i].c.sub, G.items[G.i].c);
   document.querySelectorAll("#fb .tf .btn").forEach(function (b) { b.disabled = true; });
   $("#fb").insertAdjacentHTML("beforeend", '<button type="button" class="btn go next" data-next="1">' + (G.i === G.items.length - 1 ? "Voir mon butin 🏴‍☠️" : "Carte suivante →") + "</button>");
 }
@@ -369,6 +427,7 @@ function finish() {
   var day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += ok; day.tot += tot; S.days[t] = day;
   var gain = ok * 10 + (perfect ? 20 : 0), bonusDay = false;
   if (G.type === dayFormat() && !S.daily[t] && tot) { gain += 30; S.daily[t] = 1; bonusDay = true; }
+  if (G.type === "seance" && !S.daily[t + "s"] && tot) { gain += 30; S.daily[t + "s"] = 1; bonusDay = true; }
   S.berries += gain; if (perfect) S.stats.perfect++;
   var nw = [], add = function (id) { if (!unlocked(id)) { S.badges[id] = t; nw.push(BADGES.filter(function (b) { return b[0] === id; })[0]); } };
   var st = streak(), subsAll = Object.keys(SUBNAMES).length > 0 && Object.keys(SUBNAMES).every(function (k) { return S.subs[k]; });
@@ -382,6 +441,7 @@ function finish() {
   if (G.type === "eclair" && perfect && tot === 8) add("eclair");
   if (G.type === "mystere" && perfect) add("mystere");
   if (S.berries >= 500) add("b500");
+  if ((S.stats.revised || 0) >= 5) add("revise");
   var found = null, free = TREASURES.filter(function (x) { return !S.treasures[x[1]]; });
   if (tot && ok >= Math.ceil(tot / 2) && free.length && Math.random() < 0.5) { found = free[Math.floor(Math.random() * free.length)]; S.treasures[found[1]] = t; }
   if (Object.keys(S.treasures).length >= 5) add("coll");
@@ -389,12 +449,15 @@ function finish() {
   saveLocal();
   var msg = perfect ? "Parfait, capitaine !" : ok >= Math.ceil(tot / 2) ? "Belle traversée !" : "Bon voyage d'entraînement !";
   var h = '<div class="card res"><div class="big pop">' + (perfect ? "🏆" : ok >= Math.ceil(tot / 2) ? "⛵" : "🌊") + "</div><h2>" + msg + '</h2><p>' + ok + " bonne" + (ok > 1 ? "s" : "") + " réponse" + (ok > 1 ? "s" : "") + " sur " + tot + '</p><div class="gain pop">+' + gain + " Berries</div>" +
-    (bonusDay ? '<p class="small">dont +30 pour le défi du jour 🌟</p>' : "") + '<div class="chips">';
+    (bonusDay ? '<p class="small">dont +30 de bonus du jour 🌟</p>' : "") + '<div class="chips">';
   h += '<span class="chip">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite</span>";
+  if (tot - ok > 0) h += '<span class="chip">🔁 ' + (tot - ok) + " carte" + (tot - ok > 1 ? "s" : "") + " à revoir bientôt</span>";
   if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
   nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
   if (found) h += '<span class="chip pop">' + found[0] + " Trésor trouvé : " + esc(found[1]) + "</span>";
-  h += '</div><button type="button" class="btn go" data-go="home">⚓ Retour au pont</button><button type="button" class="btn" data-play="' + G.type + '">🔁 Un autre défi comme celui-ci</button></div>';
+  h += "</div>";
+  if (day.n % 2 === 0) h += '<div class="card pause" id="pz"><h2>🏃 Pause mouvement !</h2><p class="q" style="font-size:19px;margin:4px 0 12px">' + PAUSES[Math.floor(Math.random() * PAUSES.length)] + '</p><button type="button" class="btn go" data-pause="1" style="text-align:center">Je lance 30 secondes (+5 Berries)</button><button type="button" class="btn" data-pskip="1" style="text-align:center;min-height:48px;font-size:15px">Pas maintenant</button></div>';
+  h += '<button type="button" class="btn go" data-go="home">⚓ Retour au pont</button><button type="button" class="btn" data-play="' + G.type + '">🔁 Un autre défi comme celui-ci</button></div>';
   app.innerHTML = h; window.scrollTo(0, 0); G = null;
 }
 function trophies() {
@@ -403,6 +466,67 @@ function trophies() {
   h += '</div></div><div class="card"><h2>🏺 Mes trésors</h2><p class="small">Un trésor peut apparaître quand tu réussis un défi. Lesquels trouveras-tu ?</p><div class="grid">';
   TREASURES.forEach(function (x) { var on = S.treasures[x[1]]; h += '<div class="tile ' + (on ? "" : "lock") + '"><div class="em">' + (on ? x[0] : "❔") + "</div><b>" + (on ? esc(x[1]) : "Trésor caché") + "</b></div>"; });
   app.innerHTML = h + "</div></div>"; window.scrollTo(0, 0);
+}
+
+/* ---------- pause mouvement ---------- */
+function pauseStart() {
+  var box = $("#pz"); if (!box) return; var t0 = Date.now(), dur = 30000;
+  box.innerHTML = '<h2>🏃 Pause mouvement</h2><div class="count" id="pc">30</div><div class="bar"><i id="pb" style="width:100%"></i></div><p class="small" style="margin:8px 0 0">Bouge bien jusqu\'à la fin du chrono !</p>';
+  clearInterval(pauseH);
+  pauseH = setInterval(function () {
+    var pc = $("#pc"); if (!pc) { clearInterval(pauseH); return; }
+    var el = Date.now() - t0, r = Math.max(0, 1 - el / dur); pc.textContent = Math.ceil(r * 30); $("#pb").style.width = (r * 100) + "%";
+    if (el >= dur) {
+      clearInterval(pauseH); S.berries += 5; S.stats.pauses = (S.stats.pauses || 0) + 1;
+      var nb = ""; if (S.stats.pauses >= 3 && !S.badges.pause) { S.badges.pause = today(); nb = '<p><span class="chip pop">🏃 Marin en forme</span></p>'; }
+      saveLocal(); box.innerHTML = '<h2>👏 Bravo !</h2><p>+5 Berries pour avoir bougé.</p>' + nb;
+    }
+  }, 200);
+}
+
+/* ---------- coffre de récompenses (choisies par les parents) ---------- */
+var RW = { items: [], claims: [], err: 0, busy: false, flash: "" };
+function loadRewards() {
+  if (!net.token) { try { RW.items = JSON.parse(lsGet("qd-rw") || "[]"); } catch (e) { RW.items = []; } RW.claims = []; return Promise.resolve(); }
+  return Promise.all([api("GET", "/api/collections/rewards/records?perPage=50&sort=position,created", undefined, net.token), api("GET", "/api/collections/claims/records?perPage=200&sort=-created", undefined, net.token)]).then(function (r) {
+    RW.err = 0; RW.items = r[0].items || []; RW.claims = r[1].items || []; lsSet("qd-rw", JSON.stringify(RW.items));
+    var sum = 0; RW.claims.forEach(function (c) { sum += c.cost || 0; });
+    if (sum > (S.spent || 0)) { S.spent = sum; saveLocal(); }
+  }, function (e) { RW.err = (e && e.status) || 1; });
+}
+function coffre() {
+  app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card" id="cof"><h2>🎁 Mon coffre</h2><p class="small">Chargement…</p></div>';
+  loadRewards().then(drawCoffre);
+}
+function drawCoffre() {
+  if (!$("#cof") || G) return;
+  var bal = Math.max(0, S.berries - (S.spent || 0));
+  var h = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card" id="cof"><h2>🎁 Mon coffre</h2>';
+  if (RW.flash) { h += '<div class="fb good pop" style="margin-bottom:12px"><b class="t">' + esc(RW.flash) + "</b></div>"; RW.flash = ""; }
+  h += '<p class="small" style="margin-top:0">Tu as <b>' + bal + " Berries</b> à dépenser. Ton rang, lui, ne baisse jamais !</p>";
+  if (!net.token) h += "<p>Connecte-toi (bouton ☁ en haut) pour ouvrir le coffre.</p>";
+  else if (RW.err) h += "<p>Impossible de joindre le serveur pour le moment. Réessaie un peu plus tard.</p>";
+  else if (!RW.items.length) h += "<p>Le coffre est encore vide. Demande à tes parents d'y mettre des récompenses !</p>";
+  else RW.items.forEach(function (r) {
+    var can = bal >= r.cost, pct = Math.min(100, Math.round(bal / Math.max(1, r.cost) * 100));
+    h += '<div class="rw ' + (can ? "" : "lock") + '"><span class="em">' + esc(r.icon || "🎁") + '</span><div class="tx">' + esc(r.label) + "<small>" + r.cost + " Berries" + (can ? "" : " · encore " + (r.cost - bal)) + "</small>" + (can ? "" : '<div class="bar"><i style="width:' + pct + '%"></i></div>') + '</div><button type="button" class="btn go" data-claim="' + esc(r.id) + '"' + (can ? "" : " disabled") + ">Débloquer</button></div>";
+  });
+  if (RW.claims.length) {
+    h += '<h2 style="margin-top:16px">Déjà demandées</h2>';
+    RW.claims.slice(0, 8).forEach(function (c) { h += '<div class="hist">' + esc(c.icon || "🎁") + " " + esc(c.label) + " · " + (c.done ? "✓ donnée" : "⏳ en attente") + "</div>"; });
+  }
+  app.innerHTML = h + "</div>"; window.scrollTo(0, 0);
+}
+function claim(id) {
+  var r = RW.items.filter(function (x) { return x.id === id; })[0]; if (!r || RW.busy || !net.token) return;
+  if (S.berries - (S.spent || 0) < r.cost) return;
+  if (!confirm("Dépenser " + r.cost + " Berries pour « " + r.label + " » ?")) return;
+  RW.busy = true;
+  api("POST", "/api/collections/claims/records", { label: r.label, icon: r.icon || "", cost: r.cost, done: false }, net.token).then(function () {
+    S.spent = (S.spent || 0) + r.cost; if (!S.badges.gift) S.badges.gift = today();
+    saveLocal(); RW.busy = false; RW.flash = "🎉 Bravo ! « " + r.label + " » est débloqué. Tes parents sont prévenus.";
+    return loadRewards().then(drawCoffre);
+  }, function () { RW.busy = false; RW.flash = "Oups, ça n'a pas marché (serveur injoignable ?). Tes Berries n'ont pas été dépensés."; drawCoffre(); });
 }
 
 loadLocal(); home();

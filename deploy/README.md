@@ -308,3 +308,13 @@ Page séparée de l'appli de révision, servie par le même PocketBase (`deploy/
 Elle lit les cours et les cartes de l'appli principale (aucune donnée en double) et garde la progression de Gianni
 (jours de série, Berries, réussites, trésors) dans la collection `quest` (migration `1760000500_quest.js`, appliquée par `update.sh`).
 Le bouton « Défis » de l'appli principale y mène. Pour la retirer : supprimer le dossier `pb_public/defis/` et le bouton `#defis-open`.
+
+## 11. Séance du jour, cartes à revoir, coffre de récompenses, pause mouvement, « relis »
+
+Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `rewards` et `claims`) : elle s'applique toute seule au redémarrage, donc `sudo bash /opt/aoud-travailcollege/repo/deploy/update.sh` suffit.
+
+- **Ma séance du jour** (page `/defis/`) : 8 questions mélangées, une à la fois, sans chrono, avec un message « Plus que 2 questions ! ». Bonus de 30 Berries la première fois de la journée.
+- **Cartes à revoir** : une carte ratée revient 1 jour, puis 3, 7 et 14 jours plus tard (révision espacée). Jusqu'à 3 cartes dues sont glissées dans chaque séance, avec l'étiquette « À revoir ».
+- **Pause mouvement** : après chaque paire de défis, un mini-défi physique de 30 secondes (+5 Berries).
+- **Coffre de récompenses** : les parents l'alimentent dans *Espace parent → Coffre de récompenses* (icône, nom, prix en Berries). Gianni débloque une récompense depuis la page Défis ; les parents voient la demande et la marquent « Donné ». Dépenser des Berries ne fait pas baisser le rang.
+- **Relis** : sur les fiches à l'Apple Pencil, le bouton « Relis ✓ » ouvre une liste de contrôle ; « Enregistrer en PDF » la propose si elle n'est pas complète (on peut enregistrer quand même).

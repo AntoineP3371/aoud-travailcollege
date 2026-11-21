@@ -256,6 +256,14 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .hub-list .btn { width: 100%; }
 .hub-last { margin: 0 0 4px; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .hub-help { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+#cof-claims, #cof-list { display: flex; flex-direction: column; gap: 6px; }
+.cof-h { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
+.cof-line { font-size: 14px; color: var(--muted); }
+#hub-coffre input { letter-spacing: normal; text-align: left; font-size: 18px; }
+#hub-coffre .ink-b { white-space: nowrap; flex: none; }
+.rl-list { display: flex; flex-direction: column; gap: 6px; }
+.rl-list label { display: flex; flex-direction: row; align-items: flex-start; gap: 12px; font-size: 17px; line-height: 1.35; font-weight: 400; color: var(--fg); min-height: 44px; padding: 6px 4px; }
+.rl-list input { width: 26px; height: 26px; min-height: 0; padding: 0; flex: none; margin: 0; letter-spacing: normal; }
 #ord-list { max-height: 52vh; overflow: auto; }
 .ord-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
 .ord-row .ord-btns { display: inline-flex; gap: 6px; flex: none; }
@@ -345,6 +353,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <button type="button" class="btn ghost" id="hub-corr">Voir le corrigé de cette feuille</button>
       <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
       <button type="button" class="btn ghost" id="hub-order-btn">⇅ Ordre des matières et des cours</button>
+      <button type="button" class="btn ghost" id="hub-coffre-btn">🎁 Coffre de récompenses (page Défis)</button>
       <button type="button" class="btn ghost" id="hub-gcode">Changer le mot de passe de Gianni</button>
     </div>
     <form id="hub-codeform" class="hub-form" hidden>
@@ -363,8 +372,30 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <div id="ord-list"></div>
       <div class="row"><button type="button" class="btn ghost" id="ord-back">Retour</button></div>
     </div>
+    <div id="hub-coffre" class="hub-form" hidden>
+      <p class="hub-help">Les récompenses que Gianni peut débloquer avec ses Berries sur la page Défis. Repère : environ 10 Berries par bonne réponse et 30 de bonus pour la séance du jour, soit 150 à 250 Berries par semaine de petites séances.</p>
+      <div id="cof-claims"></div>
+      <div id="cof-list"></div>
+      <form id="cof-form" class="hub-form">
+        <label>Icône (un emoji, facultatif)<input id="cf-icon" maxlength="8" autocomplete="off" placeholder="🎮"></label>
+        <label>Récompense<input id="cf-label" maxlength="120" autocomplete="off" placeholder="30 minutes d'écran"></label>
+        <label>Prix en Berries<input id="cf-cost" type="number" inputmode="numeric" min="1" max="100000" placeholder="150"></label>
+        <div class="row"><button type="submit" class="btn">Ajouter au coffre</button></div>
+      </form>
+      <div class="row"><button type="button" class="btn ghost" id="cof-back">Retour</button></div>
+    </div>
     <p id="hub-msg" role="status"></p>
     <div class="row"><button type="button" class="btn ghost" id="hub-lock">Verrouiller</button><button type="button" class="btn ghost" id="hub-close">Fermer</button></div>
+  </div>
+</div>
+
+<div class="pw" id="relis" hidden role="dialog" aria-label="Relire sa feuille">
+  <div class="pw-card">
+    <h2>Relis avant de rendre !</h2>
+    <p>Coche chaque ligne quand c'est fait. Quelques minutes de relecture évitent les erreurs d'étourderie.</p>
+    <div id="rl-list" class="rl-list"></div>
+    <p id="rl-msg" role="status"></p>
+    <div class="row"><button type="button" class="btn" id="rl-pdf">Enregistrer en PDF</button><button type="button" class="btn ghost" id="rl-close">Continuer</button></div>
   </div>
 </div>
 
@@ -435,6 +466,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
     <button type="button" class="ink-b ink-draw" id="ink-undo">Annuler</button>
     <button type="button" class="ink-b ink-draw" id="ink-clear">Tout effacer</button>
     <label class="ink-opt ink-draw"><input type="checkbox" id="ink-finger"> Écrire aussi au doigt</label>
+    <button type="button" class="ink-b ink-draw" id="ink-relis" aria-pressed="false">Relis ✓</button>
     <button type="button" class="ink-b solid ink-draw" id="ink-pdf">Enregistrer en PDF</button>
     <label class="ink-opt ink-par"><input type="checkbox" id="ink-link" checked> Défilement lié</label>
     <span id="ink-msg" role="status"></span>
@@ -1395,6 +1427,7 @@ function openInk(parent) {
     });
   }
   $("#ink-title").textContent = SUBJECTS[subject].short + (par ? " · corrigé parent" : " · exercices");
+  relisBtn();
   inkMsg(par ? "" : "Ton travail se garde tout seul sur cet appareil.");
   $("#ink").hidden = false;
   try { document.body.style.overflow = "hidden"; document.body.style.webkitUserSelect = "none"; document.body.style.userSelect = "none"; } catch (e) {}
@@ -1567,10 +1600,31 @@ function rulerShow(on) {
   $("#ink-ruler").addEventListener("click", function () { rulerShow(!rul.on); });
 })();
 
+/* ---------- « Relis » : liste de contrôle avant de rendre la feuille ---------- */
+var RELIS = ["J'ai répondu à toutes les questions.", "J'ai relu chaque consigne : je n'ai rien oublié.", "J'ai vérifié mes calculs (ou refait un calcul rapide).", "Mes réponses sont complètes : phrase, unité ou justification quand il le faut.", "Mon travail est lisible et propre."];
+var relisMem = {};
+function relisKey() { return "tc-relis-" + ink.sub; }
+function relisGet() { var a = relisMem[relisKey()] || []; try { var v = JSON.parse(lsGet(relisKey()) || "null"); if (v) a = v; } catch (e) {} return a; }
+function relisSet(a) { relisMem[relisKey()] = a; lsSet(relisKey(), JSON.stringify(a)); }
+function relisDone() { var a = relisGet(); return RELIS.every(function (x, i) { return !!a[i]; }); }
+function relisBtn() { var b = $("#ink-relis"), d = relisDone(); b.setAttribute("aria-pressed", String(d)); b.textContent = d ? "Relu ✓" : "Relis ✓"; }
+function relisUpd() { var d = relisDone(); $("#rl-msg").textContent = d ? "Bravo, tout est relu ! 🎉" : "Il reste des choses à relire avant de rendre."; $("#rl-pdf").textContent = d ? "Enregistrer en PDF" : "Enregistrer quand même"; relisBtn(); }
+function relisOpen() {
+  var a = relisGet(), box = $("#rl-list"); box.innerHTML = "";
+  RELIS.forEach(function (t, i) {
+    var l = document.createElement("label"), c = document.createElement("input"); c.type = "checkbox"; c.checked = !!a[i];
+    c.addEventListener("change", function () { var v = relisGet().slice(); v[i] = c.checked; relisSet(v); relisUpd(); });
+    l.appendChild(c); l.appendChild(document.createTextNode(t)); box.appendChild(l);
+  });
+  relisUpd(); $("#relis").hidden = false;
+}
+$("#ink-relis").addEventListener("click", relisOpen);
+$("#rl-close").addEventListener("click", function () { $("#relis").hidden = true; });
+$("#rl-pdf").addEventListener("click", function () { $("#relis").hidden = true; inkExport(); });
 $("#ink-open").addEventListener("click", openInk);
 $("#ink-close").addEventListener("click", closeInk);
 $("#ink-undo").addEventListener("click", inkUndo);
-$("#ink-pdf").addEventListener("click", inkExport);
+$("#ink-pdf").addEventListener("click", function () { if (relisDone()) inkExport(); else relisOpen(); });
 $("#ink-erase").addEventListener("click", function () {
   ink.erase = !ink.erase; this.setAttribute("aria-pressed", String(ink.erase));
 });
@@ -1585,7 +1639,7 @@ $("#ink-clear").addEventListener("click", function () {
   ink.clearArm = 0; b.textContent = "Tout effacer";
   ink.strokes = ink.strokes.map(function () { return []; }); ink.hist = [];
   for (var i = 0; i < ink.pg.length; i++) redraw(i);
-  inkSave();
+  inkSave(); relisSet([]); relisBtn();
 });
 (function () {
   var sw = document.querySelectorAll(".ink-sw"), wd = document.querySelectorAll("[data-w]");
@@ -1812,7 +1866,7 @@ function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
 function openHub() {
   var c = SUBJECTS[subject];
   $("#hub-edit").hidden = !(c && c.id);
-  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $(".hub-list").hidden = false; hubMsg("");
+  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $("#hub-coffre").hidden = true; $(".hub-list").hidden = false; hubMsg("");
   $("#hub").hidden = false;
   loadLast();
 }
@@ -1911,6 +1965,54 @@ function ordMove(coll, list, i, d, extra) {
 }
 $("#hub-order-btn").addEventListener("click", function () { $(".hub-list").hidden = true; $("#hub-order").hidden = false; hubMsg(""); ordBusy = false; ordRender(); });
 $("#ord-back").addEventListener("click", function () { $("#hub-order").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
+/* ---------- Coffre de récompenses (utilisé par la page Défis) ---------- */
+var cof = { rw: [], cl: [], busy: false };
+function cofErr(er) {
+  if (er && (er.status === 401 || er.status === 403)) { net.parentToken = ""; hubMsg("Session expirée : ferme et saisis de nouveau le code."); }
+  else if (er && er.status === 404) hubMsg("Le serveur n'est pas à jour : lance update.sh puis réessaie.");
+  else hubMsg("Échec (serveur injoignable ?).");
+}
+function cofDate(v) { var d = v ? new Date(String(v).replace(" ", "T")) : null; return d && !isNaN(d) ? d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""; }
+function cofLoad() {
+  return Promise.all([
+    api("GET", "/api/collections/rewards/records?perPage=100&sort=position,created", undefined, net.parentToken),
+    api("GET", "/api/collections/claims/records?perPage=30&sort=-created", undefined, net.parentToken)
+  ]).then(function (r) { cof.rw = r[0].items || []; cof.cl = r[1].items || []; hubMsg(""); cofRender(); }, cofErr);
+}
+function cofTxt(tag, cls, t) { var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = t; return e; }
+function cofBtn(txt, fn) { var b = document.createElement("button"); b.type = "button"; b.className = "ink-b"; b.textContent = txt; b.addEventListener("click", fn); return b; }
+function cofRow(txt, btn) { var d = document.createElement("div"); d.className = "ord-row"; d.appendChild(cofTxt("span", "", txt)); if (btn) d.appendChild(btn); return d; }
+function cofRender() {
+  var cl = $("#cof-claims"), ls = $("#cof-list"); cl.innerHTML = ""; ls.innerHTML = "";
+  var pend = cof.cl.filter(function (c) { return !c.done; }), done = cof.cl.filter(function (c) { return c.done; }).slice(0, 5);
+  cl.appendChild(cofTxt("p", "cof-h", pend.length ? "Demandées par Gianni, à donner :" : "Aucune récompense en attente."));
+  pend.forEach(function (c) {
+    cl.appendChild(cofRow((c.icon || "🎁") + " " + c.label + " (" + c.cost + " Berries) · " + cofDate(c.created), cofBtn("Donné ✓", function () { cofDo("claims", "PATCH", c.id, { done: true }); })));
+  });
+  if (done.length) {
+    cl.appendChild(cofTxt("p", "cof-h", "Déjà données :"));
+    done.forEach(function (c) { cl.appendChild(cofTxt("p", "cof-line", "✓ " + (c.icon || "🎁") + " " + c.label + " · " + cofDate(c.created))); });
+  }
+  ls.appendChild(cofTxt("p", "cof-h", cof.rw.length ? "Le coffre de Gianni :" : "Le coffre est vide : ajoute une première récompense ci-dessous."));
+  cof.rw.forEach(function (r) {
+    ls.appendChild(cofRow((r.icon || "🎁") + " " + r.label + " · " + r.cost + " Berries", cofBtn("Retirer", function () { cofDo("rewards", "DELETE", r.id); })));
+  });
+}
+function cofDo(coll, method, id, body) {
+  if (cof.busy) return; cof.busy = true; hubMsg("Enregistrement…");
+  api(method, "/api/collections/" + coll + "/records" + (id ? "/" + id : ""), body, net.parentToken).then(function () { cof.busy = false; return cofLoad(); }, function (er) { cof.busy = false; cofErr(er); });
+}
+$("#hub-coffre-btn").addEventListener("click", function () { $(".hub-list").hidden = true; $("#hub-coffre").hidden = false; hubMsg("Chargement…"); cofLoad(); });
+$("#cof-back").addEventListener("click", function () { $("#hub-coffre").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
+$("#cof-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var label = $("#cf-label").value.trim(), cost = parseInt($("#cf-cost").value, 10), icon = $("#cf-icon").value.trim();
+  if (!label) { hubMsg("Écris le nom de la récompense."); return; }
+  if (!(cost >= 1 && cost <= 100000)) { hubMsg("Le prix doit être un nombre de Berries entre 1 et 100000."); return; }
+  var pos = 0; cof.rw.forEach(function (r) { if ((r.position || 0) > pos) pos = r.position; });
+  $("#cf-label").value = ""; $("#cf-cost").value = ""; $("#cf-icon").value = "";
+  cofDo("rewards", "POST", "", { icon: icon, label: label, cost: cost, position: pos + 1 });
+});
 $("#hc-cancel").addEventListener("click", function () { $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hub-codeform").addEventListener("submit", function (e) {
   e.preventDefault();
