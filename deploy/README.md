@@ -321,7 +321,7 @@ Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `r
 
 ### Page Défis : onglets, traversée du jour, activités avec un parent
 
-- L'accueil a quatre onglets : **Défis**, **Échauffer**, **En famille**, **Butin** (coffre et réussites). Le dernier onglet ouvert est mémorisé.
+- L'accueil n'a plus d'onglets : tous les jeux sont des étiquettes, avec une petite vignette 👪 sur ceux qui se jouent avec un parent, puis le coffre et les réussites.
 - **Traversée du jour** : parcours guidé en étapes (échauffement du jour, séance, défi du jour, puis un moment facultatif avec un parent). Terminer les 3 premières étapes donne +25 Berries une fois par jour et la réussite « Capitaine de la traversée ». L'avancement est enregistré par jour (clés `daily` `…v0` à `…v3`) et synchronisé.
 - **En famille** : chasse à l'erreur lue à voix haute par le parent, perroquet à deux, duel Trésor ou requin. +15 Berries (« Bonus équipage ») la première fois de la journée.
 - Jeux d'échauffement (1 minute) : plafond de 40 Berries par jour.

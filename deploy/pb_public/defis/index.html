@@ -84,12 +84,18 @@ header h1 small { display: block; font-size: 12px; font-weight: 400; opacity: 0.
 .diff button { border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); color: #fff; border-radius: 999px; padding: 0 11px; min-height: 38px; font-weight: 700; font-size: 13px; }
 .diff button.on { background: var(--gold); color: var(--wood); border-color: var(--gold-d); }
 .small.diffnote { color: #fff; opacity: 0.85; margin: 4px 2px 0; }
-.tabs { display: flex; gap: 4px; margin: 14px 0 0; }
-.tabs button { flex: 1; min-height: 46px; border: 0; border-radius: 12px 12px 0 0; background: rgba(255,255,255,0.15); color: #fff; font-weight: 800; font-size: 13px; padding: 4px 2px; line-height: 1.15; }
-.tabs button.on { background: var(--sand); color: var(--wood); box-shadow: inset 0 3px 0 var(--gold); }
-.tabs button span { display: block; font-size: 18px; }
-.tabpane { background: var(--sand); border: 3px solid var(--gold-d); border-top: 0; border-radius: 0 0 14px 14px; padding: 12px 10px 4px; margin-bottom: 14px; box-shadow: 0 4px 0 rgba(0,0,0,0.25); }
-.tabpane .btn:last-child { margin-bottom: 8px; }
+.etq { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
+.tile2 { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 96px; padding: 12px 8px 10px; border: 3px solid var(--wood); border-radius: 14px; background: #fff7dd; color: var(--wood); font-weight: 800; font-size: 15px; line-height: 1.15; text-align: center; box-shadow: 0 4px 0 var(--wood); }
+.tile2:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--wood); }
+.tile2.star { background: linear-gradient(180deg, #ffe48a, var(--gold)); }
+.tile2.wide { background: var(--sand2); }
+.tile2 .ti { font-size: 34px; line-height: 1.1; }
+.tile2 small { font-weight: 600; font-size: 12px; color: var(--muted); }
+.tile2 .dj { font-size: 11px; font-weight: 800; background: var(--red); color: #fff; border-radius: 999px; padding: 1px 8px; margin-top: 3px; }
+.par { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--green); border: 2px solid #fff; font-size: 14px; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+.tile2 .par { position: absolute; top: -8px; right: -6px; }
+.legend { color: #fff; opacity: 0.88; font-size: 13px; margin: 0 2px 14px; display: flex; align-items: center; gap: 8px; }
+.legend .par { width: 24px; height: 24px; font-size: 12px; flex: none; box-shadow: none; }
 .famnote { background: #d9f0e1; border: 2px solid var(--green); border-radius: 12px; padding: 8px 12px; margin: 0 0 12px; font-size: 14px; color: #0f4a2c; }
 .vstep { display: flex; gap: 10px; align-items: stretch; }
 .vstep .l { width: 38px; display: flex; flex-direction: column; align-items: center; flex: none; }
@@ -375,8 +381,7 @@ var pauseH = 0;
 function render() { clearInterval(timerH); clearInterval(pauseH); wClear(); G = null; TRAV = null; inTrav = false; home(); }
 function refresh() { if (!G && !inTrav) home(); }
 function home() {
-  var rk = rankOf(S.berries), st = streak(), t = today(), df = dayFormat(), tab = lsGet("qd-tab") || "defis";
-  if (["defis", "echauf", "famille", "butin"].indexOf(tab) < 0) tab = "defis";
+  var rk = rankOf(S.berries), st = streak(), t = today(), df = dayFormat();
   var pct = rk.next ? Math.round((S.berries - rk.r[0]) / (rk.next[0] - rk.r[0]) * 100) : 100;
   var h = '<div class="card"><div class="rank"><span class="em">' + rk.r[2] + '</span><div style="flex:1"><b>' + esc(rk.r[1]) + '</b><div class="small">' + S.berries + " Berries" + (rk.next ? " · prochain rang à " + rk.next[0] : "") + '</div><div class="bar"><i style="width:' + pct + '%"></i></div></div>' +
     '<div style="text-align:center;font-weight:800;line-height:1.1"><span style="font-size:22px">🔥</span><br>' + st + " jour" + (st > 1 ? "s" : "") + "</div></div>" +
@@ -390,29 +395,20 @@ function home() {
   }
   var dv = lsGet("qd-diff"), cur = diffLevel();
   h += '<div class="diff" role="group" aria-label="Difficulté"><span>Mer :</span>' + [["auto", "Auto"]].concat(DIFFS.map(function (x) { return [x[0], x[1] + " " + x[2]]; })).map(function (x) { return '<button type="button" data-df="' + x[0] + '" class="' + ((dv || "auto") === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><p class="small diffnote">' + DIFFS[cur - 1][1] + " " + DIFFS[cur - 1][2] + ((dv || "auto") === "auto" ? " (selon ton rang)" : "") + " : plus la mer est forte, plus les défis sont difficiles.</p>";
-  var TB = [["defis", "🎯", "Défis"], ["echauf", "🧠", "Échauffer"], ["famille", "👪", "En famille"], ["butin", "🎁", "Butin"]];
-  h += '<div class="tabs" role="tablist">' + TB.map(function (x) { return '<button type="button" role="tab" aria-selected="' + (x[0] === tab) + '" class="' + (x[0] === tab ? "on" : "") + '" data-tab="' + x[0] + '"><span>' + x[1] + "</span>" + x[2] + "</button>"; }).join("") + '</div><div class="tabpane" role="tabpanel">';
-  if (tab === "defis") {
-    if (POOL.length) {
-      FORMATS.forEach(function (f) {
-        var isDay = f[0] === df, done = S.daily[t] && isDay;
-        h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "<small>" + fdesc(f[0]) + "</small></button>";
-      });
-      h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<span class="tag g">👪 avec un parent</span><small>Trouve le mot faux dans une phrase de tes cours</small></button>';
-    } else h += '<p class="small">Les défis arrivent dès que les questions sont chargées.</p>';
-  } else if (tab === "echauf") {
-    h += '<p class="small" style="margin:0 0 10px">Une minute pour se mettre en route. Plafond de ' + PTS.warmCap + ' Berries par jour.</p>';
-    WARMS.forEach(function (w) { h += '<button type="button" class="btn" data-wg="' + w[0] + '">' + w[3] + " " + w[1] + (w[4] ? '<span class="tag g">👪 avec un parent</span>' : "") + "<small>" + w[2] + "</small></button>"; });
-  } else if (tab === "famille") {
-    h += '<div class="famnote">👪 À faire avec un parent. ' + (S.daily[t + "p"] ? "Bonus équipage du jour déjà pris ✓" : "<b>+" + PTS.parent + " Berries</b> la première fois de la journée !") + "</div>";
-    h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<small>Seul, ou à deux : le parent lit la phrase à voix haute</small></button>';
-    h += '<button type="button" class="btn" data-wg="perroquet">🦜 Le perroquet<small>Seul, ou à deux : qui a la meilleure mémoire ?</small></button>';
-    h += '<button type="button" class="btn" data-wg="gonogo">🦈 Trésor ou requin<small>Seul, ou en duel avec un parent</small></button>';
-  } else {
-    h += '<button type="button" class="btn" data-go="coffre">🎁 Mon coffre<small>' + Math.max(0, S.berries - (S.spent || 0)) + " Berries à dépenser · récompenses choisies par tes parents</small></button>";
-    h += '<button type="button" class="btn" data-go="trophy">🏆 Mes réussites et trésors<small>' + Object.keys(S.badges).length + " / " + BADGES.length + " réussites · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button>";
+  var T = [];   /* étiquettes : [attribut, icône, nom, jouable avec un parent, défi du jour] */
+  if (POOL.length) {
+    FORMATS.forEach(function (f) { T.push(['data-play="' + f[0] + '"', f[3], f[1], false, f[0] === df]); });
+    T.push(['data-wg="chasse"', "🔎", "Chasse à l'erreur", true, false]);
   }
-  h += "</div>";
+  WARMS.forEach(function (w) { T.push(['data-wg="' + w[0] + '"', w[3], w[1], w[4], false]); });
+  h += '<div class="sub-h">Choisis un jeu</div><div class="etq">' + T.map(function (x) {
+    return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" +
+      (x[3] ? '<span class="par" role="img" aria-label="Jouable avec un parent">👪</span>' : "") +
+      (x[4] ? '<span class="dj">' + (S.daily[t] ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "</button>";
+  }).join("") + "</div>";
+  h += '<p class="legend"><span class="par" aria-hidden="true">👪</span> jouable avec un parent · ' + (S.daily[t + "p"] ? "bonus équipage du jour pris ✓" : "+" + PTS.parent + " Berries la première fois de la journée") + ". Échauffements : plafond de " + PTS.warmCap + " Berries par jour.</p>";
+  h += '<div class="etq"><button type="button" class="tile2 wide" data-go="coffre"><span class="ti" aria-hidden="true">🎁</span><span class="tn">Mon coffre</span><small>' + Math.max(0, S.berries - (S.spent || 0)) + ' Berries</small></button>' +
+    '<button type="button" class="tile2 wide" data-go="trophy"><span class="ti" aria-hidden="true">🏆</span><span class="tn">Mes réussites</span><small>' + Object.keys(S.badges).length + " / " + BADGES.length + " · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button></div>";
   app.innerHTML = h;
 }
 
@@ -477,7 +473,6 @@ app.addEventListener("click", function (e) {
   else if (b.dataset.hp !== undefined) huntParent(b.dataset.hp === "1");
   else if (b.dataset.hn) huntNext();
   else if (b.dataset.df) { lsSet("qd-diff", b.dataset.df); home(); }
-  else if (b.dataset.tab) { lsSet("qd-tab", b.dataset.tab); home(); }
   else if (b.dataset.trav) { if (b.dataset.trav === "open") travOpen(); else travGo(+b.dataset.i); }
   else if (b.dataset.mute) { lsSet("qd-mute", lsGet("qd-mute") === "1" ? "0" : "1"); b.textContent = lsGet("qd-mute") === "1" ? "🔇" : "🔊"; }
   else if (b.dataset.play) start(b.dataset.play);
