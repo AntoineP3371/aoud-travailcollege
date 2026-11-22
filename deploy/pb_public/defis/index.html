@@ -80,6 +80,10 @@ header h1 small { display: block; font-size: 12px; font-weight: 400; opacity: 0.
 .btn.big { min-height: 78px; font-size: 21px; }
 .hero2 { text-align: center; }
 .hero2 .tag { margin-left: 8px; }
+.diff { display: flex; gap: 5px; align-items: center; margin: 12px 0 0; flex-wrap: wrap; color: #fff; font-size: 13px; font-weight: 700; }
+.diff button { border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); color: #fff; border-radius: 999px; padding: 0 11px; min-height: 38px; font-weight: 700; font-size: 13px; }
+.diff button.on { background: var(--gold); color: var(--wood); border-color: var(--gold-d); }
+.small.diffnote { color: #fff; opacity: 0.85; margin: 4px 2px 0; }
 .tabs { display: flex; gap: 4px; margin: 14px 0 0; }
 .tabs button { flex: 1; min-height: 46px; border: 0; border-radius: 12px 12px 0 0; background: rgba(255,255,255,0.15); color: #fff; font-weight: 800; font-size: 13px; padding: 4px 2px; line-height: 1.15; }
 .tabs button.on { background: var(--sand); color: var(--wood); box-shadow: inset 0 3px 0 var(--gold); }
@@ -182,7 +186,11 @@ function today() { return ds(new Date()); }
 function dayNum() { var d = new Date(); return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
 
 /* ---------- données du jeu ---------- */
-var RANKS = [[0, "Mousse", "🧒"], [100, "Matelot", "⚓"], [300, "Gabier", "🪢"], [600, "Second", "🧭"], [1000, "Capitaine", "🏴‍☠️"], [2000, "Amiral de la flotte", "👑"]];
+var RANKS = [[0, "Mousse", "🧒"], [100, "Matelot", "⚓"], [300, "Gabier", "🪢"], [600, "Second", "🧭"], [1000, "Capitaine", "🏴‍☠️"], [2000, "Amiral de la flotte", "👑"],
+  [3500, "Commodore", "⚔️"], [5000, "Seigneur des mers", "🔱"], [7500, "Maître des océans", "🌊"], [10000, "Gardien des Sept Mers", "🐉"], [15000, "Légende vivante", "🌟"], [20000, "Roi des pirates", "☠️"]];
+var RANK_STEP = 5000;      /* au-delà du dernier rang : une étoile de plus tous les 5 000 Berries */
+/* Berries gagnés : tout est regroupé ici pour pouvoir ajuster facilement */
+var PTS = { ok: 5, perfect: 10, daily: 15, seance: 15, parent: 8, trav: 15, pause: 3, hunt: 4, huntPerfect: 5, warmCap: 20 };
 var TREASURES = [["🧭", "Boussole dorée"], ["🗺️", "Carte mystérieuse"], ["🔭", "Longue-vue"], ["💎", "Diamant bleu"], ["🦜", "Perroquet bavard"], ["🪙", "Pièce d'or"],
   ["📜", "Parchemin secret"], ["🐚", "Coquillage rare"], ["🦀", "Crabe farceur"], ["🐙", "Poulpe géant"], ["🏝️", "Île secrète"], ["⛵", "Petit voilier"],
   ["🍖", "Gigot de fête"], ["🪵", "Épave légendaire"], ["🌋", "Île au volcan"], ["🐳", "Baleine amie"]];
@@ -336,7 +344,26 @@ function streak() {
   var d = new Date(), n = 0; if (!S.days[ds(d)]) d.setDate(d.getDate() - 1);
   while (S.days[ds(d)]) { n++; d.setDate(d.getDate() - 1); } return n;
 }
-function rankOf(b) { var r = RANKS[0], nx = null; for (var i = 0; i < RANKS.length; i++) if (b >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; } return { r: r, next: nx }; }
+function rankOf(b) {
+  var r = RANKS[0], nx = null; for (var i = 0; i < RANKS.length; i++) if (b >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; }
+  if (!nx) { var L = RANKS[RANKS.length - 1], n = Math.floor((b - L[0]) / RANK_STEP); if (n > 0) r = [L[0] + n * RANK_STEP, L[1] + " ★" + n, L[2]]; nx = [L[0] + (n + 1) * RANK_STEP]; }
+  return { r: r, next: nx };
+}
+/* Difficulté : « auto » suit le rang (calme jusqu'à Matelot, agitée de Gabier à Second, tempête dès Capitaine) */
+var DIFFS = [["1", "🌊", "Mer calme"], ["2", "🌬️", "Mer agitée"], ["3", "⛈️", "Tempête"]];
+function diffLevel() { var v = lsGet("qd-diff"); if (v === "1" || v === "2" || v === "3") return +v; return S.berries >= 1000 ? 3 : S.berries >= 300 ? 2 : 1; }
+function DP() {
+  var d = diffLevel() - 1;
+  return { d: d + 1, seance: [8, 10, 12][d], mini: [5, 6, 7][d], miniMs: [180000, 150000, 120000][d], eclair: [8, 10, 12][d], eclairMs: [8000, 6000, 4500][d], mystere: [5, 6, 8][d],
+    gnN: [40, 50, 60][d], gnGo: [0.7, 0.6, 0.5][d], gnDur: [950, 800, 650][d], gnMin: [600, 450, 350][d], gnMax: [1100, 950, 800][d],
+    inSizes: [[3, 3, 4, 4, 4, 5, 5, 5], [4, 4, 5, 5, 5, 6, 6, 6], [4, 5, 5, 6, 6, 7, 7, 7, 8, 8]][d],
+    ppMax: [7, 9, 12][d], ppStep: [750, 620, 480][d], ppLives: [3, 3, 2][d], huntN: [5, 6, 8][d], huntErr: [4, 4, 5][d] };
+}
+function fdesc(k) {
+  var P = DP();
+  return k === "mini" ? P.mini + " questions en " + (P.miniMs / 60000 === 3 ? "3 minutes" : P.miniMs / 60000 + " minutes") : k === "eclair" ? P.eclair + " vrai ou faux, " + (P.eclairMs / 1000) + " secondes chacun" : P.mystere + " cartes à deviner, à ton rythme";
+}
+function nbq() { return DP().seance; }
 var WARMS = [["gonogo", "Trésor ou requin ?", "Tape sur le trésor, ne touche pas au requin", "🦈", true], ["intrus", "Chasse à l'intrus", "Trouve le symbole différent dans la grille", "🔍", false], ["perroquet", "Le perroquet", "Rejoue la suite de couleurs sans te tromper", "🦜", true]];
 var FORMATS = [["mini", "Mini-défi", "5 questions en 3 minutes", "⏱️"], ["eclair", "Défi éclair", "8 vrai ou faux, 8 secondes chacun", "⚡"], ["mystere", "Carte mystère", "5 cartes à deviner, à ton rythme", "🔮"]];
 function dayFormat() { return FORMATS[dayNum() % 3][0]; }
@@ -357,25 +384,27 @@ function home() {
   if (!POOL.length) h += '<div class="card"><p>Les questions ne sont pas encore chargées. Vérifie la connexion puis réessaie.</p></div>';
   else {
     var due = dueCards().length, sDone = !!S.daily[t + "s"], nd = travCount(), core = Math.min(nd, 3);
-    h += '<button type="button" class="btn star big hero2" data-play="seance">▶ Ma séance du jour<span class="tag">' + (sDone ? "Bonus pris ✓" : "Bonus +30") + "</span><small>8 questions, environ 5 minutes, une à la fois" + (due ? " · dont " + Math.min(due, 3) + " carte" + (Math.min(due, 3) > 1 ? "s" : "") + " à revoir" : "") + "</small></button>";
-    h += '<button type="button" class="btn" data-trav="open">🧭 Traversée du jour' + (core >= 3 ? '<span class="tag g">Terminée ✓</span>' : core ? '<span class="tag">étape ' + (core + 1) + " sur 3</span>" : '<span class="tag">Bonus +25</span>') +
+    h += '<button type="button" class="btn star big hero2" data-play="seance">▶ Ma séance du jour<span class="tag">' + (sDone ? "Bonus pris ✓" : "Bonus +" + PTS.seance) + "</span><small>" + DP().seance + " questions, environ " + Math.round(DP().seance * 0.65) + " minutes, une à la fois" + (due ? " · dont " + Math.min(due, 3) + " carte" + (Math.min(due, 3) > 1 ? "s" : "") + " à revoir" : "") + "</small></button>";
+    h += '<button type="button" class="btn" data-trav="open">🧭 Traversée du jour' + (core >= 3 ? '<span class="tag g">Terminée ✓</span>' : core ? '<span class="tag">étape ' + (core + 1) + " sur 3</span>" : '<span class="tag">Bonus +' + PTS.trav + "</span>") +
       "<small>" + (core >= 3 ? "Bravo, bonne traversée ! Un moment avec un parent est encore possible." : "Échauffement, séance et défi du jour, guidés pas à pas · environ 10 minutes") + "</small></button>";
   }
+  var dv = lsGet("qd-diff"), cur = diffLevel();
+  h += '<div class="diff" role="group" aria-label="Difficulté"><span>Mer :</span>' + [["auto", "Auto"]].concat(DIFFS.map(function (x) { return [x[0], x[1] + " " + x[2]]; })).map(function (x) { return '<button type="button" data-df="' + x[0] + '" class="' + ((dv || "auto") === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><p class="small diffnote">' + DIFFS[cur - 1][1] + " " + DIFFS[cur - 1][2] + ((dv || "auto") === "auto" ? " (selon ton rang)" : "") + " : plus la mer est forte, plus les défis sont difficiles.</p>";
   var TB = [["defis", "🎯", "Défis"], ["echauf", "🧠", "Échauffer"], ["famille", "👪", "En famille"], ["butin", "🎁", "Butin"]];
   h += '<div class="tabs" role="tablist">' + TB.map(function (x) { return '<button type="button" role="tab" aria-selected="' + (x[0] === tab) + '" class="' + (x[0] === tab ? "on" : "") + '" data-tab="' + x[0] + '"><span>' + x[1] + "</span>" + x[2] + "</button>"; }).join("") + '</div><div class="tabpane" role="tabpanel">';
   if (tab === "defis") {
     if (POOL.length) {
       FORMATS.forEach(function (f) {
         var isDay = f[0] === df, done = S.daily[t] && isDay;
-        h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +30") + "</span>" : "") + "<small>" + f[2] + "</small></button>";
+        h += '<button type="button" class="btn ' + (isDay ? "star" : "") + '" data-play="' + f[0] + '">' + f[3] + " " + f[1] + (isDay ? '<span class="tag">' + (done ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "<small>" + fdesc(f[0]) + "</small></button>";
       });
       h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<span class="tag g">👪 avec un parent</span><small>Trouve le mot faux dans une phrase de tes cours</small></button>';
     } else h += '<p class="small">Les défis arrivent dès que les questions sont chargées.</p>';
   } else if (tab === "echauf") {
-    h += '<p class="small" style="margin:0 0 10px">Une minute pour se mettre en route. Plafond de 40 Berries par jour.</p>';
+    h += '<p class="small" style="margin:0 0 10px">Une minute pour se mettre en route. Plafond de ' + PTS.warmCap + ' Berries par jour.</p>';
     WARMS.forEach(function (w) { h += '<button type="button" class="btn" data-wg="' + w[0] + '">' + w[3] + " " + w[1] + (w[4] ? '<span class="tag g">👪 avec un parent</span>' : "") + "<small>" + w[2] + "</small></button>"; });
   } else if (tab === "famille") {
-    h += '<div class="famnote">👪 À faire avec un parent. ' + (S.daily[t + "p"] ? "Bonus équipage du jour déjà pris ✓" : "<b>+15 Berries</b> la première fois de la journée !") + "</div>";
+    h += '<div class="famnote">👪 À faire avec un parent. ' + (S.daily[t + "p"] ? "Bonus équipage du jour déjà pris ✓" : "<b>+" + PTS.parent + " Berries</b> la première fois de la journée !") + "</div>";
     h += '<button type="button" class="btn" data-wg="chasse">🔎 Chasse à l\'erreur<small>Seul, ou à deux : le parent lit la phrase à voix haute</small></button>';
     h += '<button type="button" class="btn" data-wg="perroquet">🦜 Le perroquet<small>Seul, ou à deux : qui a la meilleure mémoire ?</small></button>';
     h += '<button type="button" class="btn" data-wg="gonogo">🦈 Trésor ou requin<small>Seul, ou en duel avec un parent</small></button>';
@@ -393,8 +422,8 @@ function travSteps() {
   var w = WARMS[dayNum() % 3], f = FORMATS.filter(function (x) { return x[0] === dayFormat(); })[0];
   return [
     { ico: w[3], t: "Je m'échauffe", s: w[1] + " · 1 minute" },
-    { ico: "▶", t: "Ma séance du jour", s: "8 questions · environ 5 minutes" },
-    { ico: f[3], t: f[1], s: f[2] },
+    { ico: "▶", t: "Ma séance du jour", s: DP().seance + " questions · environ " + Math.round(DP().seance * 0.65) + " minutes" },
+    { ico: f[3], t: f[1], s: fdesc(f[0]) },
     { ico: "👪", t: "Un moment avec un parent", s: "Chasse à l'erreur lue à voix haute · facultatif", opt: true }
   ];
 }
@@ -404,11 +433,11 @@ function travFirst() { for (var i = 0; i < 3; i++) if (!travDone(i)) return i; r
 function travOpen() {
   inTrav = true; G = null; TRAV = null;
   var steps = travSteps(), first = travFirst(), core = first < 0;
-  var h = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>🧭 Ma traversée du jour</h2><p class="small" style="margin:0 0 12px">' + (core ? "Les 3 étapes sont terminées. Bien joué, capitaine !" : "Suis le chemin, une étape à la fois. Les 3 premières étapes terminées : <b>+25 Berries</b>.") + "</p>";
+  var h = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>🧭 Ma traversée du jour</h2><p class="small" style="margin:0 0 12px">' + (core ? "Les 3 étapes sont terminées. Bien joué, capitaine !" : "Suis le chemin, une étape à la fois. Les 3 premières étapes terminées : <b>+" + PTS.trav + " Berries</b>.") + "</p>";
   steps.forEach(function (x, i) {
     var d = travDone(i), cur = i === first;
     h += '<div class="vstep' + (d ? " done" : "") + '"><div class="l"><b class="' + (d ? "d" : cur ? "cur" : "") + '">' + (d ? "✓" : i + 1) + "</b>" + (i < 3 ? "<u></u>" : "") + '</div><div class="c">' +
-      (i === 3 ? '<div class="famnote" style="margin:0"><b>' + x.ico + " " + x.t + "</b><br>" + x.s + (S.daily[today() + "p"] ? "" : " · +15 Berries") + "</div>" : '<div class="btn">' + x.ico + " " + x.t + "<small>" + x.s + "</small></div>") + "</div></div>";
+      (i === 3 ? '<div class="famnote" style="margin:0"><b>' + x.ico + " " + x.t + "</b><br>" + x.s + (S.daily[today() + "p"] ? "" : " · +" + PTS.parent + " Berries") + "</div>" : '<div class="btn">' + x.ico + " " + x.t + "<small>" + x.s + "</small></div>") + "</div></div>";
   });
   h += '</div>';
   if (!core) h += '<button type="button" class="btn go" data-trav="go" data-i="' + first + '" style="text-align:center">' + (first ? "▶ Reprendre : étape " + (first + 1) : "▶ Lever l'ancre !") + "</button>";
@@ -426,7 +455,7 @@ function travHook() {
   if (!TRAV) return; var t = today(), i = TRAV.i, steps = travSteps(), nw = [], extra = 0;
   TRAV = null; if (travDone(i)) return;
   S.daily[t + "v" + i] = 1;
-  if (i < 3 && travFirst() < 0 && !S.daily[t + "c"]) { S.daily[t + "c"] = 1; extra = 25; S.berries += extra; gotBadge("trav", nw); }
+  if (i < 3 && travFirst() < 0 && !S.daily[t + "c"]) { S.daily[t + "c"] = 1; extra = PTS.trav; S.berries += extra; gotBadge("trav", nw); }
   saveLocal();
   var res = app.querySelector(".res"); if (!res) return;
   Array.prototype.slice.call(res.children).forEach(function (el) { if (el.tagName === "BUTTON") el.remove(); });
@@ -447,6 +476,7 @@ app.addEventListener("click", function (e) {
   else if (b.dataset.tk !== undefined) huntAnswer(b.dataset.tk);
   else if (b.dataset.hp !== undefined) huntParent(b.dataset.hp === "1");
   else if (b.dataset.hn) huntNext();
+  else if (b.dataset.df) { lsSet("qd-diff", b.dataset.df); home(); }
   else if (b.dataset.tab) { lsSet("qd-tab", b.dataset.tab); home(); }
   else if (b.dataset.trav) { if (b.dataset.trav === "open") travOpen(); else travGo(+b.dataset.i); }
   else if (b.dataset.mute) { lsSet("qd-mute", lsGet("qd-mute") === "1" ? "0" : "1"); b.textContent = lsGet("qd-mute") === "1" ? "🔇" : "🔊"; }
@@ -472,8 +502,8 @@ document.addEventListener("keydown", function (e) {
 });
 
 function start(type) {
-  var n = type === "eclair" || type === "seance" ? 8 : 5, cs = type === "seance" ? pickSeance(n) : pick(n); if (!cs.length) return;
-  G = { type: type, items: cs, i: 0, ok: 0, n: 0, res: [], done: false, t0: Date.now(), left: 180, subs: {} };
+  var P = DP(), n = type === "eclair" ? P.eclair : type === "seance" ? P.seance : type === "mini" ? P.mini : P.mystere, cs = type === "seance" ? pickSeance(n) : pick(n); if (!cs.length) return;
+  G = { type: type, items: cs, i: 0, ok: 0, n: 0, res: [], done: false, t0: Date.now(), left: 180, subs: {}, P: P };
   if (type === "eclair") G.items = cs.map(function (c) { var good = Math.random() < 0.5, wr = c.o[1 + Math.floor(Math.random() * 3)]; return { c: c, shown: good ? c.o[0] : wr, truth: good }; });
   else if (type === "mini" || type === "seance") G.items = cs.map(function (c) { return { c: c, opts: shuffle(c.o.map(function (t, j) { return { t: t, ok: j === 0 }; })) }; });
   else G.items = cs.map(function (c) { return { c: c }; });
@@ -494,8 +524,8 @@ function showQ() {
     h += '<div class="q">' + c.q + '</div><button type="button" class="btn go" data-reveal="1">🔮 Je révèle la réponse</button><div id="fb"></div></div>';
   }
   app.innerHTML = h; window.scrollTo(0, 0);
-  if (G.type === "mini") { G.tick = Date.now(); runTimer(180000, "mini"); }
-  else if (G.type === "eclair") { runTimer(8000, "eclair"); }
+  if (G.type === "mini") { G.tick = Date.now(); runTimer(G.P.miniMs, "mini"); }
+  else if (G.type === "eclair") { runTimer(G.P.eclairMs, "eclair"); }
 }
 function runTimer(ms, kind) {
   var t0 = Date.now(), tm = $("#tm"), tmi = $("#tmi");
@@ -551,9 +581,9 @@ function finish() {
   if (!G.n) { render(); return; }
   var t = today(), secs = Math.round((Date.now() - G.t0) / 1000), tot = G.n, ok = G.ok, perfect = tot === G.items.length && ok === tot;
   var day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += ok; day.tot += tot; S.days[t] = day;
-  var gain = ok * 10 + (perfect ? 20 : 0), bonusDay = false;
-  if (G.type === dayFormat() && !S.daily[t] && tot) { gain += 30; S.daily[t] = 1; bonusDay = true; }
-  if (G.type === "seance" && !S.daily[t + "s"] && tot) { gain += 30; S.daily[t + "s"] = 1; bonusDay = true; }
+  var gain = ok * PTS.ok + (perfect ? PTS.perfect : 0), bonusDay = false;
+  if (G.type === dayFormat() && !S.daily[t] && tot) { gain += PTS.daily; S.daily[t] = 1; bonusDay = true; }
+  if (G.type === "seance" && !S.daily[t + "s"] && tot) { gain += PTS.seance; S.daily[t + "s"] = 1; bonusDay = true; }
   S.berries += gain; if (perfect) S.stats.perfect++;
   var nw = [], add = function (id) { if (!unlocked(id)) { S.badges[id] = t; nw.push(BADGES.filter(function (b) { return b[0] === id; })[0]); } };
   var st = streak(), subsAll = Object.keys(SUBNAMES).length > 0 && Object.keys(SUBNAMES).every(function (k) { return S.subs[k]; });
@@ -564,7 +594,7 @@ function finish() {
   if (G.type === "mini" && perfect && secs < 90) add("speed");
   if (subsAll) add("all");
   if (day.n >= 3) add("marathon");
-  if (G.type === "eclair" && perfect && tot === 8) add("eclair");
+  if (G.type === "eclair" && perfect && tot >= 8) add("eclair");
   if (G.type === "mystere" && perfect) add("mystere");
   if (S.berries >= 500) add("b500");
   if ((S.stats.revised || 0) >= 5) add("revise");
@@ -575,14 +605,14 @@ function finish() {
   saveLocal();
   var msg = perfect ? "Parfait, capitaine !" : ok >= Math.ceil(tot / 2) ? "Belle traversée !" : "Bon voyage d'entraînement !";
   var h = '<div class="card res"><div class="big pop">' + (perfect ? "🏆" : ok >= Math.ceil(tot / 2) ? "⛵" : "🌊") + "</div><h2>" + msg + '</h2><p>' + ok + " bonne" + (ok > 1 ? "s" : "") + " réponse" + (ok > 1 ? "s" : "") + " sur " + tot + '</p><div class="gain pop">+' + gain + " Berries</div>" +
-    (bonusDay ? '<p class="small">dont +30 de bonus du jour 🌟</p>' : "") + '<div class="chips">';
+    (bonusDay ? '<p class="small">dont bonus du jour 🌟</p>' : "") + '<div class="chips">';
   h += '<span class="chip">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite</span>";
   if (tot - ok > 0) h += '<span class="chip">🔁 ' + (tot - ok) + " carte" + (tot - ok > 1 ? "s" : "") + " à revoir bientôt</span>";
   if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
   nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
   if (found) h += '<span class="chip pop">' + found[0] + " Trésor trouvé : " + esc(found[1]) + "</span>";
   h += "</div>";
-  if (day.n % 2 === 0) h += '<div class="card pause" id="pz"><h2>🏃 Pause mouvement !</h2><p class="q" style="font-size:19px;margin:4px 0 12px">' + PAUSES[Math.floor(Math.random() * PAUSES.length)] + '</p><button type="button" class="btn go" data-pause="1" style="text-align:center">Je lance 30 secondes (+5 Berries)</button><button type="button" class="btn" data-pskip="1" style="text-align:center;min-height:48px;font-size:15px">Pas maintenant</button></div>';
+  if (day.n % 2 === 0) h += '<div class="card pause" id="pz"><h2>🏃 Pause mouvement !</h2><p class="q" style="font-size:19px;margin:4px 0 12px">' + PAUSES[Math.floor(Math.random() * PAUSES.length)] + '</p><button type="button" class="btn go" data-pause="1" style="text-align:center">Je lance 30 secondes (+' + PTS.pause + ' Berries)</button><button type="button" class="btn" data-pskip="1" style="text-align:center;min-height:48px;font-size:15px">Pas maintenant</button></div>';
   h += '<button type="button" class="btn go" data-go="home">⚓ Retour au pont</button><button type="button" class="btn" data-play="' + G.type + '">🔁 Un autre défi comme celui-ci</button></div>';
   app.innerHTML = h; window.scrollTo(0, 0); G = null; travHook();
 }
@@ -601,7 +631,7 @@ function topBar(extra) { return '<div class="top"><button class="pill" type="but
 function parentBonus(yes) {
   var t = today(); if (!yes) return 0;
   S.stats.withParent = (S.stats.withParent || 0) + 1;
-  if (S.daily[t + "p"]) return 0; S.daily[t + "p"] = 1; return 15;
+  if (S.daily[t + "p"]) return 0; S.daily[t + "p"] = 1; return PTS.parent;
 }
 function gotBadge(id, list) { if (!S.badges[id]) { S.badges[id] = today(); list.push(BADGES.filter(function (b) { return b[0] === id; })[0]); } }
 function wFinish(o) {
@@ -619,14 +649,14 @@ function wFinish(o) {
   wClear(); G = null; app.innerHTML = h; window.scrollTo(0, 0); travHook();
 }
 function wGain(base, parent) {      /* échauffement : 40 Berries par jour au maximum, bonus parent à part */
-  var t = today(), got = S.warm[t] || 0, g = Math.min(base, Math.max(0, 40 - got));
+  var t = today(), got = S.warm[t] || 0, g = Math.min(Math.ceil(base / 2), Math.max(0, PTS.warmCap - got));
   S.warm[t] = got + g; var bonus = parentBonus(parent); S.berries += g + bonus; return { g: g, bonus: bonus };
 }
 var INTRO = {
   gonogo: ["🦈", "Trésor ou requin ?", "Des images apparaissent une à une pendant environ une minute. Tape vite sur le trésor (🪙 ou 💎) et ne touche surtout pas le requin (🦈) !", "Duel avec un parent", "Gianni joue, puis le parent joue la même partie."],
-  intrus: ["🔍", "Chasse à l'intrus", "Dans chaque grille, un seul symbole est différent des autres. Touche-le le plus vite possible. 8 grilles, de plus en plus grandes.", null, null],
-  perroquet: ["🦜", "Le perroquet", "Regarde la suite de couleurs, puis rejoue-la dans le même ordre. Tu as trois vies.", "À deux avec un parent", "Chacun son tour : rejoue toute la suite puis ajoute une couleur. Pas de suite affichée : c'est la mémoire qui joue !"],
-  chasse: ["🔎", "Chasse à l'erreur", "Une phrase de tes cours a parfois un mot remplacé par un mot faux. Lis bien, puis touche le mot faux. Si tout est juste, touche « Tout est juste ». 5 phrases.", "Un parent lit à voix haute", "Le parent lit la phrase à voix haute, Gianni écoute sans regarder l'écran et dit où est l'erreur."]
+  intrus: ["🔍", "Chasse à l'intrus", "Dans chaque grille, un seul symbole est différent des autres. Touche-le le plus vite possible. Les grilles deviennent de plus en plus grandes.", null, null],
+  perroquet: ["🦜", "Le perroquet", "Regarde la suite de couleurs, puis rejoue-la dans le même ordre. Tu as quelques vies : fais attention.", "À deux avec un parent", "Chacun son tour : rejoue toute la suite puis ajoute une couleur. Pas de suite affichée : c'est la mémoire qui joue !"],
+  chasse: ["🔎", "Chasse à l'erreur", "Une phrase de tes cours a parfois un mot remplacé par un mot faux. Lis bien, puis touche le mot faux. Si tout est juste, touche « Tout est juste ».", "Un parent lit à voix haute", "Le parent lit la phrase à voix haute, Gianni écoute sans regarder l'écran et dit où est l'erreur."]
 };
 function intro(g) {
   var d = INTRO[g]; if (!d) return;
@@ -651,8 +681,8 @@ function gnReady() {
 }
 function gnRun() {
   if (!G || G.game !== "gonogo") return;
-  var N = 40, seq = []; for (var i = 0; i < N; i++) seq.push(i < 2 || Math.random() < 0.7 ? 1 : 0);
-  G.st = { seq: seq, i: -1, hits: 0, miss: 0, cr: 0, fa: 0, streak: 0, dur: G.mode === "duo" ? 900 : 950, visible: false, tapped: false, cur: 1 };
+  var P = DP(), N = P.gnN, seq = []; for (var i = 0; i < N; i++) seq.push(i < 2 || Math.random() < P.gnGo ? 1 : 0);
+  G.st = { seq: seq, i: -1, hits: 0, miss: 0, cr: 0, fa: 0, streak: 0, dur: G.mode === "duo" ? DP().gnDur - 50 : DP().gnDur, visible: false, tapped: false, cur: 1 };
   app.innerHTML = topBar('<div class="who">' + esc(G.players[G.p]) + "</div>") + '<div class="timer"><i id="tmi"></i></div><button type="button" class="stim" id="stim" aria-label="Touche ici si tu vois un trésor"></button><p class="small" style="color:#fff;text-align:center">🪙 💎 = tape &nbsp;·&nbsp; 🦈 = ne touche pas</p>';
   $("#stim").addEventListener("pointerdown", gnTap);
   wT = setTimeout(gnNext, 600);
@@ -672,7 +702,7 @@ function gnNext() {
   wT = setTimeout(function () {
     var e2 = $("#stim"); if (!e2) return;
     if (!st.tapped) { if (st.cur) { st.miss++; st.streak = 0; } else { st.cr++; st.streak++; } }
-    if (G.mode === "solo") { if (st.streak >= 4) { st.dur = Math.max(600, st.dur - 50); st.streak = 0; } else if (!st.streak) st.dur = Math.min(1100, st.dur + 40); }
+    if (G.mode === "solo") { if (st.streak >= 4) { st.dur = Math.max(DP().gnMin, st.dur - 50); st.streak = 0; } else if (!st.streak) st.dur = Math.min(DP().gnMax, st.dur + 40); }
     st.visible = false; e2.textContent = ""; e2.className = "stim";
     wT = setTimeout(gnNext, 450);
   }, st.dur);
@@ -691,26 +721,26 @@ function gnEnd() {
 var PAIRS_E = [["🐙", "🦑"], ["🐚", "🐌"], ["⭐", "🌟"], ["🧭", "⏱️"], ["🦀", "🦞"], ["⚓", "🎣"]];
 var PAIRS_L = [["b", "d"], ["p", "q"], ["6", "9"], ["E", "F"], ["n", "u"], ["O", "Q"], ["m", "w"], ["R", "B"]];
 function inStart() {
-  var sizes = [3, 3, 4, 4, 4, 5, 5, 5], pe = shuffle(PAIRS_E), pl = shuffle(PAIRS_L), rounds = [];
-  for (var i = 0; i < 8; i++) { var pr = i < 4 ? pe[i] : pl[i - 4]; if (Math.random() < 0.5) pr = [pr[1], pr[0]]; rounds.push({ n: sizes[i], base: pr[0], odd: pr[1], at: 0 }); rounds[i].at = Math.floor(Math.random() * sizes[i] * sizes[i]); }
+  var sizes = DP().inSizes, pe = shuffle(PAIRS_E), pl = shuffle(PAIRS_L), rounds = [];
+  for (var i = 0; i < sizes.length; i++) { var pr = i < 4 ? pe[i] : pl[(i - 4) % pl.length]; if (Math.random() < 0.5) pr = [pr[1], pr[0]]; rounds.push({ n: sizes[i], base: pr[0], odd: pr[1], at: 0 }); rounds[i].at = Math.floor(Math.random() * sizes[i] * sizes[i]); }
   G = { type: "warm", game: "intrus", rounds: rounds, i: 0, errs: 0, found: 0, t0: Date.now(), res: [] };
   inShow();
 }
 function inShow() {
-  var r = G.rounds[G.i], dots = ""; for (var k = 0; k < 8; k++) dots += '<i class="' + (G.res[k] === 1 ? "ok" : k === G.i ? "cur" : "") + '"></i>';
-  var cells = ""; for (var j = 0; j < r.n * r.n; j++) cells += '<button type="button" class="cellz" data-ic="' + j + '" style="font-size:' + (r.n === 3 ? 44 : r.n === 4 ? 36 : 30) + 'px">' + (j === r.at ? r.odd : r.base) + "</button>";
-  app.innerHTML = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + dots + '</div></div><div class="card"><div class="tagline">Grille ' + (G.i + 1) + " sur 8</div><p class=\"small\" style=\"margin:4px 0\">Touche le symbole <b>différent</b>.</p><div class=\"gridz\" style=\"grid-template-columns:repeat(" + r.n + ',1fr)">' + cells + "</div></div>";
+  var r = G.rounds[G.i], dots = ""; for (var k = 0; k < G.rounds.length; k++) dots += '<i class="' + (G.res[k] === 1 ? "ok" : k === G.i ? "cur" : "") + '"></i>';
+  var cells = ""; for (var j = 0; j < r.n * r.n; j++) cells += '<button type="button" class="cellz" data-ic="' + j + '" style="font-size:' + (r.n === 3 ? 44 : r.n === 4 ? 36 : r.n === 5 ? 30 : r.n === 6 ? 26 : r.n === 7 ? 22 : 19) + 'px">' + (j === r.at ? r.odd : r.base) + "</button>";
+  app.innerHTML = '<div class="top"><button class="pill" type="button" data-quit="1">✕ Quitter</button><div class="dots">' + dots + '</div></div><div class="card"><div class="tagline">Grille ' + (G.i + 1) + " sur " + G.rounds.length + "</div><p class=\"small\" style=\"margin:4px 0\">Touche le symbole <b>différent</b>.</p><div class=\"gridz\" style=\"grid-template-columns:repeat(" + r.n + ',1fr)">' + cells + "</div></div>";
   window.scrollTo(0, 0);
 }
 app.addEventListener("click", function (e) {
   var b = e.target.closest(".cellz"); if (!b || !G || G.game !== "intrus" || G.lock) return;
   var r = G.rounds[G.i], j = +b.dataset.ic;
-  if (j === r.at) { G.lock = true; b.classList.add("ok"); G.res[G.i] = 1; G.found++; wT = setTimeout(function () { G.lock = false; if (G.i >= 7) inEnd(); else { G.i++; inShow(); } }, 450); }
+  if (j === r.at) { G.lock = true; b.classList.add("ok"); G.res[G.i] = 1; G.found++; wT = setTimeout(function () { G.lock = false; if (G.i >= G.rounds.length - 1) inEnd(); else { G.i++; inShow(); } }, 450); }
   else { b.classList.add("ko"); b.disabled = true; G.errs++; }
 });
 function inEnd() {
   var secs = Math.round((Date.now() - G.t0) / 1000), w = wGain(6 + Math.max(0, 14 - G.errs * 2), false);
-  wFinish({ emoji: G.errs <= 1 ? "🏆" : "🔍", title: G.errs <= 1 ? "Regard de lynx !" : "Bien cherché !", lines: ["8 grilles en <b>" + secs + " secondes</b>", G.errs ? G.errs + " erreur" + (G.errs > 1 ? "s" : "") + " en route, ce n'est pas grave." : "Aucune erreur, bravo !"], g: w.g, bonus: w.bonus, warm: true, again: { wg: "intrus", wm: "solo" } });
+  wFinish({ emoji: G.errs <= 1 ? "🏆" : "🔍", title: G.errs <= 1 ? "Regard de lynx !" : "Bien cherché !", lines: [G.rounds.length + " grilles en <b>" + secs + " secondes</b>", G.errs ? G.errs + " erreur" + (G.errs > 1 ? "s" : "") + " en route, ce n'est pas grave." : "Aucune erreur, bravo !"], g: w.g, bonus: w.bonus, warm: true, again: { wg: "intrus", wm: "solo" } });
 }
 
 /* --- Le perroquet (suite de couleurs) --- */
@@ -724,16 +754,16 @@ function padsHtml(on) { return '<div class="pads">' + PADS.map(function (p, i) {
 function muteBtn() { return '<button class="pill sm" type="button" data-mute="1" aria-label="Son">' + (lsGet("qd-mute") === "1" ? "🔇" : "🔊") + "</button>"; }
 function flash(i, ms) { var b = document.querySelector('.pad[data-pp="' + i + '"]'); if (!b) return; b.classList.add("lit"); tone(i); setTimeout(function () { b.classList.remove("lit"); }, ms || 350); }
 function ppStart(m) {
-  G = { type: "warm", game: "perroquet", mode: m, seq: [], idx: 0, lives: 3, len: 2, maxLen: 0, who: 0, players: ["Le parent", "Gianni"], over: false };
+  G = { type: "warm", game: "perroquet", mode: m, seq: [], idx: 0, lives: DP().ppLives, len: 2, maxLen: 0, who: 0, players: ["Le parent", "Gianni"], over: false };
   if (m === "solo") { for (var i = 0; i < 2; i++) G.seq.push(Math.floor(Math.random() * 4)); ppSoloPlay(); } else ppDuoDraw("");
 }
-function hearts() { var h = ""; for (var i = 0; i < 3; i++) h += i < G.lives ? "❤️" : "🖤"; return h; }
+function hearts() { var h = ""; for (var i = 0; i < DP().ppLives; i++) h += i < G.lives ? "❤️" : "🖤"; return h; }
 function ppSoloPlay(msg) {
   G.idx = 0; G.busy = true;
   app.innerHTML = topBar('<div class="who">🦜 Suite de ' + G.seq.length + "</div>" + muteBtn()) + '<div class="card"><div class="who" id="pm">' + (msg || "Regarde bien…") + '</div><div style="text-align:center;font-size:24px">' + hearts() + "</div>" + padsHtml(false) + "</div>";
   window.scrollTo(0, 0); var k = 0;
   function step() { if (!G || G.game !== "perroquet") return; if (k >= G.seq.length) { G.busy = false; document.querySelectorAll(".pad").forEach(function (b) { b.disabled = false; }); var pm = $("#pm"); if (pm) pm.textContent = "À toi !"; return; }
-    flash(G.seq[k], 450); k++; wT = setTimeout(step, 750); }
+    flash(G.seq[k], Math.round(DP().ppStep * 0.6)); k++; wT = setTimeout(step, DP().ppStep); }
   wT = setTimeout(step, 900);
 }
 function ppDuoDraw(msg) {
@@ -745,7 +775,7 @@ app.addEventListener("click", function (e) {
   var b = e.target.closest(".pad"); if (!b || !G || G.game !== "perroquet" || G.busy || G.over) return;
   var i = +b.dataset.pp; flash(i, 220);
   if (G.mode === "solo") {
-    if (G.seq[G.idx] === i) { G.idx++; if (G.idx >= G.seq.length) { G.maxLen = G.seq.length; G.busy = true; if (G.seq.length >= 7) { ppEnd(); return; } G.seq.push(Math.floor(Math.random() * 4)); wT = setTimeout(function () { ppSoloPlay("Bravo ! Une couleur de plus"); }, 700); } }
+    if (G.seq[G.idx] === i) { G.idx++; if (G.idx >= G.seq.length) { G.maxLen = G.seq.length; G.busy = true; if (G.seq.length >= DP().ppMax) { ppEnd(); return; } G.seq.push(Math.floor(Math.random() * 4)); wT = setTimeout(function () { ppSoloPlay("Bravo ! Une couleur de plus"); }, 700); } }
     else { G.lives--; G.busy = true; if (G.lives <= 0) { wT = setTimeout(ppEnd, 500); } else wT = setTimeout(function () { ppSoloPlay("Oups ! Regarde encore"); }, 700); }
   } else {
     if (G.idx < G.seq.length) { if (G.seq[G.idx] === i) G.idx++; else { G.over = true; G.loser = G.who; wT = setTimeout(ppEnd, 500); } }
@@ -806,8 +836,8 @@ function huntStart(m) {
   if (!POOL.length) { app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><p>Les questions ne sont pas chargées. Vérifie la connexion puis réessaie.</p></div>'; return; }
   if (!SEGS) segIndex();
   var rounds = [], seen = {}, pool = shuffle(POOL).filter(function (c) { var k = plainText(c.e).slice(0, 60); if (seen[k]) return false; seen[k] = 1; return true; }), errs = 0, i, r;
-  for (i = 0; i < pool.length && errs < 4; i++) { r = huntRound(pool[i], true); if (r) { rounds.push(r); errs++; } }
-  for (i = 0; i < pool.length && rounds.length < 5; i++) { if (rounds.some(function (x) { return x.c === pool[i]; })) continue; r = huntRound(pool[i], false); if (r) rounds.push(r); }
+  for (i = 0; i < pool.length && errs < DP().huntErr; i++) { r = huntRound(pool[i], true); if (r) { rounds.push(r); errs++; } }
+  for (i = 0; i < pool.length && rounds.length < DP().huntN; i++) { if (rounds.some(function (x) { return x.c === pool[i]; })) continue; r = huntRound(pool[i], false); if (r) rounds.push(r); }
   if (errs < 2) { app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><p>Pas assez de phrases adaptées dans les cours pour ce jeu. Importe d\'autres cours !</p></div>'; return; }
   rounds = shuffle(rounds);
   G = { type: "chasse", mode: m, rounds: rounds, i: 0, found: 0, res: [], done: false };
@@ -843,7 +873,7 @@ function huntNext() {
 function huntFinish() {
   var found = G.found, n = G.rounds.length, t = today(), parent = G.mode === "parent" || G.mode === "duo", m = G.mode;
   var day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += found; day.tot += n; S.days[t] = day;
-  var gain = found * 8 + (found === n ? 10 : 0), bonus = parentBonus(parent); S.berries += gain + bonus; S.stats.hunt = (S.stats.hunt || 0) + found;
+  var gain = found * PTS.hunt + (found === n ? PTS.huntPerfect : 0), bonus = parentBonus(parent); S.berries += gain + bonus; S.stats.hunt = (S.stats.hunt || 0) + found;
   var nw = [], st = streak(); gotBadge("first", nw); if (st >= 3) gotBadge("s3", nw); if (st >= 7) gotBadge("s7", nw); if (day.n >= 3) gotBadge("marathon", nw);
   if ((S.stats.hunt || 0) >= 10) gotBadge("hunt", nw); if (S.berries >= 500) gotBadge("b500", nw);
   wFinish({ emoji: found === n ? "🏆" : found >= 3 ? "🔎" : "🌊", title: found === n ? "Œil de lynx !" : "Bien cherché !", lines: [found + " erreur" + (found > 1 ? "s" : "") + " ou phrase" + (found > 1 ? "s" : "") + " bien repérée" + (found > 1 ? "s" : "") + " sur " + n], g: gain, bonus: bonus, nw: nw, again: { wg: "chasse", wm: m } });
@@ -858,9 +888,9 @@ function pauseStart() {
     var pc = $("#pc"); if (!pc) { clearInterval(pauseH); return; }
     var el = Date.now() - t0, r = Math.max(0, 1 - el / dur); pc.textContent = Math.ceil(r * 30); $("#pb").style.width = (r * 100) + "%";
     if (el >= dur) {
-      clearInterval(pauseH); S.berries += 5; S.stats.pauses = (S.stats.pauses || 0) + 1;
+      clearInterval(pauseH); S.berries += PTS.pause; S.stats.pauses = (S.stats.pauses || 0) + 1;
       var nb = ""; if (S.stats.pauses >= 3 && !S.badges.pause) { S.badges.pause = today(); nb = '<p><span class="chip pop">🏃 Marin en forme</span></p>'; }
-      saveLocal(); box.innerHTML = '<h2>👏 Bravo !</h2><p>+5 Berries pour avoir bougé.</p>' + nb;
+      saveLocal(); box.innerHTML = '<h2>👏 Bravo !</h2><p>+' + PTS.pause + ' Berries pour avoir bougé.</p>' + nb;
     }
   }, 200);
 }

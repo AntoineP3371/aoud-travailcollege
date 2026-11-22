@@ -330,3 +330,9 @@ Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `r
 
 - Le site s'ouvre sur le **Sommaire** : une carte par matière (icône, nombre de cours), qui se déplie pour lister ses cours avec le nombre de cartes, la présence d'exercices et de PDF, et le meilleur score. Un cours s'ouvre d'un toucher ; le bouton **Sommaire** de l'en-tête y ramène. Les anciens liens `…/#maths` ouvrent toujours directement le cours.
 - Icône d'une matière : champ facultatif `icon` de la collection `subjects` (migration `1760000700_subject_icon.js`, à modifier dans l'interface d'administration de PocketBase). Sans valeur : 📐 maths, 🤝 EMC, 🏺 histoire-géo, 🌍 SVT, 📘 autre matière.
+
+### Difficulté et points de la page Défis
+
+- Sélecteur **Mer** sur l'accueil : Auto (suit le rang : calme jusqu'à Matelot, agitée de Gabier à Second, tempête dès Capitaine), ou Mer calme / agitée / Tempête au choix. Plus la mer est forte : plus de questions, minuteurs plus courts, grilles plus grandes, suites plus longues, moins de vies, plus de phrases à la chasse à l'erreur.
+- Points : tout est regroupé dans l'objet `PTS` en haut du script de `defis/index.html` (5 Berries par bonne réponse, +10 parfait, +15 séance et défi du jour, +8 parent, +15 traversée, plafond d'échauffement 20 par jour).
+- Rangs : après Amiral de la flotte viennent Commodore (3 500), Seigneur des mers (5 000), Maître des océans (7 500), Gardien des Sept Mers (10 000), Légende vivante (15 000), Roi des pirates (20 000), puis une étoile de plus tous les 5 000 Berries.
