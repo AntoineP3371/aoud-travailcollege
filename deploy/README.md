@@ -326,6 +326,21 @@ Cette mise à jour ajoute une migration (`1760000600_rewards.js`, collections `r
 - **En famille** : chasse à l'erreur lue à voix haute par le parent, perroquet à deux, duel Trésor ou requin. +15 Berries (« Bonus équipage ») la première fois de la journée.
 - Jeux d'échauffement (1 minute) : plafond de 40 Berries par jour.
 
+### Page Défis : jeux d'écriture et de réflexion
+
+Huit jeux, regroupés sous « Écrire et raisonner » sur l'accueil (vignette 👪 = jouable avec un parent). Aucun n'est corrigé par une IA : le site vérifie ce qu'il peut (mots-clés du cours, mot de liaison « parce que / donc », majuscule et point, nombres et unités) et laisse le reste à l'auto-évaluation ou au parent.
+
+- **Explique à ta façon** (👪) : une question du cours, réponse écrite avec ses mots, comparée au cours (mots-clés retrouvés), jugée « claire » par Gianni ou le parent.
+- **Le maître de l'équipage** (👪, à deux uniquement) : Gianni invente une question et sa réponse, le parent répond, Gianni juge et explique par écrit.
+- **Atelier du problème** : 3 problèmes générés au hasard (nombres différents à chaque partie), en 4 étapes : données utiles, opération, calcul, phrase-réponse. Le niveau de mer change les types de problèmes.
+- **Programme de construction** : remettre dans l'ordre les étapes d'une démarche (cercle, perpendiculaire, addition de décimaux, démarche d'investigation, présenter un document…), puis écrire une étape cachée. Banque `PROCS` dans le script.
+- **La chaîne de causes** : compléter les maillons manquants puis écrire une phrase avec « donc / parce que ». Banque `CHAINS`.
+- **Surligne l'essentiel** : toucher les mots-clés (les mots en gras des explications de cartes) d'un paragraphe, avec un nombre maximum de mots surlignés.
+- **Ma fiche de révision** : associer des paragraphes à leurs sous-titres (étiquette « tag » des cartes), donner un titre ; la fiche mise en forme s'affiche à recopier. Nécessite un cours avec au moins 3 cartes ayant un tag court.
+- **Le tribunal de l'équipage** (👪) : question d'EMC, choix pour/contre, deux arguments avec « parce que », puis grille Clair / Justifié / Respectueux cochée par Gianni ou le parent. Banque `TRIB`.
+- Points : environ 20 Berries au maximum par partie (+5 si parfait) ; réussite **Plume d'or** après 5 jeux d'écriture.
+- Les banques de contenu (`PROCS`, `CHAINS`, `TRIB`, `PBT`) sont des tableaux au début de chaque jeu dans `defis/index.html` : on peut y ajouter des entrées au même format.
+
 ### Page Sommaire (page d'ouverture)
 
 - Le site s'ouvre sur le **Sommaire** : une carte par matière (icône, nombre de cours), qui se déplie pour lister ses cours avec le nombre de cartes, la présence d'exercices et de PDF, et le meilleur score. Un cours s'ouvre d'un toucher ; le bouton **Sommaire** de l'en-tête y ramène. Les anciens liens `…/#maths` ouvrent toujours directement le cours.

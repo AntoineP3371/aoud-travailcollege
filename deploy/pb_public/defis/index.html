@@ -157,6 +157,47 @@ dialog, .modal { position: fixed; inset: 0; background: rgba(5,20,40,0.6); displ
 .modal input { width: 100%; font-size: 20px; min-height: 48px; border: 2.5px solid var(--wood); border-radius: 10px; padding: 0 12px; background: #fff; margin: 8px 0; }
 .small { font-size: 13px; color: var(--muted); }
 #ver { opacity: 0.7; font-size: 12px; color: #fff; }
+.wta { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 18px; line-height: 1.4; padding: 10px 12px; border: 3px solid var(--wood); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin: 4px 0 8px; }
+.wta:disabled { background: #f1ead5; }
+.num { display: inline-block; min-width: 46px; min-height: 46px; padding: 2px 10px; margin: 0 2px; border: 3px solid var(--wood); border-radius: 10px; background: #fff7dd; font: inherit; font-weight: 800; font-size: 20px; color: inherit; cursor: pointer; }
+.num.sel { background: var(--gold); border-color: var(--gold-d); }
+.num.good { background: #c9f0d9; border-color: var(--green); }
+.num.bad { background: #ffd2cd; border-color: var(--red); }
+.num:disabled { cursor: default; }
+.btn.good { background: #c9f0d9; border-color: var(--green); box-shadow: 0 4px 0 var(--green); }
+.btn.bad { background: #ffd2cd; border-color: var(--red); box-shadow: 0 4px 0 var(--red); }
+.btn.opn, .btn.stp { font-size: 16px; min-height: 52px; font-weight: 700; }
+.chps { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.chp { border: 2px solid var(--wood); border-radius: 999px; padding: 5px 11px; background: #fff; font: inherit; font-size: 14px; font-weight: 700; color: inherit; }
+.chp.on { background: #c9f0d9; border-color: var(--green); }
+.chp.off { background: #ffe3df; border-color: var(--red); }
+.chp.pick { cursor: pointer; min-height: 40px; }
+.chp.pick.on { background: var(--gold); border-color: var(--gold-d); }
+.olist { margin: 0 0 10px; padding-left: 24px; }
+.olist li { margin: 6px 0; line-height: 1.4; }
+.olist li small { display: block; color: var(--muted); font-size: 13px; }
+.olist li.good { color: #1b6b3a; font-weight: 700; }
+.olist li.bad { color: #a32a1d; font-weight: 700; }
+.blank { border-bottom: 3px dashed var(--gold-d); font-weight: 800; padding: 0 6px; }
+.chain .lnk { background: #fff; border: 2.5px solid var(--wood); border-radius: 12px; padding: 10px 12px; font-weight: 600; line-height: 1.35; }
+.chain .lnk.empty { border-style: dashed; color: var(--muted); }
+.chain .lnk.cur { border-style: dashed; border-color: var(--gold-d); background: #fff3cf; }
+.chain .lnk.good { background: #c9f0d9; border-color: var(--green); }
+.chain .lnk.bad { background: #ffd2cd; border-color: var(--red); }
+.arw { text-align: center; font-weight: 800; color: var(--muted); line-height: 1.2; margin: 2px 0; }
+.fpar { margin: 0 0 14px; padding-bottom: 10px; border-bottom: 2px dashed var(--gold-d); }
+.fpt { font-size: 16px; line-height: 1.4; margin-bottom: 6px; }
+.fiche { background: #fff; }
+.fiche .ft { text-align: center; text-decoration: underline; text-decoration-color: var(--red); margin: 0 0 10px; font-size: 22px; }
+.fiche .fs { color: var(--sea); font-weight: 800; margin-top: 10px; font-size: 17px; }
+.fiche .fs::before { content: "▸ "; }
+.fiche p { margin: 2px 0 0 14px; line-height: 1.45; }
+.fiche b { background: #fff2a8; padding: 0 2px; }
+.ck { display: flex; gap: 10px; align-items: center; padding: 8px 0; font-size: 17px; font-weight: 600; }
+.ck input { width: 24px; height: 24px; flex: none; }
+.tok.hl { background: #fff2a8; border-color: var(--gold-d); }
+.tok.miss { background: #ffe0a8; border-color: #e08a00; }
+.tok.ok, .tok.ko, .tok.miss { cursor: default; }
 </style>
 </head>
 <body>
@@ -219,7 +260,8 @@ var BADGES = [
   ["hunt", "🔎", "Œil de lynx", "Trouver 10 erreurs dans la chasse à l'erreur"],
   ["parent", "👪", "Équipage complet", "Jouer 3 fois avec un parent"],
   ["warm", "🎯", "Bien échauffé", "Faire 5 mini-jeux d'échauffement"],
-  ["trav", "🧭", "Capitaine de la traversée", "Terminer les 3 étapes d'une traversée du jour"]
+  ["trav", "🧭", "Capitaine de la traversée", "Terminer les 3 étapes d'une traversée du jour"],
+  ["plume", "✒️", "Plume d'or", "Terminer 5 jeux d'écriture et de réflexion"]
 ];
 var PAUSES = ["10 sauts les bras en l'air 🙌", "Fais le tour de la pièce en marchant comme un crabe 🦀", "10 squats : monte à bord du mât ! 🏴‍☠️", "Étire-toi comme si tu attrapais les voiles ⛵",
   "Marche sur place en levant bien les genoux 🥁", "Tourne les bras comme les rames d'un bateau 🚣", "Tiens en équilibre sur une jambe pendant 20 secondes, comme sur le pont par gros temps 🌊",
@@ -395,17 +437,24 @@ function home() {
   }
   var dv = lsGet("qd-diff"), cur = diffLevel();
   h += '<div class="diff" role="group" aria-label="Difficulté"><span>Mer :</span>' + [["auto", "Auto"]].concat(DIFFS.map(function (x) { return [x[0], x[1] + " " + x[2]]; })).map(function (x) { return '<button type="button" data-df="' + x[0] + '" class="' + ((dv || "auto") === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><p class="small diffnote">' + DIFFS[cur - 1][1] + " " + DIFFS[cur - 1][2] + ((dv || "auto") === "auto" ? " (selon ton rang)" : "") + " : plus la mer est forte, plus les défis sont difficiles.</p>";
-  var T = [];   /* étiquettes : [attribut, icône, nom, jouable avec un parent, défi du jour] */
+  var T1 = [], T2 = [], T3 = [];   /* étiquettes : [attribut, icône, nom, jouable avec un parent, défi du jour] */
   if (POOL.length) {
-    FORMATS.forEach(function (f) { T.push(['data-play="' + f[0] + '"', f[3], f[1], false, f[0] === df]); });
-    T.push(['data-wg="chasse"', "🔎", "Chasse à l'erreur", true, false]);
+    FORMATS.forEach(function (f) { T1.push(['data-play="' + f[0] + '"', f[3], f[1], false, f[0] === df]); });
+    T1.push(['data-wg="chasse"', "🔎", "Chasse à l'erreur", true, false]);
   }
-  WARMS.forEach(function (w) { T.push(['data-wg="' + w[0] + '"', w[3], w[1], w[4], false]); });
-  h += '<div class="sub-h">Choisis un jeu</div><div class="etq">' + T.map(function (x) {
-    return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" +
-      (x[3] ? '<span class="par" role="img" aria-label="Jouable avec un parent">👪</span>' : "") +
-      (x[4] ? '<span class="dj">' + (S.daily[t] ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "</button>";
-  }).join("") + "</div>";
+  WARMS.forEach(function (w) { T3.push(['data-wg="' + w[0] + '"', w[3], w[1], w[4], false]); });
+  [["explique", "✍️", "Explique à ta façon", true, true], ["maitre", "🎓", "Le maître de l'équipage", true, true], ["probleme", "🧮", "Atelier du problème", false, false], ["programme", "📐", "Programme de construction", false, false], ["chaine", "🔗", "La chaîne de causes", false, false], ["surligne", "🖍️", "Surligne l'essentiel", false, true], ["fiche", "🗂️", "Ma fiche de révision", false, true], ["tribunal", "⚖️", "Le tribunal de l'équipage", true, false]].forEach(function (x) {
+    if (x[4] && !POOL.length) return; T2.push(['data-wg="' + x[0] + '"', x[1], x[2], x[3], false]);
+  });
+  function grid(list) {
+    return '<div class="etq">' + list.map(function (x) {
+      return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" +
+        (x[3] ? '<span class="par" role="img" aria-label="Jouable avec un parent">👪</span>' : "") +
+        (x[4] ? '<span class="dj">' + (S.daily[t] ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+  }
+  if (T1.length) h += '<div class="sub-h">Réviser le cours</div>' + grid(T1);
+  h += '<div class="sub-h">Écrire et raisonner</div>' + grid(T2) + '<div class="sub-h">Échauffements</div>' + grid(T3);
   h += '<p class="legend"><span class="par" aria-hidden="true">👪</span> jouable avec un parent · ' + (S.daily[t + "p"] ? "bonus équipage du jour pris ✓" : "+" + PTS.parent + " Berries la première fois de la journée") + ". Échauffements : plafond de " + PTS.warmCap + " Berries par jour.</p>";
   h += '<div class="etq"><button type="button" class="tile2 wide" data-go="coffre"><span class="ti" aria-hidden="true">🎁</span><span class="tn">Mon coffre</span><small>' + Math.max(0, S.berries - (S.spent || 0)) + ' Berries</small></button>' +
     '<button type="button" class="tile2 wide" data-go="trophy"><span class="ti" aria-hidden="true">🏆</span><span class="tn">Mes réussites</span><small>' + Object.keys(S.badges).length + " / " + BADGES.length + " · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button></div>";
@@ -466,7 +515,8 @@ function travHook() {
 }
 app.addEventListener("click", function (e) {
   var b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.wm) startGame(b.dataset.wg, b.dataset.wm);
+  if (b.dataset.wr) wrClick(b.dataset.wr);
+  else if (b.dataset.wm) startGame(b.dataset.wg, b.dataset.wm);
   else if (b.dataset.wg) intro(b.dataset.wg);
   else if (b.dataset.gn) gnRun();
   else if (b.dataset.tk !== undefined) huntAnswer(b.dataset.tk);
@@ -490,7 +540,7 @@ app.addEventListener("click", function (e) {
   else if (b.dataset.quit) { if (G && G.n && !confirm("Quitter ce défi ? Ta progression de ce défi ne sera pas gardée.")) return; render(); }
 });
 document.addEventListener("keydown", function (e) {
-  if (!G) return; var k = e.key;
+  if (!G || G.type === "wr") return; var k = e.key;
   if (G.type !== "eclair" && G.type !== "mystere" && /^[1-4]$/.test(k) && !G.done) answerQcm(+k - 1);
   else if (G.type === "eclair" && !G.done && (k === "v" || k === "f")) answerTf(k === "v");
   else if (k === "Enter" && G.done && G.items) nextQ();
@@ -651,17 +701,27 @@ var INTRO = {
   gonogo: ["🦈", "Trésor ou requin ?", "Des images apparaissent une à une pendant environ une minute. Tape vite sur le trésor (🪙 ou 💎) et ne touche surtout pas le requin (🦈) !", "Duel avec un parent", "Gianni joue, puis le parent joue la même partie."],
   intrus: ["🔍", "Chasse à l'intrus", "Dans chaque grille, un seul symbole est différent des autres. Touche-le le plus vite possible. Les grilles deviennent de plus en plus grandes.", null, null],
   perroquet: ["🦜", "Le perroquet", "Regarde la suite de couleurs, puis rejoue-la dans le même ordre. Tu as quelques vies : fais attention.", "À deux avec un parent", "Chacun son tour : rejoue toute la suite puis ajoute une couleur. Pas de suite affichée : c'est la mémoire qui joue !"],
-  chasse: ["🔎", "Chasse à l'erreur", "Une phrase de tes cours a parfois un mot remplacé par un mot faux. Lis bien, puis touche le mot faux. Si tout est juste, touche « Tout est juste ».", "Un parent lit à voix haute", "Le parent lit la phrase à voix haute, Gianni écoute sans regarder l'écran et dit où est l'erreur."]
+  chasse: ["🔎", "Chasse à l'erreur", "Une phrase de tes cours a parfois un mot remplacé par un mot faux. Lis bien, puis touche le mot faux. Si tout est juste, touche « Tout est juste ».", "Un parent lit à voix haute", "Le parent lit la phrase à voix haute, Gianni écoute sans regarder l'écran et dit où est l'erreur."],
+  explique: ["✍️", "Explique à ta façon", "Une question de ton cours s'affiche. Écris la réponse avec tes mots, sans regarder le cours. Ensuite, compare : as-tu retrouvé les mots importants ?", "À deux avec un parent", "Le parent lit ta réponse et dit si elle est claire."],
+  maitre: ["🎓", "Le maître de l'équipage", "C'est toi le maître ! Invente une question sur ton cours, écris la bonne réponse, puis pose la question à ton parent. Tu juges sa réponse et tu lui expliques pourquoi.", "🎓 Je suis le maître", "Une question pour ton parent, une explication à écrire.", true],
+  probleme: ["🧮", "Atelier du problème", "Un petit problème de maths, résolu comme en classe : repérer les données utiles, choisir l'opération, calculer, puis écrire la phrase-réponse.", null, null],
+  programme: ["📐", "Programme de construction", "Remets les étapes d'une démarche dans le bon ordre, puis écris avec tes mots une étape cachée.", null, null],
+  chaine: ["🔗", "La chaîne de causes", "Complète les maillons manquants d'une chaîne d'événements, puis écris une phrase avec « donc » ou « parce que ».", null, null],
+  surligne: ["🖍️", "Surligne l'essentiel", "Dans un paragraphe de ton cours, touche seulement les mots importants. Tu as un nombre limité de mots à surligner : choisis bien !", null, null],
+  fiche: ["🗂️", "Ma fiche de révision", "Associe des paragraphes à leurs sous-titres, donne un titre à ta fiche, et elle se met en forme.", null, null],
+  tribunal: ["⚖️", "Le tribunal de l'équipage", "Une question de la vie en classe : choisis ton camp, écris deux arguments avec « parce que », puis vérifie-les avec la grille.", "À deux avec un parent", "Le parent défend l'autre camp à l'oral et coche la grille avec toi."]
 };
 function intro(g) {
   var d = INTRO[g]; if (!d) return;
-  app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>' + d[0] + " " + d[1] + "</h2><p>" + d[2] + '</p><button type="button" class="btn go" data-wg="' + g + '" data-wm="solo">▶ Je joue seul</button>' +
-    (d[3] ? '<button type="button" class="btn" data-wg="' + g + '" data-wm="duo">👪 ' + d[3] + "<small>" + d[4] + "</small></button>" : "") + "</div>";
+  app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><h2>' + d[0] + " " + d[1] + "</h2><p>" + d[2] + "</p>" +
+    (d[5] ? "" : '<button type="button" class="btn go" data-wg="' + g + '" data-wm="solo">▶ Je joue seul</button>') +
+    (d[3] ? '<button type="button" class="btn' + (d[5] ? " go" : "") + '" data-wg="' + g + '" data-wm="duo">' + (d[5] ? "" : "👪 ") + d[3] + "<small>" + d[4] + "</small></button>" : "") + "</div>";
   window.scrollTo(0, 0);
 }
 function startGame(g, m) {
   wClear(); clearInterval(timerH);
   if (g === "gonogo") gnStart(m); else if (g === "intrus") inStart(); else if (g === "perroquet") ppStart(m); else if (g === "chasse") huntStart(m);
+  else if (g === "explique") exStart(m); else if (g === "maitre") maStart(); else if (g === "probleme") prStart(); else if (g === "programme") pgStart(); else if (g === "chaine") chStart(); else if (g === "surligne") suStart(); else if (g === "fiche") fiStart(); else if (g === "tribunal") trStart(m);
 }
 
 /* --- Trésor ou requin (Go / No-Go) --- */
@@ -784,6 +844,401 @@ function ppEnd() {
   else lines.push(len ? "Tu as rejoué une suite de <b>" + len + " couleurs</b>." : "Pas encore de suite complète : on réessaie, tu vas y arriver !");
   var m = G.mode; wFinish({ emoji: len >= 6 ? "🏆" : "🦜", title: len >= 6 ? "Mémoire de perroquet !" : "Bien joué !", lines: lines, g: w.g, bonus: w.bonus, warm: true, again: { wg: "perroquet", wm: m } });
 }
+
+/* ---------- jeux d'écriture, de méthode et de réflexion ---------- */
+function norm(x) { return String(x == null ? "" : x).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim(); }
+function hasTerm(text, term) {      /* le texte contient-il ce terme ? (début de mot, donc « sédentaires » = « sédentaire ») */
+  var T = " " + norm(text), ws = norm(term).split(" ").filter(function (w) { return w.length >= 3; });
+  return ws.length > 0 && ws.every(function (w) { return T.indexOf(" " + w.slice(0, Math.min(w.length, 5))) >= 0; });
+}
+function keyTerms(c) {
+  var seen = {}, out = [];
+  boldSegs(c.e).forEach(function (s) { var n = norm(s); if (!n.split(" ").some(function (w) { return w.length >= 4; }) || seen[n]) return; seen[n] = 1; out.push(s); });
+  return out.slice(0, 6);
+}
+function hasConn(t) { return /(parce que|parce qu|\bcar\b|puisque|\bdonc\b|c est pourquoi|grace a|\bainsi\b|\balors\b|en effet|pour que|afin de)/.test(norm(t)); }
+function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function fmtN(v) { return String(Math.round(v * 100) / 100).replace(".", ","); }
+function ta(id, ph, rows) { return '<textarea id="' + id + '" class="wta" rows="' + (rows || 3) + '" placeholder="' + esc(ph || "") + '" autocomplete="off" autocapitalize="sentences" spellcheck="true"></textarea>'; }
+function val(id) { var e = $("#" + id); return e ? e.value.trim() : ""; }
+function wrHdr(label, i, n) { return topBar('<div class="who">' + label + (n ? " · " + (i + 1) + "/" + n : "") + "</div>"); }
+function wrBtn(act, label, cls) { return '<button type="button" class="btn ' + (cls === undefined ? "go" : cls) + '" data-wr="' + act + '" style="text-align:center">' + label + "</button>"; }
+function wrFb(ok, title, msg) { return '<div class="fb ' + (ok ? "good" : "bad") + '"><b class="t">' + title + "</b>" + msg + "</div>"; }
+function noContent() { app.innerHTML = '<div class="top"><button class="pill" type="button" data-go="home">← Retour</button></div><div class="card"><p>Il n\'y a pas encore assez de contenu de cours pour ce jeu. Importe d\'autres cours !</p></div>'; }
+function dedupe(list) { var seen = {}; return list.filter(function (c) { var k = plainText(c.e).slice(0, 60); if (seen[k]) return false; seen[k] = 1; return true; }); }
+var WRH = {};
+function wrClick(a, b) { if (!G || G.type !== "wr") return; var f = WRH[G.game]; if (f) f(a, b); }
+function wrFinish(o) {
+  /* o : game, mode, pts, max, emoji, title, lines[], parent */
+  var t = today(), day = S.days[t] || { n: 0, ok: 0, tot: 0 }; day.n++; day.ok += o.pts; day.tot += o.max; S.days[t] = day;
+  var ratio = o.max ? o.pts / o.max : 0, gain = Math.round(ratio * 20) + (ratio >= 1 ? 5 : 0), bonus = parentBonus(!!o.parent);
+  S.berries += gain + bonus; S.stats.writes = (S.stats.writes || 0) + 1;
+  var nw = [], st = streak(); gotBadge("first", nw); if (st >= 3) gotBadge("s3", nw); if (st >= 7) gotBadge("s7", nw); if (day.n >= 3) gotBadge("marathon", nw);
+  if (S.stats.writes >= 5) gotBadge("plume", nw); if (S.berries >= 500) gotBadge("b500", nw);
+  o.lines = (o.lines || []).concat(["<b>" + o.pts + " point" + (o.pts > 1 ? "s" : "") + " sur " + o.max + "</b>"]);
+  wFinish({ emoji: o.emoji || (ratio >= 0.8 ? "🏆" : ratio >= 0.5 ? "✍️" : "🌊"), title: o.title || (ratio >= 0.8 ? "Excellent travail !" : "Bien joué !"), lines: o.lines, g: gain, bonus: bonus, nw: nw, again: { wg: o.game, wm: o.mode || "solo" } });
+}
+
+/* --- 1. Explique à ta façon --- */
+function exStart(m) {
+  var n = [2, 3, 4][DP().d - 1], cards = dedupe(shuffle(POOL.filter(function (c) { return keyTerms(c).length >= 1 && plainText(c.e).length >= 40; }))).slice(0, n);
+  if (!cards.length) { noContent(); return; }
+  G = { type: "wr", game: "explique", mode: m, cards: cards, i: 0, pts: 0, max: 0, kf: 0, kt: 0 };
+  exShow();
+}
+function exShow() {
+  var c = G.cards[G.i];
+  app.innerHTML = wrHdr("✍️ Explique", G.i, G.cards.length) + '<div class="card"><div class="tagline">' + esc(SUBNAMES[c.sub] || c.sub) + (c.tag ? " · " + esc(c.tag) : "") + '</div><p class="q">' + c.q + '</p><p class="small" style="margin:6px 0">Réponds avec tes mots, en une ou deux phrases, sans regarder le cours.</p>' + ta("w1", "Je pense que…", 4) + '<div id="fb"></div>' + wrBtn("ex:done", "J'ai fini ✓") + "</div>";
+  window.scrollTo(0, 0);
+}
+WRH.explique = function (a) {
+  var c = G.cards[G.i];
+  if (a === "ex:done") {
+    var txt = val("w1"); if (txt.length < 15) { $("#fb").innerHTML = wrFb(false, "Encore un peu !", "Écris au moins une phrase complète."); return; }
+    var keys = keyTerms(c), found = keys.filter(function (k) { return hasTerm(txt, k); });
+    G.cur = { found: found.length, tot: keys.length, a: found.length / keys.length >= 0.5 ? 1 : 0 }; G.kf += found.length; G.kt += keys.length;
+    var chips = keys.map(function (k) { var f = found.indexOf(k) >= 0; return '<span class="chp ' + (f ? "on" : "off") + '">' + (f ? "✓ " : "") + k + "</span>"; }).join("");
+    app.innerHTML = wrHdr("✍️ Explique", G.i, G.cards.length) + '<div class="card"><p class="small" style="margin:0">Ta réponse</p><div class="pbox" style="margin:4px 0 10px">' + esc(txt) + '</div><p class="small" style="margin:0">Mots-clés du cours : ' + found.length + " sur " + keys.length + '</p><div class="chps">' + chips + '</div><p class="small" style="margin:10px 0 0">Le cours dit</p><div class="pbox" style="margin:4px 0 12px">' + c.e + "</div>" +
+      '<p style="margin:0 0 8px"><b>' + (G.mode === "duo" ? "👪 Le parent lit la réponse et la compare : est-elle claire ?" : "Relis ta réponse : est-elle claire pour quelqu'un qui ne connaît pas le cours ?") + "</b></p>" +
+      '<div class="tf">' + wrBtn("ex:ok", "✓ Claire") + wrBtn("ex:no", "✎ À améliorer", "") + "</div></div>";
+    window.scrollTo(0, 0);
+  } else if (a === "ex:ok" || a === "ex:no") {
+    var ok = a === "ex:ok"; G.pts += G.cur.a + (ok ? 1 : 0); G.max += 2; track(c, G.cur.a === 1 && ok);
+    if (G.i >= G.cards.length - 1) wrFinish({ game: "explique", mode: G.mode, pts: G.pts, max: G.max, parent: G.mode === "duo", emoji: "✍️", title: "Belles explications !", lines: ["Mots-clés retrouvés : <b>" + G.kf + " sur " + G.kt + "</b>"] });
+    else { G.i++; exShow(); }
+  }
+};
+
+/* --- 2. Le maître de l'équipage (à deux) --- */
+function maStart() {
+  var cards = dedupe(shuffle(POOL.filter(function (c) { return keyTerms(c).length >= 1 && plainText(c.e).length >= 40; }))).slice(0, 6);
+  if (cards.length < 3) { noContent(); return; }
+  G = { type: "wr", game: "maitre", mode: "duo", cards: cards, r: 0, rounds: cards.length >= 6 ? 2 : 1, pts: 0, max: 0, step: "pick", c: null, q: "", ans: "" };
+  maShow();
+}
+function maShow() {
+  var h = wrHdr("🎓 Le maître", G.r, G.rounds);
+  if (G.step === "pick") {
+    h += '<div class="card"><h2>Choisis un point du cours</h2><p class="small">Tu vas poser une question à ton parent. Sur quel sujet ?</p>' + G.cards.slice(G.r * 3, G.r * 3 + 3).map(function (c, j) { return '<button type="button" class="btn" data-wr="ma:t' + (G.r * 3 + j) + '">' + esc(SUBNAMES[c.sub] || c.sub) + (c.tag ? " · " + esc(c.tag) : "") + "<small>" + esc(plainText(c.q)) + "</small></button>"; }).join("") + "</div>";
+  } else if (G.step === "write") {
+    h += '<div class="card"><div class="tagline">' + esc(SUBNAMES[G.c.sub] || G.c.sub) + (G.c.tag ? " · " + esc(G.c.tag) : "") + '</div><p class="small" style="margin:4px 0">Rappel du cours</p><div class="pbox" style="margin:0 0 10px">' + G.c.e + '</div><p style="margin:0 0 4px"><b>Ta question</b> (elle doit finir par ?)</p>' + ta("w1", "Par exemple : Comment… ? Pourquoi… ? Qu'est-ce que… ?", 2) + '<p style="margin:10px 0 4px"><b>La bonne réponse</b></p>' + ta("w2", "La réponse que ton parent devrait donner", 2) + '<div id="fb"></div>' + wrBtn("ma:ask", "Poser la question à mon parent") + "</div>";
+  } else if (G.step === "ask") {
+    h += '<div class="card"><h2>👪 Parent, à vous !</h2><p class="small" style="margin:0 0 6px">Répondez à voix haute à la question de Gianni.</p><div class="sentence" style="font-size:20px">' + esc(G.q) + '</div><div id="rv"></div>' + wrBtn("ma:show", "Voir la réponse attendue", "") + "</div>";
+  } else if (G.step === "judge") {
+    h += '<div class="card"><p class="small" style="margin:0">Question</p><div class="pbox" style="margin:2px 0 8px">' + esc(G.q) + '</div><p class="small" style="margin:0">Réponse attendue (Gianni)</p><div class="pbox" style="margin:2px 0 10px">' + esc(G.ans) + '</div><p style="margin:0 0 6px"><b>Ton parent a-t-il bien répondu ?</b></p><div class="tf">' + wrBtn("ma:j1", "✓ Oui") + wrBtn("ma:j0", "✗ Pas tout à fait", "") + '</div><p style="margin:12px 0 4px"><b>Explique-lui pourquoi</b> (une phrase)</p>' + ta("w3", "C'est juste (ou faux) parce que…", 2) + '<div id="fb"></div>' + wrBtn("ma:end", "Terminer cette question") + "</div>";
+  }
+  app.innerHTML = h; window.scrollTo(0, 0);
+}
+WRH.maitre = function (a) {
+  if (a.indexOf("ma:t") === 0) { G.c = G.cards[+a.slice(4)]; G.step = "write"; maShow(); }
+  else if (a === "ma:ask") {
+    var q = val("w1"), r = val("w2");
+    if (q.length < 15 || q.indexOf("?") < 0) { $("#fb").innerHTML = wrFb(false, "Ta question n'est pas finie.", "Écris une vraie question d'au moins une ligne, qui finit par un point d'interrogation."); return; }
+    if (r.length < 5) { $("#fb").innerHTML = wrFb(false, "Et la réponse ?", "Écris la réponse attendue pour pouvoir juger ton parent."); return; }
+    G.q = q; G.ans = r; G.pts += 1 + (keyTerms(G.c).some(function (k) { return hasTerm(q + " " + r, k); }) ? 1 : 0); G.max += 4; G.step = "ask"; maShow();
+  } else if (a === "ma:show") { $("#rv").innerHTML = '<div class="pbox" style="margin:10px 0">Réponse attendue : <b>' + esc(G.ans) + "</b></div>" + wrBtn("ma:next", "Gianni juge la réponse"); }
+  else if (a === "ma:next") { G.step = "judge"; maShow(); }
+  else if (a === "ma:j1" || a === "ma:j0") { document.querySelectorAll('[data-wr^="ma:j"]').forEach(function (b) { b.classList.remove("go"); b.style.outline = ""; }); var on = document.querySelector('[data-wr="' + a + '"]'); on.style.outline = "4px solid var(--gold)"; G.j = a; }
+  else if (a === "ma:end") {
+    var w = val("w3"); if (!G.j) { $("#fb").innerHTML = wrFb(false, "Choisis d'abord", "Dis si ton parent a bien répondu."); return; }
+    if (w.length < 20) { $("#fb").innerHTML = wrFb(false, "Explique un peu plus", "Écris une phrase complète pour expliquer pourquoi."); return; }
+    G.pts += 1 + ((hasConn(w) || keyTerms(G.c).some(function (k) { return hasTerm(w, k); })) ? 1 : 0); G.j = null;
+    if (G.r >= G.rounds - 1) wrFinish({ game: "maitre", mode: "duo", pts: G.pts, max: G.max, parent: true, emoji: "🎓", title: "Bravo, maître !", lines: [G.rounds + " questions posées à ton parent"] });
+    else { G.r++; G.step = "pick"; maShow(); }
+  }
+};
+
+/* --- 3. Atelier du problème --- */
+var PBT = {
+  add: function () { var a = rnd(12, 60), b = rnd(10, 45), d = rnd(5, 30); return { t: "Au marché, Karim achète {a} pommes et {b} poires. Sa sœur a acheté {d} bananes. Combien de fruits Karim a-t-il achetés ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{a} + {b}", ko: ["{a} − {b}", "{a} × {b}", "{a} + {b} + {d}"], res: a + b, un: ["fruit"] }; },
+  sub: function () { var a = rnd(120, 300), b = rnd(30, 110), d = rnd(10, 40); return { t: "Un livre a {a} pages. Mia en a déjà lu {b}. Elle a aussi lu {d} pages d'une BD. Combien de pages lui reste-t-il à lire dans ce livre ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{a} − {b}", ko: ["{a} + {b}", "{a} − {b} − {d}", "{b} − {a}"], res: a - b, un: ["page"] }; },
+  mult: function () { var a = rnd(6, 24), b = rnd(3, 9), d = rnd(4, 15); return { t: "Un paquet contient {a} biscuits. Tom achète {b} paquets et paie {d} euros. Combien de biscuits Tom a-t-il ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{a} × {b}", ko: ["{a} + {b}", "{a} × {d}", "{b} × {d}"], res: a * b, un: ["biscuit"] }; },
+  div: function () { var b = rnd(3, 8), k = rnd(3, 9), a = b * k, d = rnd(20, 60); return { t: "{a} élèves sont répartis en équipes de {b} élèves. Le gymnase mesure {d} mètres de long. Combien d'équipes y a-t-il ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{a} ÷ {b}", ko: ["{a} × {b}", "{a} − {b}", "{a} ÷ {d}"], res: k, un: ["equipe"] }; },
+  dadd: function () { var a = rnd(30, 138) * 5 / 100, b = rnd(30, 138) * 5 / 100, d = rnd(5, 20); return { t: "Un cahier coûte {a} € et un stylo coûte {b} €. Léo a {d} € dans sa poche. Combien coûtent le cahier et le stylo ensemble ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{a} + {b}", ko: ["{a} − {b}", "{a} + {b} + {d}", "{d} − {a}"], res: Math.round((a + b) * 100) / 100, un: ["euro"] }; },
+  dsub: function () { var a = rnd(30, 138) * 5 / 100, b = a < 5 ? 5 : 10, d = rnd(9, 12); return { t: "Sam, {d} ans, paie un jeu de {a} € avec un billet de {b} €. Combien la caissière lui rend-elle ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "{b} − {a}", ko: ["{b} + {a}", "{a} − {b}", "{b} × {a}"], res: Math.round((b - a) * 100) / 100, un: ["euro"] }; },
+  peri: function () { var a = rnd(12, 40), b = rnd(6, 11), d = rnd(8, 30); return { t: "Un terrain rectangulaire mesure {a} m de long et {b} m de large. Il est entouré de {d} poteaux. Quel est son périmètre ?", v: { a: a, b: b, d: d }, use: ["a", "b"], ok: "({a} + {b}) × 2", ko: ["{a} × {b}", "{a} + {b}", "{a} × 2 + {b}"], res: (a + b) * 2, un: ["metre"] }; },
+  two1: function () { var a = rnd(3, 6), b = rnd(20, 30), c = rnd(2, 9); return { t: "Dans un collège, il y a {a} classes de {b} élèves. {c} élèves sont absents aujourd'hui. Combien d'élèves sont présents ?", v: { a: a, b: b, c: c }, use: ["a", "b", "c"], ok: "{a} × {b} − {c}", ko: ["{a} × {b} + {c}", "{a} + {b} − {c}", "{a} × ({b} − {c})"], res: a * b - c, un: ["eleve"] }; },
+  two2: function () { var a = rnd(2, 5), b = rnd(2, 4), c = a * b < 20 ? 20 : 50; return { t: "Sam achète {a} cahiers à {b} € l'un et paie avec un billet de {c} €. Combien la caissière lui rend-elle ?", v: { a: a, b: b, c: c }, use: ["a", "b", "c"], ok: "{c} − {a} × {b}", ko: ["{c} − {a} − {b}", "{a} × {b} − {c}", "({c} − {a}) × {b}"], res: c - a * b, un: ["euro"] }; },
+  two3: function () { var a = rnd(120, 300), b = rnd(20, 60), c = rnd(15, 50); return { t: "Un train part avec {a} voyageurs. À la première gare, {b} descendent et {c} montent. Combien y a-t-il de voyageurs ensuite ?", v: { a: a, b: b, c: c }, use: ["a", "b", "c"], ok: "{a} − {b} + {c}", ko: ["{a} + {b} − {c}", "{a} − {b} − {c}", "{a} + {b} + {c}"], res: a - b + c, un: ["voyageur"] }; }
+};
+var PBLV = [["add", "sub", "mult", "div"], ["dadd", "dsub", "peri", "div", "mult"], ["two1", "two2", "two3", "peri", "dsub"]];
+function pbFill(s, v) { return s.replace(/\{(\w)\}/g, function (_, k) { return fmtN(v[k]); }); }
+function prStart() {
+  var keys = shuffle(PBLV[DP().d - 1].slice()).slice(0, 3), ps = keys.map(function (k) { var p = PBT[k](); p.opts = shuffle([{ e: p.ok, ok: true }].concat(p.ko.map(function (x) { return { e: x, ok: false }; }))); return p; });
+  G = { type: "wr", game: "probleme", mode: "solo", ps: ps, i: 0, step: "data", ph: "ask", pts: 0, max: ps.length * 5, sel: {}, picked: -1 };
+  prShow();
+}
+function prShow() {
+  var p = G.ps[G.i], st = G.step, ph = G.ph, labels = { data: "1 · Les données utiles", op: "2 · L'opération", calc: "3 · Le calcul", phrase: "4 · La phrase-réponse" };
+  var text = p.t.replace(/\{(\w)\}/g, function (_, k) {
+    var on = G.sel[k] ? " sel" : "", cls = ph === "fb" && st === "data" ? (p.use.indexOf(k) >= 0 ? " good" : G.sel[k] ? " bad" : "") : "";
+    return '<button type="button" class="num' + on + cls + '"' + (st === "data" && ph === "ask" ? ' data-wr="pn:' + k + '"' : " disabled") + ">" + fmtN(p.v[k]) + "</button>";
+  });
+  var h = wrHdr("🧮 Problème", G.i, G.ps.length) + '<div class="card"><div class="sentence" style="font-size:19px;line-height:2.1">' + text + '</div></div><div class="card"><div class="tagline">Étape ' + labels[st] + "</div>";
+  if (st === "data") h += '<p style="margin:6px 0">Touche dans l\'énoncé les <b>nombres utiles</b> pour répondre à la question.</p><div id="fb">' + (ph === "fb" ? G.fb : "") + "</div>" + (ph === "ask" ? wrBtn("pr:data", "Valider mes données") : wrBtn("pr:next", "Suite →"));
+  else if (st === "op") {
+    h += '<p style="margin:6px 0">Quelle opération permet de répondre ?</p>' + p.opts.map(function (o, j) { var cls = ph === "fb" ? (o.ok ? " good" : G.picked === j ? " bad" : "") : ""; return '<button type="button" class="btn opn' + cls + '" ' + (ph === "ask" ? 'data-wr="po:' + j + '"' : "disabled") + ">" + esc(pbFill(o.e, p.v)) + "</button>"; }).join("") + '<div id="fb">' + (ph === "fb" ? G.fb : "") + "</div>" + (ph === "fb" ? wrBtn("pr:next", "Suite →") : "");
+  } else if (st === "calc") h += '<p style="margin:6px 0">Calcule : <b>' + esc(pbFill(p.opts.filter(function (o) { return o.ok; })[0].e, p.v)) + '</b></p><input id="w1" class="wta" type="text" inputmode="decimal" autocomplete="off" placeholder="Ton résultat"' + (ph === "fb" ? " disabled" : "") + '><div id="fb">' + (ph === "fb" ? G.fb : "") + "</div>" + (ph === "ask" ? wrBtn("pr:calc", "Valider mon calcul") : wrBtn("pr:next", "Suite →"));
+  else h += '<p style="margin:6px 0">Écris la <b>phrase-réponse</b> : une phrase complète, avec le résultat et l\'unité, une majuscule au début et un point à la fin.</p>' + ta("w1", "Karim a acheté…", 3).replace("<textarea", "<textarea" + (ph === "fb" ? " disabled" : "")) + '<div id="fb">' + (ph === "fb" ? G.fb : "") + "</div>" + (ph === "ask" ? wrBtn("pr:phrase", "Valider ma phrase") : wrBtn("pr:next", G.i >= G.ps.length - 1 ? "Terminer 🏁" : "Problème suivant →"));
+  app.innerHTML = h + "</div>"; window.scrollTo(0, 0);
+  if (ph === "fb" && (st === "calc" || st === "phrase")) { var e = $("#w1"); if (e) e.value = G.said || ""; }
+}
+WRH.probleme = function (a) {
+  var p = G.ps[G.i];
+  if (a.indexOf("pn:") === 0) { var k = a.slice(3); G.sel[k] = !G.sel[k]; var b = document.querySelector('[data-wr="' + a + '"]'); if (b) b.classList.toggle("sel", !!G.sel[k]); }
+  else if (a === "pr:data") {
+    var ok = p.use.every(function (k) { return G.sel[k]; }) && Object.keys(G.sel).every(function (k) { return !G.sel[k] || p.use.indexOf(k) >= 0; });
+    if (ok) G.pts++; G.fb = wrFb(ok, ok ? "✓ Bien repéré !" : "✗ Pas tout à fait.", ok ? "Ce sont bien les nombres utiles." : "Les nombres utiles sont en vert. Un nombre peut servir à rien : c'est un piège !"); G.ph = "fb"; prShow();
+  } else if (a.indexOf("po:") === 0) {
+    var j = +a.slice(3), good = p.opts[j].ok; G.picked = j; if (good) G.pts++; G.fb = wrFb(good, good ? "✓ Bonne opération !" : "✗ Ce n'est pas celle-là.", good ? "" : "La bonne opération est en vert."); G.ph = "fb"; prShow();
+  } else if (a === "pr:calc") {
+    var raw = val("w1").replace(",", ".").replace(/\s/g, ""), n = parseFloat(raw);
+    if (!raw || isNaN(n)) { $("#fb").innerHTML = wrFb(false, "Écris un nombre.", ""); return; }
+    var good2 = Math.abs(n - p.res) < 0.005; if (good2) G.pts++; G.said = val("w1"); G.fb = wrFb(good2, good2 ? "✓ Juste !" : "✗ Le résultat est " + fmtN(p.res) + ".", good2 ? "" : "Refais le calcul posé pour trouver ton erreur."); G.ph = "fb"; prShow();
+  } else if (a === "pr:phrase") {
+    var s = val("w1"); if (s.length < 10) { $("#fb").innerHTML = wrFb(false, "Écris une phrase complète.", ""); return; }
+    var nums = (s.replace(/(\d)[ ](\d)/g, "$1$2").replace(/,/g, ".").match(/\d+(\.\d+)?/g) || []).map(parseFloat), hasN = nums.some(function (x) { return Math.abs(x - p.res) < 0.005; });
+    var hasU = p.un.some(function (u) { return norm(s).indexOf(u) >= 0; }) || (p.un[0] === "euro" && s.indexOf("€") >= 0), form = /^[A-ZÀÂÉÈÊÎÔÛÇ]/.test(s) && /[.!]$/.test(s);
+    var c1 = hasN && hasU; if (c1) G.pts++; if (form) G.pts++;
+    function pc(ok, t) { return '<span class="chp ' + (ok ? "on" : "off") + '">' + (ok ? "✓ " : "✗ ") + t + "</span>"; }
+    G.said = s; G.fb = wrFb(c1 && form, c1 && form ? "✓ Phrase parfaite !" : "À vérifier :", '<div class="chps">' + pc(hasN, "le résultat " + fmtN(p.res)) + pc(hasU, "l'unité") + pc(form, "majuscule et point") + "</div>"); G.ph = "fb"; prShow();
+  } else if (a === "pr:next") {
+    var order = ["data", "op", "calc", "phrase"], k2 = order.indexOf(G.step);
+    if (k2 < 3) { G.step = order[k2 + 1]; G.ph = "ask"; G.picked = -1; G.said = ""; prShow(); }
+    else if (G.i >= G.ps.length - 1) wrFinish({ game: "probleme", pts: G.pts, max: G.max, emoji: "🧮", title: "Problèmes résolus !", lines: [G.ps.length + " problèmes, de l'énoncé à la phrase-réponse"] });
+    else { G.i++; G.step = "data"; G.ph = "ask"; G.sel = {}; G.picked = -1; G.said = ""; prShow(); }
+  }
+};
+
+/* --- 4. Programme de construction (remettre dans l'ordre, puis écrire) --- */
+var PROCS = [
+  { s: "Mathématiques", t: "Tracer un cercle de centre O et de rayon 3 cm", st: ["Je marque le centre O avec un petit point.", "J'écarte le compas de 3 cm sur la règle graduée.", "Je pose la pointe du compas sur le point O.", "Je tourne le compas pour tracer le cercle.", "J'écris le nom du centre O et la valeur du rayon."] },
+  { s: "Mathématiques", t: "Tracer un segment [AB] de 7 cm", st: ["Je place le point A avec la pointe du crayon.", "Je pose la règle graduée, le zéro en face de A.", "Je marque le point B sur la graduation 7 cm.", "Je relie A et B avec la règle.", "J'écris [AB] et je code la longueur 7 cm."] },
+  { s: "Mathématiques", t: "Tracer la perpendiculaire à une droite (d) passant par A", st: ["Je pose un côté de l'angle droit de l'équerre sur la droite (d).", "Je fais glisser l'équerre jusqu'à ce que l'autre côté de l'angle droit passe par A.", "Je trace la droite le long de ce côté de l'équerre.", "Je code l'angle droit avec un petit carré.", "Je nomme la nouvelle droite (d')."] },
+  { s: "Mathématiques", t: "Poser une addition de nombres décimaux", st: ["J'aligne les virgules les unes sous les autres.", "Je complète avec des zéros si une partie décimale est plus courte.", "J'additionne colonne par colonne, de la droite vers la gauche.", "Je n'oublie pas les retenues.", "Je place la virgule dans le résultat, sous les autres virgules."] },
+  { s: "Mathématiques", t: "Mesurer un angle avec le rapporteur", st: ["Je place le centre du rapporteur sur le sommet de l'angle.", "J'aligne le zéro du rapporteur avec un côté de l'angle.", "Je lis la graduation en face de l'autre côté.", "Je vérifie si l'angle est aigu ou obtus pour choisir la bonne échelle.", "J'écris la mesure avec le symbole degré."] },
+  { s: "Mathématiques", t: "Résoudre un problème", st: ["Je lis l'énoncé en entier.", "Je souligne les données utiles.", "Je repère la question posée.", "Je choisis l'opération.", "Je calcule.", "J'écris la phrase-réponse avec l'unité."] },
+  { s: "SVT", t: "La démarche d'investigation", st: ["Je pose le problème à résoudre.", "J'émets une hypothèse.", "Je réalise une expérience pour tester l'hypothèse.", "J'observe et je note les résultats.", "Je conclus : l'hypothèse est validée ou non."] },
+  { s: "Histoire-Géo", t: "Présenter un document", st: ["Je donne la nature du document (texte, photo, carte…).", "Je donne le nom de l'auteur.", "Je donne la date du document.", "Je dis d'où il vient et dans quel contexte il a été créé.", "J'explique l'idée principale du document."] },
+  { s: "Méthode", t: "Rédiger un paragraphe", st: ["Je lis la consigne et je repère les mots importants.", "Je cherche les idées dans mon cours.", "J'écris une phrase d'introduction.", "Je développe avec un exemple précis.", "Je termine par une phrase de conclusion.", "Je me relis : majuscules, ponctuation et accords."] },
+  { s: "Méthode", t: "Apprendre une leçon", st: ["Je lis la leçon en entier.", "Je surligne les mots importants.", "Je cache le cours et je me récite la leçon.", "Je vérifie et je corrige mes oublis.", "Je refais un test le lendemain."] }
+];
+function pgStart() {
+  var P = DP(), list = shuffle(PROCS.slice()).slice(0, [2, 2, 3][P.d - 1]);
+  G = { type: "wr", game: "programme", mode: "solo", list: list, i: 0, pts: 0, max: 0, step: "order", order: [] };
+  pgInit(); pgShow();
+}
+function pgInit() { var pr = G.list[G.i]; G.order = []; G.mix = shuffle(pr.st.map(function (_, i) { return i; })); G.step = "order"; G.fbk = ""; }
+function pgShow() {
+  var pr = G.list[G.i], n = pr.st.length, h = wrHdr("📐 Programme", G.i, G.list.length) + '<div class="card"><div class="tagline">' + esc(pr.s) + '</div><h2 style="margin:4px 0 10px">' + esc(pr.t) + "</h2>";
+  if (G.step === "order") {
+    h += '<p class="small" style="margin:0 0 8px">Touche les étapes <b>dans le bon ordre</b>.</p><ol class="olist">' + G.order.map(function (k) { return "<li>" + esc(pr.st[k]) + "</li>"; }).join("") + "</ol>" +
+      G.mix.filter(function (k) { return G.order.indexOf(k) < 0; }).map(function (k) { return '<button type="button" class="btn stp" data-wr="pg:o' + k + '">' + esc(pr.st[k]) + "</button>"; }).join("") +
+      (G.order.length ? wrBtn("pg:undo", "↩ Annuler la dernière", "") : "") + (G.order.length === n ? wrBtn("pg:check", "Vérifier mon ordre") : "");
+  } else if (G.step === "fb") {
+    h += '<ol class="olist">' + G.order.map(function (k, i) { return '<li class="' + (k === i ? "good" : "bad") + '">' + (k === i ? "✓ " : "✗ ") + esc(pr.st[k]) + (k === i ? "" : '<small>À cette place : ' + esc(pr.st[i]) + "</small>") + "</li>"; }).join("") + "</ol>" + wrFb(G.fbok, G.fbt, G.fbm) + wrBtn("pg:write", "Écrire une étape avec mes mots →");
+  } else if (G.step === "write") {
+    h += '<p class="small" style="margin:0 0 6px">Une étape est cachée. Écris-la avec tes mots.</p><ol class="olist">' + pr.st.map(function (s, i) { return "<li>" + (i === G.hid ? '<span class="blank">… (étape ' + (i + 1) + ")</span>" : esc(s)) + "</li>"; }).join("") + "</ol>" + ta("w1", "L'étape cachée, c'est…", 2) + '<div id="fb"></div>' + wrBtn("pg:val", "Valider mon étape");
+  } else {
+    h += '<p class="small" style="margin:0">Ton étape</p><div class="pbox" style="margin:2px 0 8px">' + esc(G.said) + '</div><p class="small" style="margin:0">L\'étape du programme</p><div class="pbox" style="margin:2px 0 8px"><b>' + esc(pr.st[G.hid]) + "</b></div>" + wrFb(G.kf, G.kf ? "✓ Tu as utilisé les mots importants." : "Compare avec le modèle.", "") +
+      (G.kf ? wrBtn("pg:next", G.i >= G.list.length - 1 ? "Terminer 🏁" : "Programme suivant →") : '<p style="margin:8px 0"><b>Ta phrase dit-elle la même chose ?</b></p><div class="tf">' + wrBtn("pg:same1", "✓ Oui") + wrBtn("pg:same0", "✗ Non", "") + "</div>");
+  }
+  app.innerHTML = h + "</div>"; window.scrollTo(0, 0);
+}
+WRH.programme = function (a) {
+  var pr = G.list[G.i], n = pr.st.length;
+  if (a.indexOf("pg:o") === 0) { G.order.push(+a.slice(4)); pgShow(); }
+  else if (a === "pg:undo") { G.order.pop(); pgShow(); }
+  else if (a === "pg:check") {
+    var c = G.order.filter(function (k, i) { return k === i; }).length; G.pts += c; G.max += n + 2; G.fbok = c === n; G.fbt = c === n ? "✓ Parfait, tout est dans l'ordre !" : c + " étape" + (c > 1 ? "s" : "") + " bien placée" + (c > 1 ? "s" : "") + " sur " + n; G.fbm = c === n ? "" : "Regarde la bonne place des étapes qui sont en rouge."; G.step = "fb"; pgShow();
+  } else if (a === "pg:write") { var cand = pr.st.map(function (_, i) { return i; }).filter(function (i) { return i > 0 && i < n - 1 && pr.st[i].split(" ").some(function (w) { return norm(w).length >= 6; }); }); G.hid = cand.length ? cand[rnd(0, cand.length - 1)] : 1; G.step = "write"; pgShow(); }
+  else if (a === "pg:val") {
+    var s = val("w1"); if (s.length < 12) { $("#fb").innerHTML = wrFb(false, "Écris une phrase complète.", ""); return; }
+    var words = norm(pr.st[G.hid]).split(" ").filter(function (w) { return w.length >= 5; }).sort(function (x, y) { return y.length - x.length; }).slice(0, 3);
+    G.kf = words.some(function (w) { return hasTerm(s, w); }); G.said = s; if (G.kf) G.pts += 2; G.step = "res"; pgShow();
+  } else if (a === "pg:same1" || a === "pg:same0") { if (a === "pg:same1") G.pts += 1; WRH.programme("pg:next"); }
+  else if (a === "pg:next") {
+    if (G.i >= G.list.length - 1) wrFinish({ game: "programme", pts: G.pts, max: G.max, emoji: "📐", title: "Bien dans l'ordre !", lines: [G.list.length + " démarches remises en ordre et rédigées"] });
+    else { G.i++; pgInit(); pgShow(); }
+  }
+};
+
+/* --- 5. La chaîne de causes --- */
+var CHAINS = [
+  { s: "Histoire", t: "Du climat aux villages", m: ["Le climat se réchauffe.", "Les céréales sauvages poussent mieux.", "Les hommes inventent l'agriculture.", "Ils restent au même endroit : ils deviennent sédentaires.", "Ils construisent des villages."] },
+  { s: "Histoire", t: "Population et agriculture", m: ["Les hommes cultivent et élèvent des animaux.", "Ils produisent plus de nourriture.", "Les enfants sont mieux nourris.", "Les familles ont plus d'enfants.", "La population augmente fortement."] },
+  { s: "SVT", t: "Une planète habitable", m: ["La Terre est à la bonne distance du Soleil.", "La température permet à l'eau d'être liquide.", "L'eau liquide est présente à la surface.", "La vie peut apparaître et se développer."] },
+  { s: "EMC", t: "Une règle commune", m: ["La classe décide d'une règle commune.", "Tout le monde la connaît.", "Chacun sait ce qu'il peut ou ne peut pas faire.", "Les conflits diminuent.", "La classe devient plus calme."] },
+  { s: "EMC", t: "Les conséquences d'une moquerie", m: ["Un élève se moque d'un camarade.", "Le camarade se sent blessé et isolé.", "Il n'a plus envie d'aller en classe.", "Ses résultats baissent.", "Les adultes interviennent et rappellent les règles."] },
+  { s: "Mathématiques", t: "Comparer deux décimaux", m: ["On veut comparer 3,5 et 3,45.", "On écrit 3,5 avec deux décimales : 3,50.", "On compare 50 centièmes et 45 centièmes.", "50 est plus grand que 45.", "Donc 3,5 est plus grand que 3,45."] },
+  { s: "Mathématiques", t: "Le cercle", m: ["Tous les points d'un cercle sont à la même distance du centre.", "Cette distance s'appelle le rayon.", "Le diamètre est deux fois plus long que le rayon.", "Si le rayon mesure 4 cm, le diamètre mesure 8 cm."] },
+  { s: "Histoire", t: "Nomades et sédentaires", m: ["Les chasseurs-cueilleurs sont nomades.", "Ils se déplacent pour trouver de la nourriture.", "Ils ne peuvent pas stocker beaucoup de nourriture.", "Ils ont peu d'enfants.", "La population reste faible."] }
+];
+function chStart() {
+  var P = DP(), list = shuffle(CHAINS.slice()).slice(0, 2), k = [1, 2, 2][P.d - 1];
+  G = { type: "wr", game: "chaine", mode: "solo", list: list, i: 0, pts: 0, max: 0, k: k };
+  chInit(); chShow();
+}
+function chInit() {
+  var ch = G.list[G.i], idx = ch.m.map(function (_, i) { return i; }).filter(function (i) { return i > 0; }), blanks = shuffle(idx).slice(0, Math.min(G.k, idx.length - 1)).sort(function (a, b) { return a - b; });
+  var others = []; G.list.concat(CHAINS).forEach(function (c) { if (c !== ch) c.m.forEach(function (x) { if (ch.m.indexOf(x) < 0 && others.indexOf(x) < 0) others.push(x); }); });
+  G.blanks = blanks; G.b = 0; G.filled = {}; G.phase = "fill"; G.pool = shuffle(others);
+  G.max += blanks.length + 2;
+  G.opts = shuffle([ch.m[blanks[0]]].concat(G.pool.slice(0, 3)));
+}
+function chShow() {
+  var ch = G.list[G.i], h = wrHdr("🔗 Chaîne", G.i, G.list.length) + '<div class="card"><div class="tagline">' + esc(ch.s) + '</div><h2 style="margin:4px 0 10px">' + esc(ch.t) + '</h2><div class="chain">';
+  ch.m.forEach(function (m, i) {
+    var bl = G.blanks.indexOf(i) >= 0, done = G.filled[i], cur = G.phase === "fill" && G.blanks[G.b] === i;
+    h += '<div class="lnk ' + (bl && !done ? (cur ? "cur" : "empty") : bl ? (done === "ok" ? "good" : "bad") : "") + '">' + (bl && !done ? (cur ? "❓ Quel maillon manque ?" : "❓") : esc(m)) + "</div>" + (i < ch.m.length - 1 ? '<div class="arw">↓</div>' : "");
+  });
+  h += "</div>";
+  if (G.phase === "fill") h += '<p class="small" style="margin:10px 0 6px">Choisis le maillon qui manque :</p>' + G.opts.map(function (o, j) { return '<button type="button" class="btn opn" data-wr="ch:o' + j + '">' + esc(o) + "</button>"; }).join("");
+  else if (G.phase === "write") {
+    var A = ch.m[G.pair], B = ch.m[G.pair + 1];
+    h += '<p style="margin:12px 0 6px"><b>Relie ces deux idées avec une phrase</b> qui utilise « donc » ou « parce que ».</p><div class="pbox" style="margin:0 0 4px">' + esc(A) + '</div><div class="arw">↓</div><div class="pbox" style="margin:0 0 8px">' + esc(B) + "</div>" + ta("w1", "Par exemple : … donc …", 2) + '<div id="fb"></div>' + wrBtn("ch:val", "Valider ma phrase");
+  } else h += '<div id="fb">' + G.fb + "</div>" + wrBtn("ch:next", G.i >= G.list.length - 1 ? "Terminer 🏁" : "Chaîne suivante →");
+  app.innerHTML = h + "</div>"; window.scrollTo(0, 0);
+}
+WRH.chaine = function (a) {
+  var ch = G.list[G.i];
+  if (a.indexOf("ch:o") === 0) {
+    var j = +a.slice(4), pos = G.blanks[G.b], ok = G.opts[j] === ch.m[pos]; G.filled[pos] = ok ? "ok" : "ko"; if (ok) G.pts++; G.chosen = G.opts[j];
+    if (!ok) { G.filled[pos] = "ko"; }
+    G.b++;
+    if (G.b < G.blanks.length) { G.opts = shuffle([ch.m[G.blanks[G.b]]].concat(G.pool.filter(function (x) { return x !== ch.m[G.blanks[G.b]]; }).slice(0, 3))); }
+    else { G.phase = "write"; G.pair = rnd(0, ch.m.length - 2); }
+    chShow();
+  } else if (a === "ch:val") {
+    var s = val("w1"); if (s.length < 20) { $("#fb").innerHTML = wrFb(false, "Écris une phrase complète.", ""); return; }
+    var A = ch.m[G.pair], B = ch.m[G.pair + 1], conn = hasConn(s), used = norm(A + " " + B).split(" ").filter(function (w) { return w.length >= 5; }).some(function (w) { return hasTerm(s, w); });
+    if (conn) G.pts++; if (used) G.pts++;
+    G.fb = wrFb(conn && used, conn && used ? "✓ Belle phrase !" : "À améliorer :", '<div class="pbox" style="margin:6px 0">' + esc(s) + '</div><div class="chps"><span class="chp ' + (conn ? "on" : "off") + '">' + (conn ? "✓" : "✗") + ' un mot de liaison (donc, parce que…)</span><span class="chp ' + (used ? "on" : "off") + '">' + (used ? "✓" : "✗") + " les idées de la chaîne</span></div>"); G.phase = "res"; chShow();
+  } else if (a === "ch:next") {
+    if (G.i >= G.list.length - 1) wrFinish({ game: "chaine", pts: G.pts, max: G.max, emoji: "🔗", title: "Chaînes reconstituées !", lines: [G.list.length + " chaînes de causes complétées"] });
+    else { G.i++; chInit(); chShow(); }
+  }
+};
+
+/* --- 6. Surligne l'essentiel --- */
+function tokensOf(html) {
+  var d = document.createElement("div"), toks = [], trail = true; d.innerHTML = html.replace(/<br\s*\/?>/g, " ");
+  (function walk(n, key) {
+    if (n.nodeType === 3) { var txt = n.textContent, first = true; txt.split(/\s+/).filter(Boolean).forEach(function (w) { toks.push({ t: w, key: key, sp: first ? (trail || /^\s/.test(txt)) : true }); first = false; }); if (txt.trim()) trail = /\s$/.test(txt); }
+    else if (n.nodeType === 1) { var k2 = key || n.tagName === "B"; n.childNodes.forEach(function (x) { walk(x, k2); }); }
+  })(d, false);
+  return toks;
+}
+function suStart() {
+  var n = [2, 3, 3][DP().d - 1], rounds = [];
+  dedupe(shuffle(POOL.slice())).forEach(function (c) {
+    if (rounds.length >= n) return; var toks = tokensOf(c.e), nk = toks.filter(function (t) { return t.key && norm(t.t).length >= 3; }).length;
+    if (toks.length >= 8 && toks.length <= 42 && nk >= 2 && nk <= 9) rounds.push({ c: c, toks: toks, nk: nk });
+  });
+  if (!rounds.length) { noContent(); return; }
+  G = { type: "wr", game: "surligne", mode: "solo", rounds: rounds, i: 0, pts: 0, max: 0, hl: {}, done: false, f: 0, k: 0 };
+  suShow();
+}
+function suShow() {
+  var r = G.rounds[G.i], lim = r.nk + 2;
+  app.innerHTML = wrHdr("🖍️ Surligne", G.i, G.rounds.length) + '<div class="card"><div class="tagline">' + esc(SUBNAMES[r.c.sub] || r.c.sub) + (r.c.tag ? " · " + esc(r.c.tag) : "") + '</div><p class="small" style="margin:4px 0 8px">Touche les <b>mots-clés</b> à surligner. Pas plus de <b>' + lim + ' mots</b> : choisis l\'essentiel !</p><div class="sentence">' +
+    r.toks.map(function (t, i) { return (t.sp ? " " : "") + '<button type="button" class="tok' + (t.sp ? "" : " glue") + '" data-wr="su:' + i + '">' + esc(t.t) + "</button>"; }).join("") + '</div><p class="small" id="cnt" style="margin:6px 0">0 / ' + lim + ' surlignés</p><div id="fb"></div>' + wrBtn("su:val", "Valider mon surlignage") + "</div>";
+  G.hl = {}; G.done = false; window.scrollTo(0, 0);
+}
+WRH.surligne = function (a) {
+  var r = G.rounds[G.i], lim = r.nk + 2;
+  if (G.done && a !== "su:next") return;
+  if (a.indexOf("su:") === 0 && /^su:\d+$/.test(a)) {
+    var i = +a.slice(3), cnt = Object.keys(G.hl).length;
+    if (G.hl[i]) delete G.hl[i]; else if (cnt >= lim) { $("#fb").innerHTML = wrFb(false, "Trop de mots surlignés !", "Retire-en un avant d'en ajouter."); return; } else { G.hl[i] = 1; $("#fb").innerHTML = ""; }
+    document.querySelectorAll(".tok")[i].classList.toggle("hl", !!G.hl[i]); $("#cnt").textContent = Object.keys(G.hl).length + " / " + lim + " surlignés";
+  } else if (a === "su:val") {
+    var tp = 0, fp = 0, fn = 0, keyN = 0;
+    r.toks.forEach(function (t, i) { var isK = t.key && norm(t.t).length >= 3, h = !!G.hl[i]; if (isK) keyN++; if (isK && h) tp++; else if (!isK && h) fp++; else if (isK && !h) fn++; });
+    if (!tp && !fp) { $("#fb").innerHTML = wrFb(false, "Surligne au moins un mot.", ""); return; }
+    var f1 = tp ? 2 * tp / (2 * tp + fp + fn) : 0, pts = Math.round(f1 * 4); G.pts += pts; G.max += 4; G.f += tp; G.k += keyN; G.done = true; track(r.c, f1 >= 0.6);
+    document.querySelectorAll(".tok").forEach(function (b, i) { var t = r.toks[i], isK = t.key && norm(t.t).length >= 3; b.disabled = true; b.classList.remove("hl"); if (isK && G.hl[i]) b.classList.add("ok"); else if (!isK && G.hl[i]) b.classList.add("ko"); else if (isK) b.classList.add("miss"); });
+    $("#cnt").remove(); $("#fb").innerHTML = wrFb(f1 >= 0.6, f1 >= 0.6 ? "✓ Bien vu !" : "À retravailler.", "Tu as surligné <b>" + tp + " mot" + (tp > 1 ? "s" : "") + "-clé" + (tp > 1 ? "s" : "") + " sur " + keyN + "</b>. Vert = bien trouvé, rouge = pas essentiel, orange = oublié.") +
+      wrBtn("su:next", G.i >= G.rounds.length - 1 ? "Terminer 🏁" : "Paragraphe suivant →");
+    var vb = document.querySelector('[data-wr="su:val"]'); if (vb) vb.remove();
+  } else if (a === "su:next") {
+    if (G.i >= G.rounds.length - 1) wrFinish({ game: "surligne", pts: G.pts, max: G.max, emoji: "🖍️", title: "Œil de surligneur !", lines: ["Mots-clés trouvés : <b>" + G.f + " sur " + G.k + "</b>"] });
+    else { G.i++; suShow(); }
+  }
+};
+
+/* --- 7. Ma fiche de révision --- */
+function fiStart() {
+  var nS = [4, 5, 6][DP().d - 1], by = {};
+  dedupe(shuffle(POOL.slice())).forEach(function (c) { var t = (c.tag || "").trim(), pl = plainText(c.e).trim(); if (t && t.length <= 32 && pl.length >= 30 && pl.length <= 230) (by[c.course] = by[c.course] || []).push(c); });
+  var best = Object.keys(by).map(function (k) { var seen = {}; return by[k].filter(function (c) { if (seen[c.tag]) return false; seen[c.tag] = 1; return true; }); }).filter(function (l) { return l.length >= 3; });
+  if (!best.length) { noContent(); return; }
+  best = shuffle(best); var cards = best.filter(function (l) { return l.length >= nS; })[0] || best[0]; cards = shuffle(cards.slice()).slice(0, nS);
+  G = { type: "wr", game: "fiche", mode: "solo", cards: cards, tags: shuffle(cards.map(function (c) { return c.tag; })), order: shuffle(cards.map(function (_, i) { return i; })), pick: {}, step: "match", pts: 0, max: cards.length + 2, course: cards[0].course };
+  fiShow();
+}
+function fiShow() {
+  var h = wrHdr("🗂️ Fiche", 0, 0).replace(" · 1/0", "");
+  if (G.step === "match") {
+    h += '<div class="card"><div class="tagline">' + esc(G.course) + '</div><p class="small" style="margin:4px 0 8px">Associe chaque paragraphe à son <b>sous-titre</b>.</p>' + G.order.map(function (k, r) {
+      var c = G.cards[k]; return '<div class="fpar"><div class="fpt">' + esc(plainText(c.e)) + '</div><div class="chps">' + G.tags.map(function (t, j) { return '<button type="button" class="chp pick' + (G.pick[k] === j ? " on" : "") + '" data-wr="fi:' + k + ":" + j + '">' + esc(t) + "</button>"; }).join("") + "</div></div>";
+    }).join("") + '<div id="fb"></div>' + wrBtn("fi:val", "Valider") + "</div>";
+  } else if (G.step === "title") {
+    h += '<div class="card"><p class="small" style="margin:0 0 6px">Parfait ! Maintenant, donne un <b>titre</b> à ta fiche.</p><input id="w1" class="wta" type="text" maxlength="60" autocomplete="off" placeholder="Le titre de ma fiche"><div id="fb"></div>' + wrBtn("fi:title", "Mettre en forme ma fiche") + "</div>";
+  } else {
+    h += '<div class="card fiche"><h2 class="ft">' + esc(G.titre) + '</h2>' + G.cards.map(function (c) { return '<div class="fs">' + esc(c.tag) + "</div><p>" + c.e + "</p>"; }).join("") + "</div>" + '<div class="card"><p style="margin:0"><b>Ta fiche est prête !</b> Recopie-la proprement sur ta feuille : titre en haut et souligné, sous-titres en couleur, mots importants surlignés.</p></div>' + wrBtn("fi:end", "Terminer 🏁");
+  }
+  app.innerHTML = h; window.scrollTo(0, 0);
+}
+WRH.fiche = function (a) {
+  if (/^fi:\d+:\d+$/.test(a)) { var p = a.split(":"); G.pick[+p[1]] = +p[2]; var par = document.querySelectorAll(".fpar")[G.order.indexOf(+p[1])]; if (par) par.querySelectorAll(".chp").forEach(function (b, jj) { b.classList.toggle("on", jj === +p[2]); }); }
+  else if (a === "fi:val") {
+    if (Object.keys(G.pick).length < G.cards.length) { $("#fb").innerHTML = wrFb(false, "Il en manque !", "Choisis un sous-titre pour chaque paragraphe."); return; }
+    var c = 0; G.cards.forEach(function (card, k) { if (G.tags[G.pick[k]] === card.tag) c++; }); G.pts += c; G.step = "title"; G.matchOk = c; fiShow();
+    $("#fb").innerHTML = wrFb(c === G.cards.length, c + " sous-titre" + (c > 1 ? "s" : "") + " juste" + (c > 1 ? "s" : "") + " sur " + G.cards.length, c === G.cards.length ? "" : "La fiche finale utilisera les bons sous-titres.");
+  } else if (a === "fi:title") {
+    var t = val("w1"); if (t.length < 6) { $("#fb").innerHTML = wrFb(false, "Ton titre est trop court.", ""); return; }
+    G.pts += 1; if (norm(G.course).split(" ").filter(function (w) { return w.length >= 4; }).some(function (w) { return hasTerm(t, w); })) G.pts += 1;
+    G.titre = t; G.step = "fiche"; fiShow();
+  } else if (a === "fi:end") wrFinish({ game: "fiche", pts: G.pts, max: G.max, emoji: "🗂️", title: "Fiche réussie !", lines: ["Sous-titres justes : <b>" + G.matchOk + " sur " + G.cards.length + "</b>"] });
+};
+
+/* --- 8. Le tribunal de l'équipage --- */
+var TRIB = [
+  { q: "Faut-il porter un uniforme à l'école ?", pro: ["Tous les élèves sont habillés pareil : on se moque moins des vêtements.", "On gagne du temps le matin."], con: ["Chacun doit pouvoir exprimer sa personnalité.", "L'uniforme coûte cher aux familles."] },
+  { q: "Les téléphones portables doivent-ils être autorisés à la récréation ?", pro: ["On peut prévenir ses parents en cas de besoin.", "C'est un moment de détente pour les élèves."], con: ["On ne joue plus ni ne parle ensemble.", "Il y a des risques de vol ou de photos sans accord."] },
+  { q: "Les élèves doivent-ils nettoyer leur classe ?", pro: ["Chacun apprend à être responsable et à respecter le lieu.", "La classe est plus propre quand on la nettoie soi-même."], con: ["C'est le travail du personnel d'entretien.", "On perdrait du temps sur les cours."] },
+  { q: "Faut-il toujours dire la vérité ?", pro: ["La confiance entre les personnes dépend de l'honnêteté.", "Un mensonge finit souvent par se savoir."], con: ["Parfois la vérité peut blesser inutilement.", "On peut garder pour soi une chose privée."] },
+  { q: "Les devoirs à la maison sont-ils utiles ?", pro: ["Ils aident à retenir les leçons.", "Ils apprennent à travailler seul."], con: ["Ils fatiguent les élèves et prennent du temps libre.", "Tous les élèves n'ont pas de l'aide à la maison."] },
+  { q: "Une classe doit-elle décider de ses règles à la majorité ?", pro: ["Le vote est une règle juste : chacun a une voix.", "On respecte mieux une règle qu'on a choisie."], con: ["La majorité peut oublier les besoins d'un seul élève.", "Certaines règles sont obligatoires et ne se votent pas."] },
+  { q: "Faut-il choisir un délégué plutôt que parler chacun pour soi ?", pro: ["Un délégué porte la voix de toute la classe.", "C'est plus clair et plus rapide pour les adultes."], con: ["Chacun connaît mieux ce qu'il veut dire.", "Certains élèves risquent de ne pas être entendus."] },
+  { q: "Peut-on rire de tout ?", pro: ["L'humour permet de dédramatiser les choses.", "Chacun a le droit de s'exprimer librement."], con: ["Une moquerie peut blesser quelqu'un.", "La liberté s'arrête là où commence le respect des autres."] }
+];
+function trStart(m) {
+  G = { type: "wr", game: "tribunal", mode: m, list: shuffle(TRIB.slice()).slice(0, 2), i: 0, pts: 0, max: 0, step: "side", side: "" };
+  trShow();
+}
+function trShow() {
+  var s = G.list[G.i], h = wrHdr("⚖️ Tribunal", G.i, G.list.length);
+  if (G.step === "side") h += '<div class="card"><h2 style="margin-top:0">' + esc(s.q) + '</h2><p class="small">Choisis ton camp. ' + (G.mode === "duo" ? "👪 Le parent défendra l'autre camp à l'oral." : "Tu défendras ce point de vue par écrit.") + '</p><div class="tf">' + wrBtn("tr:pro", "👍 Pour") + wrBtn("tr:con", "👎 Contre", "") + "</div></div>";
+  else if (G.step === "write") h += '<div class="card"><p style="margin:0 0 4px"><b>' + esc(s.q) + '</b> · tu es <b>' + (G.side === "pro" ? "pour" : "contre") + '</b></p><p class="small" style="margin:0 0 6px">Écris deux arguments. Chacun doit expliquer <b>pourquoi</b> (utilise « parce que » ou « car »).</p>' + ta("w1", "Argument 1 : je pense que… parce que…", 2) + '<div style="height:8px"></div>' + ta("w2", "Argument 2 : …", 2) + '<div id="fb"></div>' + wrBtn("tr:val", "Présenter mes arguments") + "</div>";
+  else h += '<div class="card"><p class="small" style="margin:0">Tes arguments</p><div class="pbox" style="margin:2px 0 6px">1. ' + esc(G.a1) + '</div><div class="pbox" style="margin:0 0 8px">2. ' + esc(G.a2) + "</div>" + G.auto + '<p class="small" style="margin:10px 0 4px">Des idées auxquelles tu n\'as peut-être pas pensé :</p><ul class="olist" style="margin:0 0 10px">' + s[G.side].map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul><p style="margin:0 0 6px"><b>' + (G.mode === "duo" ? "👪 Le parent répond à l'oral, puis coche ce qui est vrai :" : "Coche ce qui est vrai pour tes arguments :") + '</b></p>' +
+    ["Clairs (on comprend facilement)", "Justifiés (il y a une raison)", "Respectueux des autres"].map(function (t, j) { return '<label class="ck"><input type="checkbox" id="g' + j + '"> ' + t + "</label>"; }).join("") + wrBtn("tr:end", G.i >= G.list.length - 1 ? "Terminer 🏁" : "Question suivante →") + "</div>";
+  app.innerHTML = h; window.scrollTo(0, 0);
+}
+WRH.tribunal = function (a) {
+  var s = G.list[G.i];
+  if (a === "tr:pro" || a === "tr:con") { G.side = a.slice(3); G.step = "write"; trShow(); }
+  else if (a === "tr:val") {
+    var a1 = val("w1"), a2 = val("w2"); if (a1.length < 20 || a2.length < 20) { $("#fb").innerHTML = wrFb(false, "Développe un peu !", "Chaque argument doit faire au moins une phrase."); return; }
+    var c1 = hasConn(a1), c2 = hasConn(a2); G.a1 = a1; G.a2 = a2; G.pts += (c1 ? 1 : 0) + (c2 ? 1 : 0); G.max += 5;
+    G.auto = '<div class="chps"><span class="chp ' + (c1 ? "on" : "off") + '">' + (c1 ? "✓" : "✗") + ' argument 1 expliqué (parce que, car…)</span><span class="chp ' + (c2 ? "on" : "off") + '">' + (c2 ? "✓" : "✗") + " argument 2 expliqué</span></div>"; G.step = "judge"; trShow();
+  } else if (a === "tr:end") {
+    for (var j = 0; j < 3; j++) { var e = $("#g" + j); if (e && e.checked) G.pts++; }
+    if (G.i >= G.list.length - 1) wrFinish({ game: "tribunal", mode: G.mode, pts: G.pts, max: G.max, parent: G.mode === "duo", emoji: "⚖️", title: "Plaidoirie réussie !", lines: [G.list.length + " débats menés"] });
+    else { G.i++; G.step = "side"; trShow(); }
+  }
+};
 
 /* --- Chasse à l'erreur --- */
 function boldSegs(e) { var m, out = [], re = /<b>([^<]{2,40})<\/b>/g; while ((m = re.exec(e))) out.push(m[1]); return out; }
