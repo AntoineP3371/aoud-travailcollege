@@ -288,6 +288,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .gm-row { display: flex; flex-direction: column; gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--border); }
 .gm-name { font-weight: 700; font-size: 15px; color: var(--ink); }
 .gm-sub { font-size: 13px; color: var(--muted); font-weight: 400; }
+.gm-rk { font-weight: 700; }
 .gm-h { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
 .gm-b { display: flex; gap: 6px; flex-wrap: wrap; }
 .gm-b .ink-b { flex: 1; min-width: 80px; }
@@ -2061,10 +2062,18 @@ $("#cof-form").addEventListener("submit", function (e) {
   cofDo("rewards", "POST", "", { icon: icon, label: label, cost: cost, position: pos + 1 });
 });
 /* ---------- Jeux visibles sur la page Défis (fiche « config » de la collection quest) ---------- */
-var GM = [["Réviser le cours", [["mini", "⏱️", "Mini-défi"], ["eclair", "⚡", "Défi éclair"], ["mystere", "🔮", "Carte mystère"], ["chasse", "🔎", "Chasse à l'erreur"]]],
-  ["Écrire et raisonner", [["surligne", "🖍️", "Surligne l'essentiel", "Mousse"], ["probleme", "🧮", "Atelier du problème", "Mousse"], ["explique", "✍️", "Explique à ta façon", "Matelot (100 Berries)"], ["programme", "📐", "Programme de construction", "Matelot (100 Berries)"],
-    ["chaine", "🔗", "La chaîne de causes", "Gabier (300 Berries)"], ["tribunal", "⚖️", "Le tribunal de l'équipage", "Gabier (300 Berries)"], ["fiche", "🗂️", "Ma fiche de révision", "Second (600 Berries)"], ["maitre", "🎓", "Le maître de l'équipage", "Second (600 Berries)"]]],
-  ["Échauffements", [["gonogo", "🦈", "Trésor ou requin ?"], ["intrus", "🔍", "Chasse à l'intrus"], ["perroquet", "🦜", "Le perroquet"]]]];
+var GM = [["Réviser le cours", [["mini", "⏱️", "Mini-défi", "5 questions du cours en 3 minutes."], ["eclair", "⚡", "Défi éclair", "8 vrai ou faux, 8 secondes par question."], ["mystere", "🔮", "Carte mystère", "5 cartes à deviner, à son rythme."],
+    ["chasse", "🔎", "Chasse à l'erreur", "Repérer le mot faux dans une phrase du cours. Se joue aussi avec un parent qui lit la phrase à voix haute."]]],
+  ["Écrire et raisonner", [["surligne", "🖍️", "Surligne l'essentiel", "Surligner les mots-clés d'un paragraphe de cours, avec un nombre limité de mots.", "Mousse"],
+    ["probleme", "🧮", "Atelier du problème", "Problème de maths en 4 étapes : données utiles, opération, calcul, phrase-réponse.", "Mousse"],
+    ["explique", "✍️", "Explique à ta façon", "Expliquer une notion avec ses mots, puis comparer avec le cours. Le parent peut juger si c'est clair.", "Matelot (100 Berries)"],
+    ["programme", "📐", "Programme de construction", "Remettre une démarche dans l'ordre (cercle, perpendiculaire, investigation…), puis écrire une étape.", "Matelot (100 Berries)"],
+    ["chaine", "🔗", "La chaîne de causes", "Compléter une chaîne de causes, puis écrire une phrase avec « donc » ou « parce que ».", "Gabier (300 Berries)"],
+    ["tribunal", "⚖️", "Le tribunal de l'équipage", "Débat d'EMC : pour ou contre, deux arguments avec « parce que ». Le parent défend l'autre camp et coche la grille.", "Gabier (300 Berries)"],
+    ["fiche", "🗂️", "Ma fiche de révision", "Associer des paragraphes à leurs sous-titres, donner un titre, obtenir une fiche à recopier.", "Second (600 Berries)"],
+    ["maitre", "🎓", "Le maître de l'équipage", "À deux : Gianni invente une question, le parent répond, Gianni juge et explique pourquoi.", "Second (600 Berries)"]]],
+  ["Échauffements", [["gonogo", "🦈", "Trésor ou requin ?", "Réflexe d'une minute : taper sur le trésor, jamais sur le requin. Duel possible avec un parent."], ["intrus", "🔍", "Chasse à l'intrus", "Trouver le symbole différent dans une grille de plus en plus grande."],
+    ["perroquet", "🦜", "Le perroquet", "Mémoire : rejouer une suite de couleurs. À deux avec un parent, chacun son tour."]]]];
 var gm = { rec: null, games: {}, busy: false };
 function gmLoad() {
   return api("GET", "/api/collections/quest/records?perPage=1&filter=" + q('key="config"'), undefined, net.parentToken).then(function (d) {
@@ -2082,7 +2091,7 @@ function gmRender() {
     box.appendChild(cofTxt("p", "gm-h", sec[0]));
     sec[1].forEach(function (g) {
       var row = document.createElement("div"); row.className = "gm-row";
-      var nm = cofTxt("div", "gm-name", g[1] + " " + g[2]); if (g[3]) nm.appendChild(cofTxt("div", "gm-sub", "Auto : dès le rang " + g[3]));
+      var nm = cofTxt("div", "gm-name", g[1] + " " + g[2]); nm.appendChild(cofTxt("div", "gm-sub", g[3])); nm.appendChild(cofTxt("div", "gm-sub gm-rk", g[4] ? "Auto : dès le rang " + g[4] : "Auto : toujours visible"));
       row.appendChild(nm); var bar = document.createElement("div"); bar.className = "gm-b";
       [["", "Auto"], ["on", "Toujours"], ["off", "Masqué"]].forEach(function (o) {
         var b = cofBtn(o[1], function () { if (o[0]) gm.games[g[0]] = o[0]; else delete gm.games[g[0]]; gmSave(); });

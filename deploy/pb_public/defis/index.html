@@ -159,7 +159,7 @@ dialog, .modal { position: fixed; inset: 0; background: rgba(5,20,40,0.6); displ
 #ver { opacity: 0.7; font-size: 12px; color: #fff; }
 .tile2.lock { background: #e7e1cf; color: var(--muted); box-shadow: 0 4px 0 #9a8f73; border-color: #9a8f73; cursor: default; }
 .tile2.lock .ti { filter: grayscale(1); opacity: 0.75; }
-.tile2.lock small { font-weight: 700; }
+.tile2.lock small.rk { font-weight: 800; margin-top: 2px; }
 .wta { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 18px; line-height: 1.4; padding: 10px 12px; border: 3px solid var(--wood); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin: 4px 0 8px; }
 .wta:disabled { background: #f1ead5; }
 .num { display: inline-block; min-width: 46px; min-height: 46px; padding: 2px 10px; margin: 0 2px; border: 3px solid var(--wood); border-radius: 10px; background: #fff7dd; font: inherit; font-weight: 800; font-size: 20px; color: inherit; cursor: pointer; }
@@ -429,6 +429,10 @@ var CFG = { games: {} };
 try { var c0 = JSON.parse(lsGet("qd-cfg") || "null"); if (c0 && c0.games) CFG = c0; } catch (e) {}
 var UNLOCK = { surligne: 0, probleme: 0, explique: 100, programme: 100, chaine: 300, tribunal: 300, fiche: 600, maitre: 600 };
 var GNAME = { mini: "Mini-défi", eclair: "Défi éclair", mystere: "Carte mystère", chasse: "Chasse à l'erreur", gonogo: "Trésor ou requin ?", intrus: "Chasse à l'intrus", perroquet: "Le perroquet", explique: "Explique à ta façon", maitre: "Le maître de l'équipage", probleme: "Atelier du problème", programme: "Programme de construction", chaine: "La chaîne de causes", surligne: "Surligne l'essentiel", fiche: "Ma fiche de révision", tribunal: "Le tribunal de l'équipage" };
+var GDESC = { chasse: "Trouve le mot faux dans une phrase du cours", gonogo: "Tape sur le trésor, pas sur le requin", intrus: "Trouve le symbole différent", perroquet: "Rejoue la suite de couleurs",
+  explique: "Explique avec tes mots, puis compare", maitre: "Invente une question pour ton parent", probleme: "Données, opération, calcul, phrase-réponse", programme: "Remets la démarche dans l'ordre",
+  chaine: "Complète la chaîne de causes", surligne: "Surligne seulement l'essentiel", fiche: "Associe, titre, et ta fiche est prête", tribunal: "Pour ou contre : défends ton camp" };
+function gDesc(id) { return ["mini", "eclair", "mystere"].indexOf(id) >= 0 ? fdesc(id) : (GDESC[id] || ""); }
 function gState(id) {
   var c = (CFG.games || {})[id]; if (c === "off") return "hidden"; if (c === "on") return "open";
   return S.berries >= (UNLOCK[id] || 0) ? "open" : "locked";
@@ -476,8 +480,8 @@ function home() {
     list = list.filter(function (x) { return gState(x[5]) !== "hidden"; });
     if (!list.length) return "";
     return '<div class="etq">' + list.map(function (x) {
-      if (gState(x[5]) === "locked") return '<button type="button" class="tile2 lock" disabled aria-label="' + esc(x[2]) + ', verrouillé"><span class="ti" aria-hidden="true">🔒</span><span class="tn">' + x[2] + "</span><small>Au rang " + rankOf(UNLOCK[x[5]]).r[1] + "</small></button>";
-      return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" +
+      if (gState(x[5]) === "locked") return '<button type="button" class="tile2 lock" disabled aria-label="' + esc(x[2]) + ', verrouillé"><span class="ti" aria-hidden="true">🔒</span><span class="tn">' + x[2] + "</span>" + (gDesc(x[5]) ? "<small>" + esc(gDesc(x[5])) + "</small>" : "") + '<small class="rk">Au rang ' + rankOf(UNLOCK[x[5]]).r[1] + "</small></button>";
+      return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" + (gDesc(x[5]) ? "<small>" + esc(gDesc(x[5])) + "</small>" : "") +
         (x[3] ? '<span class="par" role="img" aria-label="Jouable avec un parent">👪</span>' : "") +
         (x[4] ? '<span class="dj">' + (S.daily[t] ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "</button>";
     }).join("") + "</div>";
