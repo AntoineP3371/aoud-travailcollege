@@ -157,6 +157,9 @@ dialog, .modal { position: fixed; inset: 0; background: rgba(5,20,40,0.6); displ
 .modal input { width: 100%; font-size: 20px; min-height: 48px; border: 2.5px solid var(--wood); border-radius: 10px; padding: 0 12px; background: #fff; margin: 8px 0; }
 .small { font-size: 13px; color: var(--muted); }
 #ver { opacity: 0.7; font-size: 12px; color: #fff; }
+.tile2.lock { background: #e7e1cf; color: var(--muted); box-shadow: 0 4px 0 #9a8f73; border-color: #9a8f73; cursor: default; }
+.tile2.lock .ti { filter: grayscale(1); opacity: 0.75; }
+.tile2.lock small { font-weight: 700; }
 .wta { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 18px; line-height: 1.4; padding: 10px 12px; border: 3px solid var(--wood); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin: 4px 0 8px; }
 .wta:disabled { background: #f1ead5; }
 .num { display: inline-block; min-width: 46px; min-height: 46px; padding: 2px 10px; margin: 0 2px; border: 3px solid var(--wood); border-radius: 10px; background: #fff7dd; font: inherit; font-weight: 800; font-size: 20px; color: inherit; cursor: pointer; }
@@ -328,6 +331,13 @@ function pull() {
     return push();
   }, function (e) { if (e && (e.status === 401 || e.status === 403)) { net.token = ""; lsDel("tc-auth"); setNet("login"); } else setNet("err"); });
 }
+function loadCfg() {
+  if (!net.token) return Promise.resolve();
+  return api("GET", "/api/collections/quest/records?perPage=1&filter=" + encodeURIComponent('key="config"'), undefined, net.token).then(function (d) {
+    var r = d.items && d.items[0], g = r && r.data && r.data.games;
+    CFG = { games: g && typeof g === "object" ? g : {} }; lsSet("qd-cfg", JSON.stringify(CFG));
+  }, function () {});
+}
 function netInit() {
   var a = null; try { a = JSON.parse(lsGet("tc-auth") || "null"); } catch (e) {}
   if (!a || !a.token) { setNet("login"); return Promise.resolve(); }
@@ -337,13 +347,13 @@ function netInit() {
     return pull();
   }, function (e) { if (e && (e.status === 401 || e.status === 403 || e.status === 400)) { net.token = ""; lsDel("tc-auth"); setNet("login"); } else setNet("err"); });
 }
-$("#sync").addEventListener("click", function () { if (net.state === "login") { $("#lg-msg").textContent = ""; $("#lg-in").value = ""; $("#lg").hidden = false; $("#lg-in").focus(); } else netInit().then(refresh); });
+$("#sync").addEventListener("click", function () { if (net.state === "login") { $("#lg-msg").textContent = ""; $("#lg-in").value = ""; $("#lg").hidden = false; $("#lg-in").focus(); } else netInit().then(loadCfg).then(refresh); });
 $("#lg-x").addEventListener("click", function () { $("#lg").hidden = true; });
 $("#lg-form").addEventListener("submit", function (e) {
   e.preventDefault(); var pw = $("#lg-in").value; if (!pw) return; $("#lg-msg").textContent = "Connexion…";
   api("POST", "/api/collections/users/auth-with-password", { identity: "gianni@travail.local", password: pw }).then(function (d) {
     if (d.record && d.record.role !== "student") { $("#lg-msg").textContent = "Ce compte n'est pas celui de l'élève."; return; }
-    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token })); $("#lg").hidden = true; return pull().then(refresh);
+    net.token = d.token; lsSet("tc-auth", JSON.stringify({ token: d.token })); $("#lg").hidden = true; return pull().then(loadCfg).then(refresh);
   }, function (er) { $("#lg-msg").textContent = er && er.status === 400 ? "Mot de passe incorrect." : "Serveur injoignable."; $("#lg-in").value = ""; });
 });
 
@@ -414,7 +424,23 @@ function fdesc(k) {
 function nbq() { return DP().seance; }
 var WARMS = [["gonogo", "Trésor ou requin ?", "Tape sur le trésor, ne touche pas au requin", "🦈", true], ["intrus", "Chasse à l'intrus", "Trouve le symbole différent dans la grille", "🔍", false], ["perroquet", "Le perroquet", "Rejoue la suite de couleurs sans te tromper", "🦜", true]];
 var FORMATS = [["mini", "Mini-défi", "5 questions en 3 minutes", "⏱️"], ["eclair", "Défi éclair", "8 vrai ou faux, 8 secondes chacun", "⚡"], ["mystere", "Carte mystère", "5 cartes à deviner, à ton rythme", "🔮"]];
-function dayFormat() { return FORMATS[dayNum() % 3][0]; }
+/* Jeux visibles : par défaut selon le rang (UNLOCK, en Berries) ; le parent peut forcer « on » (ouvert) ou « off » (masqué) pour chaque jeu */
+var CFG = { games: {} };
+try { var c0 = JSON.parse(lsGet("qd-cfg") || "null"); if (c0 && c0.games) CFG = c0; } catch (e) {}
+var UNLOCK = { surligne: 0, probleme: 0, explique: 100, programme: 100, chaine: 300, tribunal: 300, fiche: 600, maitre: 600 };
+var GNAME = { mini: "Mini-défi", eclair: "Défi éclair", mystere: "Carte mystère", chasse: "Chasse à l'erreur", gonogo: "Trésor ou requin ?", intrus: "Chasse à l'intrus", perroquet: "Le perroquet", explique: "Explique à ta façon", maitre: "Le maître de l'équipage", probleme: "Atelier du problème", programme: "Programme de construction", chaine: "La chaîne de causes", surligne: "Surligne l'essentiel", fiche: "Ma fiche de révision", tribunal: "Le tribunal de l'équipage" };
+function gState(id) {
+  var c = (CFG.games || {})[id]; if (c === "off") return "hidden"; if (c === "on") return "open";
+  return S.berries >= (UNLOCK[id] || 0) ? "open" : "locked";
+}
+function visWarms() { var l = WARMS.filter(function (w) { return gState(w[0]) === "open"; }); return l.length ? l : WARMS; }
+function visFormats() { var l = FORMATS.filter(function (f) { return gState(f[0]) === "open"; }); return l.length ? l : FORMATS; }
+function dayWarm() { var l = visWarms(); return l[dayNum() % l.length]; }
+function dayFormat() { var l = visFormats(); return l[dayNum() % l.length][0]; }
+function unlockChips(before, after) {
+  var h = ""; Object.keys(UNLOCK).forEach(function (id) { var u = UNLOCK[id]; if (u > 0 && before < u && after >= u && !(CFG.games || {})[id]) h += '<span class="chip pop">🔓 Nouveau jeu : ' + GNAME[id] + "</span>"; });
+  return h;
+}
 
 /* ---------- écrans ---------- */
 var app = $("#app"), G = null, timerH = 0;
@@ -439,22 +465,27 @@ function home() {
   h += '<div class="diff" role="group" aria-label="Difficulté"><span>Mer :</span>' + [["auto", "Auto"]].concat(DIFFS.map(function (x) { return [x[0], x[1] + " " + x[2]]; })).map(function (x) { return '<button type="button" data-df="' + x[0] + '" class="' + ((dv || "auto") === x[0] ? "on" : "") + '">' + x[1] + "</button>"; }).join("") + '</div><p class="small diffnote">' + DIFFS[cur - 1][1] + " " + DIFFS[cur - 1][2] + ((dv || "auto") === "auto" ? " (selon ton rang)" : "") + " : plus la mer est forte, plus les défis sont difficiles.</p>";
   var T1 = [], T2 = [], T3 = [];   /* étiquettes : [attribut, icône, nom, jouable avec un parent, défi du jour] */
   if (POOL.length) {
-    FORMATS.forEach(function (f) { T1.push(['data-play="' + f[0] + '"', f[3], f[1], false, f[0] === df]); });
-    T1.push(['data-wg="chasse"', "🔎", "Chasse à l'erreur", true, false]);
+    FORMATS.forEach(function (f) { T1.push(['data-play="' + f[0] + '"', f[3], f[1], false, f[0] === df, f[0]]); });
+    T1.push(['data-wg="chasse"', "🔎", "Chasse à l'erreur", true, false, "chasse"]);
   }
-  WARMS.forEach(function (w) { T3.push(['data-wg="' + w[0] + '"', w[3], w[1], w[4], false]); });
+  WARMS.forEach(function (w) { T3.push(['data-wg="' + w[0] + '"', w[3], w[1], w[4], false, w[0]]); });
   [["explique", "✍️", "Explique à ta façon", true, true], ["maitre", "🎓", "Le maître de l'équipage", true, true], ["probleme", "🧮", "Atelier du problème", false, false], ["programme", "📐", "Programme de construction", false, false], ["chaine", "🔗", "La chaîne de causes", false, false], ["surligne", "🖍️", "Surligne l'essentiel", false, true], ["fiche", "🗂️", "Ma fiche de révision", false, true], ["tribunal", "⚖️", "Le tribunal de l'équipage", true, false]].forEach(function (x) {
-    if (x[4] && !POOL.length) return; T2.push(['data-wg="' + x[0] + '"', x[1], x[2], x[3], false]);
+    if (x[4] && !POOL.length) return; T2.push(['data-wg="' + x[0] + '"', x[1], x[2], x[3], false, x[0]]);
   });
   function grid(list) {
+    list = list.filter(function (x) { return gState(x[5]) !== "hidden"; });
+    if (!list.length) return "";
     return '<div class="etq">' + list.map(function (x) {
+      if (gState(x[5]) === "locked") return '<button type="button" class="tile2 lock" disabled aria-label="' + esc(x[2]) + ', verrouillé"><span class="ti" aria-hidden="true">🔒</span><span class="tn">' + x[2] + "</span><small>Au rang " + rankOf(UNLOCK[x[5]]).r[1] + "</small></button>";
       return '<button type="button" class="tile2' + (x[4] ? " star" : "") + '" ' + x[0] + '><span class="ti" aria-hidden="true">' + x[1] + '</span><span class="tn">' + x[2] + "</span>" +
         (x[3] ? '<span class="par" role="img" aria-label="Jouable avec un parent">👪</span>' : "") +
         (x[4] ? '<span class="dj">' + (S.daily[t] ? "Défi du jour ✓" : "Défi du jour +" + PTS.daily) + "</span>" : "") + "</button>";
     }).join("") + "</div>";
   }
-  if (T1.length) h += '<div class="sub-h">Réviser le cours</div>' + grid(T1);
-  h += '<div class="sub-h">Écrire et raisonner</div>' + grid(T2) + '<div class="sub-h">Échauffements</div>' + grid(T3);
+  var g1 = grid(T1), g2 = grid(T2), g3 = grid(T3);
+  if (g1) h += '<div class="sub-h">Réviser le cours</div>' + g1;
+  if (g2) h += '<div class="sub-h">Écrire et raisonner</div>' + g2;
+  if (g3) h += '<div class="sub-h">Échauffements</div>' + g3;
   h += '<p class="legend"><span class="par" aria-hidden="true">👪</span> jouable avec un parent · ' + (S.daily[t + "p"] ? "bonus équipage du jour pris ✓" : "+" + PTS.parent + " Berries la première fois de la journée") + ". Échauffements : plafond de " + PTS.warmCap + " Berries par jour.</p>";
   h += '<div class="etq"><button type="button" class="tile2 wide" data-go="coffre"><span class="ti" aria-hidden="true">🎁</span><span class="tn">Mon coffre</span><small>' + Math.max(0, S.berries - (S.spent || 0)) + ' Berries</small></button>' +
     '<button type="button" class="tile2 wide" data-go="trophy"><span class="ti" aria-hidden="true">🏆</span><span class="tn">Mes réussites</span><small>' + Object.keys(S.badges).length + " / " + BADGES.length + " · " + Object.keys(S.treasures).length + " / " + TREASURES.length + " trésors</small></button></div>";
@@ -464,7 +495,7 @@ function home() {
 /* ---------- traversée du jour : un parcours guidé en étapes ---------- */
 var TRAV = null, inTrav = false;
 function travSteps() {
-  var w = WARMS[dayNum() % 3], f = FORMATS.filter(function (x) { return x[0] === dayFormat(); })[0];
+  var w = dayWarm(), f = FORMATS.filter(function (x) { return x[0] === dayFormat(); })[0];
   return [
     { ico: w[3], t: "Je m'échauffe", s: w[1] + " · 1 minute" },
     { ico: "▶", t: "Ma séance du jour", s: DP().seance + " questions · environ " + Math.round(DP().seance * 0.65) + " minutes" },
@@ -491,7 +522,7 @@ function travOpen() {
   app.innerHTML = h; window.scrollTo(0, 0);
 }
 function travGo(i) {
-  if (!POOL.length) return; var steps = travSteps(), w = WARMS[dayNum() % 3];
+  if (!POOL.length) return; var steps = travSteps(), w = dayWarm();
   TRAV = { i: i }; inTrav = false;
   if (i === 0) { if (w[4]) intro(w[0]); else startGame(w[0], "solo"); } else if (i === 1) start("seance"); else if (i === 2) start(dayFormat()); else intro("chasse");
 }
@@ -654,6 +685,7 @@ function finish() {
   h += '<span class="chip">🔥 ' + st + " jour" + (st > 1 ? "s" : "") + " de suite</span>";
   if (tot - ok > 0) h += '<span class="chip">🔁 ' + (tot - ok) + " carte" + (tot - ok > 1 ? "s" : "") + " à revoir bientôt</span>";
   if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
+  h += unlockChips(before, S.berries);
   nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
   if (found) h += '<span class="chip pop">' + found[0] + " Trésor trouvé : " + esc(found[1]) + "</span>";
   h += "</div>";
@@ -689,6 +721,7 @@ function wFinish(o) {
   h += '<div class="chips">';
   if (o.bonus) h += '<span class="chip">👪 Bonus équipage +' + o.bonus + "</span>";
   if (ra[1] !== rb) h += '<span class="chip pop">' + ra[2] + " Nouveau rang : " + esc(ra[1]) + "</span>";
+  h += unlockChips(S.berries - tot, S.berries);
   nw.forEach(function (b) { h += '<span class="chip pop">' + b[1] + " " + esc(b[2]) + "</span>"; });
   h += '</div><button type="button" class="btn go" data-go="home">⚓ Retour au pont</button>' + (o.again ? '<button type="button" class="btn" data-wg="' + o.again.wg + '" data-wm="' + o.again.wm + '">🔁 Rejouer</button>' : "") + "</div>";
   wClear(); G = null; app.innerHTML = h; window.scrollTo(0, 0); travHook();
@@ -1391,8 +1424,8 @@ function claim(id) {
 }
 
 loadLocal(); home();
-loadPool().then(refresh).then(netInit).then(refresh);
-window.addEventListener("online", function () { netInit(); });
+loadPool().then(refresh).then(netInit).then(loadCfg).then(refresh);
+window.addEventListener("online", function () { netInit().then(loadCfg); });
 })();
 </script>
 </body>

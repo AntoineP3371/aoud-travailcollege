@@ -268,6 +268,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 .ed-new { border: 2px solid var(--ink); border-radius: 10px; padding: 4px 14px 12px; margin-bottom: 12px; }
 .ed-help { margin: 4px 0; font-size: 13px; color: var(--muted); }
 .pw-card { background: var(--card); color: var(--fg); border: 1.5px solid var(--border); border-radius: 12px; padding: 22px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; font-family: var(--body); }
+.pw-card.hub-card { max-height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .pw-card h2 { margin: 0; font-family: var(--display); font-size: 30px; color: var(--ink); }
 .pw-card p { margin: 0; color: var(--muted); }
 .pw-card input { font: inherit; font-size: 22px; letter-spacing: 0.3em; text-align: center; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--fg); min-height: 52px; }
@@ -283,6 +284,13 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
 #cof-claims, #cof-list { display: flex; flex-direction: column; gap: 6px; }
 .cof-h { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
 .cof-line { font-size: 14px; color: var(--muted); }
+#gm-list { display: flex; flex-direction: column; }
+.gm-row { display: flex; flex-direction: column; gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.gm-name { font-weight: 700; font-size: 15px; color: var(--ink); }
+.gm-sub { font-size: 13px; color: var(--muted); font-weight: 400; }
+.gm-h { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
+.gm-b { display: flex; gap: 6px; flex-wrap: wrap; }
+.gm-b .ink-b { flex: 1; min-width: 80px; }
 #hub-coffre input { letter-spacing: normal; text-align: left; font-size: 18px; }
 #hub-coffre .ink-b { white-space: nowrap; flex: none; }
 .rl-list { display: flex; flex-direction: column; gap: 6px; }
@@ -385,6 +393,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
       <button type="button" class="btn ghost" id="hub-code">Changer le code parent</button>
       <button type="button" class="btn ghost" id="hub-order-btn">⇅ Ordre des matières et des cours</button>
       <button type="button" class="btn ghost" id="hub-coffre-btn">🎁 Coffre de récompenses (page Défis)</button>
+      <button type="button" class="btn ghost" id="hub-games-btn">🎮 Jeux visibles (page Défis)</button>
       <button type="button" class="btn ghost" id="hub-gcode">Changer le mot de passe de Gianni</button>
     </div>
     <form id="hub-codeform" class="hub-form" hidden>
@@ -414,6 +423,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 46px; 
         <div class="row"><button type="submit" class="btn">Ajouter au coffre</button></div>
       </form>
       <div class="row"><button type="button" class="btn ghost" id="cof-back">Retour</button></div>
+    </div>
+    <div id="hub-games" class="hub-form" hidden>
+      <p class="hub-help">Choisis les jeux de la page Défis. <b>Auto</b> : le jeu apparaît quand Gianni atteint le rang indiqué (en attendant, il est affiché verrouillé). <b>Toujours</b> : visible tout de suite. <b>Masqué</b> : caché. C'est enregistré tout de suite.</p>
+      <div id="gm-list"></div>
+      <div class="row"><button type="button" class="btn ghost" id="gm-back">Retour</button></div>
     </div>
     <p id="hub-msg" role="status"></p>
     <div class="row"><button type="button" class="btn ghost" id="hub-lock">Verrouiller</button><button type="button" class="btn ghost" id="hub-close">Fermer</button></div>
@@ -1899,7 +1913,7 @@ function hubMsg(t) { $("#hub-msg").textContent = t || ""; }
 function openHub() {
   var c = SUBJECTS[subject];
   $("#hub-edit").hidden = !(c && c.id) || !$("#som").hidden;
-  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $("#hub-coffre").hidden = true; $(".hub-list").hidden = false; hubMsg("");
+  $("#hub-codeform").hidden = true; $("#hub-gform").hidden = true; $("#hub-order").hidden = true; $("#hub-coffre").hidden = true; $("#hub-games").hidden = true; $(".hub-list").hidden = false; hubMsg("");
   $("#hub").hidden = false;
   loadLast();
 }
@@ -2046,6 +2060,40 @@ $("#cof-form").addEventListener("submit", function (e) {
   $("#cf-label").value = ""; $("#cf-cost").value = ""; $("#cf-icon").value = "";
   cofDo("rewards", "POST", "", { icon: icon, label: label, cost: cost, position: pos + 1 });
 });
+/* ---------- Jeux visibles sur la page Défis (fiche « config » de la collection quest) ---------- */
+var GM = [["Réviser le cours", [["mini", "⏱️", "Mini-défi"], ["eclair", "⚡", "Défi éclair"], ["mystere", "🔮", "Carte mystère"], ["chasse", "🔎", "Chasse à l'erreur"]]],
+  ["Écrire et raisonner", [["surligne", "🖍️", "Surligne l'essentiel", "Mousse"], ["probleme", "🧮", "Atelier du problème", "Mousse"], ["explique", "✍️", "Explique à ta façon", "Matelot (100 Berries)"], ["programme", "📐", "Programme de construction", "Matelot (100 Berries)"],
+    ["chaine", "🔗", "La chaîne de causes", "Gabier (300 Berries)"], ["tribunal", "⚖️", "Le tribunal de l'équipage", "Gabier (300 Berries)"], ["fiche", "🗂️", "Ma fiche de révision", "Second (600 Berries)"], ["maitre", "🎓", "Le maître de l'équipage", "Second (600 Berries)"]]],
+  ["Échauffements", [["gonogo", "🦈", "Trésor ou requin ?"], ["intrus", "🔍", "Chasse à l'intrus"], ["perroquet", "🦜", "Le perroquet"]]]];
+var gm = { rec: null, games: {}, busy: false };
+function gmLoad() {
+  return api("GET", "/api/collections/quest/records?perPage=1&filter=" + q('key="config"'), undefined, net.parentToken).then(function (d) {
+    gm.rec = (d.items && d.items[0]) || null; var g = gm.rec && gm.rec.data && gm.rec.data.games; gm.games = g && typeof g === "object" ? g : {}; hubMsg(""); gmRender();
+  }, cofErr);
+}
+function gmSave() {
+  if (gm.busy) return; gm.busy = true; hubMsg("Enregistrement…");
+  var body = { key: "config", data: { games: gm.games }, ts: Date.now() };
+  (gm.rec ? api("PATCH", "/api/collections/quest/records/" + gm.rec.id, body, net.parentToken) : api("POST", "/api/collections/quest/records", body, net.parentToken)).then(function (r) { gm.rec = r; gm.busy = false; hubMsg("Enregistré ✓"); gmRender(); }, function (er) { gm.busy = false; cofErr(er); });
+}
+function gmRender() {
+  var box = $("#gm-list"); box.innerHTML = "";
+  GM.forEach(function (sec) {
+    box.appendChild(cofTxt("p", "gm-h", sec[0]));
+    sec[1].forEach(function (g) {
+      var row = document.createElement("div"); row.className = "gm-row";
+      var nm = cofTxt("div", "gm-name", g[1] + " " + g[2]); if (g[3]) nm.appendChild(cofTxt("div", "gm-sub", "Auto : dès le rang " + g[3]));
+      row.appendChild(nm); var bar = document.createElement("div"); bar.className = "gm-b";
+      [["", "Auto"], ["on", "Toujours"], ["off", "Masqué"]].forEach(function (o) {
+        var b = cofBtn(o[1], function () { if (o[0]) gm.games[g[0]] = o[0]; else delete gm.games[g[0]]; gmSave(); });
+        b.setAttribute("aria-pressed", String((gm.games[g[0]] || "") === o[0])); bar.appendChild(b);
+      });
+      row.appendChild(bar); box.appendChild(row);
+    });
+  });
+}
+$("#hub-games-btn").addEventListener("click", function () { $(".hub-list").hidden = true; $("#hub-games").hidden = false; hubMsg("Chargement…"); gmLoad(); });
+$("#gm-back").addEventListener("click", function () { $("#hub-games").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hc-cancel").addEventListener("click", function () { $("#hub-codeform").hidden = true; $(".hub-list").hidden = false; hubMsg(""); });
 $("#hub-codeform").addEventListener("submit", function (e) {
   e.preventDefault();
